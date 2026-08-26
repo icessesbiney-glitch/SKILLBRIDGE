@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — SkillBridge</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .split {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .panel-brand {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel-brand::after {
+    content: "";
+    position: absolute;
+    right: -120px;
+    bottom: -120px;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(194,80,44,0.35), transparent 70%);
+  }
+  .panel-brand .quote {
+    font-family: var(--ff-display);
+    font-size: clamp(26px, 3.4vw, 38px);
+    line-height: 1.24;
+    max-width: 440px;
+    position: relative;
+    z-index: 1;
+  }
+  .panel-brand .quote em { color: var(--accent-soft); font-style: italic; }
+  .panel-brand .attr { font-family: var(--ff-mono); font-size: 12.5px; color: var(--ink-faint); margin-top: 18px; position: relative; z-index: 1; }
+
+  .panel-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 40px;
+  }
+  .form-card { width: 100%; max-width: 400px; }
+  .tabs { display: flex; gap: 4px; background: var(--bg-alt); border-radius: var(--radius); padding: 4px; margin-bottom: 30px; }
+  .tab {
+    flex: 1; text-align: center; padding: 10px 0;
+    font-family: var(--ff-mono); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    cursor: pointer; border-radius: var(--radius); color: var(--ink-soft);
+    transition: background 0.2s, color 0.2s;
+  }
+  .tab.active { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-card); }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-family: var(--ff-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin-bottom: 7px; }
+  .field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    font-family: var(--ff-body);
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field.error input { border-color: var(--accent-dark); }
+  .field .err-msg { font-size: 12.5px; color: var(--accent-dark); margin-top: 6px; display: none; }
+  .field.error .err-msg { display: block; }
+
+  .demo-note {
+    margin-top: 22px;
+    padding: 13px 14px;
+    background: var(--bg-alt);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .demo-note strong { color: var(--ink); }
+
+  .success-flash {
+    display: none;
+    margin-top: 16px;
+    padding: 11px 14px;
+    background: #e4e9d4;
+    color: #47501f;
+    border-radius: var(--radius);
+    font-family: var(--ff-mono);
+    font-size: 13px;
+  }
+
+  @media (max-width: 820px) {
+    .split { grid-template-columns: 1fr; }
+    .panel-brand { padding: 40px 28px; min-height: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="split">
+  <div class="panel-brand">
+    <a href="index.html" class="brand" style="color:var(--bg);">Skill<span style="color:var(--accent-soft);">Bridge</span></a>
+    <div class="quote">
+      “I taught someone <em>darkroom printing</em> for six Saturdays. They fixed my spreadsheets for the same six.”
+    </div>
+    <div class="attr">— Marguerite Oduya, member since Apr 2025</div>
+  </div>
+
+  <div class="panel-form">
+    <div class="form-card">
+      <div class="tabs">
+        <div class="tab active" id="tab-signin">Sign in</div>
+        <div class="tab" id="tab-join">Join</div>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="field" id="field-name" style="display:none;">
+          <label for="name">Name</label>
+          <input id="name" type="text" autocomplete="name" placeholder="Marguerite Oduya">
+        </div>
+        <div class="field" id="field-email">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+          <div class="err-msg">Enter something that looks like an email.</div>
+        </div>
+        <div class="field" id="field-password">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+          <div class="err-msg">Password needs at least 4 characters.</div>
+        </div>
+        <button type="submit" class="btn btn-accent btn-block" id="submit-btn">Continue to dashboard</button>
+        <div class="success-flash" id="success-flash">Session created locally — redirecting…</div>
+      </form>
+
+      <div class="demo-note">
+        <strong>This is a running prototype.</strong> There's no server behind this form — any email and password creates a local session in your browser, so you can see the owner dashboard without connecting a real account.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  sbSeedIfEmpty();
+
+  const tabSignin = document.getElementById('tab-signin');
+  const tabJoin = document.getElementById('tab-join');
+  const fieldName = document.getElementById('field-name');
+  const submitBtn = document.getElementById('submit-btn');
+
+  tabSignin.addEventListener('click', () => {
+    tabSignin.classList.add('active');
+    tabJoin.classList.remove('active');
+    fieldName.style.display = 'none';
+    submitBtn.textContent = 'Continue to dashboard';
+  });
+  tabJoin.addEventListener('click', () => {
+    tabJoin.classList.add('active');
+    tabSignin.classList.remove('active');
+    fieldName.style.display = 'block';
+    submitBtn.textContent = 'Create local session';
+  });
+
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const emailField = document.getElementById('field-email');
+    const passField = document.getElementById('field-password');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const name = document.getElementById('name').value.trim();
+
+    const emailOk = /\S+@\S+\.\S+/.test(email);
+    const passOk = password.length >= 4;
+
+    emailField.classList.toggle('error', !emailOk);
+    passField.classList.toggle('error', !passOk);
+    if (!emailOk || !passOk) return;
+
+    sbLogin(name, email);
+    document.getElementById('success-flash').style.display = 'block';
+    submitBtn.setAttribute('disabled', 'true');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 650);
+  });
+</script>
+</body>
+</html>
