@@ -1,219 +1,278 @@
-# SKILLBRIDGE
+# SKILLBRIDGE - Complete Authentication System
 
-**A Secure, Full-Stack Authentication & Role-Based Access Control Platform**
+A production-ready authentication and authorization system built with Next.js, Supabase, and Tailwind CSS.
 
----
+## Features
 
-## 📋 Overview
+✅ **Email/Password Authentication**
+- Secure signup and login
+- Email verification
+- Password reset functionality
+- Persistent Supabase authentication
 
-SKILLBRIDGE is a modern, production-ready web application that provides comprehensive user authentication, profile management, and role-based access control. Built with industry best practices, it features persistent Supabase authentication, protected routes, and a sophisticated server-side database architecture with Row-Level Security (RLS) policies.
+✅ **User Profiles**
+- Complete profile management
+- User information storage
+- Avatar and bio support
+- Profile editing capabilities
 
----
+✅ **Role-Based Access Control**
+- User and Admin roles
+- Server-side role model
+- Protected routes and pages
+- Role-based dashboard access
 
-## ✨ Key Features
+✅ **Protected Pages**
+- Dashboard (for all authenticated users)
+- Admin panel (admin-only access)
+- User profile page
+- Automatic redirection for unauthorized access
 
-### 🔐 Authentication & Security
-- **Email/Password Sign-Up & Login** - Secure user registration and authentication
-- **Persistent Supabase Authentication** - Enterprise-grade auth with persistent sessions
-- **Row-Level Security (RLS) Policies** - Database-level access control for maximum security
-- **Protected Routes** - Authenticated dashboard and admin pages with role-based access
+✅ **Database**
+- SQL schema with migrations
+- Row-Level Security (RLS) policies
+- Optimized indexes
+- Automatic timestamp management
 
-### 👤 User Management
-- **User Profiles** - Customizable user profiles with profile information
-- **Role-Based Access Control** - Hierarchical permission system (Admin, User, etc.)
-- **Server-Side Role Model** - Backend validation and enforcement of user roles
+## Tech Stack
 
-### 🏗️ Architecture
-- **Supabase Database** - PostgreSQL-backed relational database
-- **SQL Schema** - Normalized database design with proper relationships
-- **RLS Policies** - Fine-grained access control at the database level
-- **Protected Dashboard** - User-specific authenticated area
-- **Protected Admin Page** - Administrative functionality with permission checks
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend**: [Framework/Libraries - to be updated]
-- **Backend**: Node.js / Supabase Functions
-- **Database**: PostgreSQL (via Supabase)
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **Hosting**: [Platform - to be updated]
+- **Deployment**: Vercel Ready
 
----
+## Quick Start
 
-## 🚀 Getting Started
+### 1. Clone the Repository
+```bash
+git clone https://github.com/icessesbiney-glitch/SKILLBRIDGE.git
+cd SKILLBRIDGE
+```
 
-### Prerequisites
-- Node.js (v14+)
-- npm or yarn
-- Supabase account
+### 2. Install Dependencies
+```bash
+npm install
+# or
+yarn install
+```
 
-### Installation
+### 3. Set Up Supabase
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/icessesbiney-glitch/SKILLBRIDGE.git
-   cd SKILLBRIDGE
-   ```
+1. Go to [supabase.com](https://supabase.com)
+2. Create a new project
+3. Go to Settings → API to get your credentials:
+   - Project URL (NEXT_PUBLIC_SUPABASE_URL)
+   - Anon Key (NEXT_PUBLIC_SUPABASE_ANON_KEY)
+   - Service Role Key (SUPABASE_SERVICE_ROLE_KEY)
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### 4. Configure Environment Variables
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   Add your Supabase credentials:
-   ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_anon_key
-   ```
+Create a `.env.local` file:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
-4. **Run the application**
-   ```bash
-   npm run dev
-   ```
+### 5. Set Up Database Schema
 
----
+1. Go to Supabase Dashboard → SQL Editor
+2. Create a new query
+3. Copy and paste the SQL from `sql/schema.sql`
+4. Run the query
 
-## 📚 Database Schema
+### 6. Enable Email Authentication
 
-### Tables
+1. Go to Supabase Dashboard → Authentication → Providers
+2. Enable Email Provider
+3. Configure email settings if needed
 
-#### `users`
-- `id` (UUID, Primary Key)
-- `email` (VARCHAR, Unique)
-- `role` (ENUM: admin, user)
-- `created_at` (TIMESTAMP)
-- `updated_at` (TIMESTAMP)
+### 7. Run Development Server
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-#### `profiles`
-- `id` (UUID, Primary Key)
-- `user_id` (UUID, Foreign Key → users.id)
-- `full_name` (VARCHAR)
-- `avatar_url` (VARCHAR)
-- `bio` (TEXT)
-- `updated_at` (TIMESTAMP)
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Row-Level Security Policies
+## Project Structure
 
-- **Users** can only access their own profile data
-- **Admins** have full access to all user data
-- **Public** data is accessible without authentication where specified
+```
+SKILLBRIDGE/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Home page
+│   │   ├── login/                # Login page
+│   │   ├── signup/               # Signup page
+│   │   ├── dashboard/            # User dashboard
+│   │   ├── profile/              # User profile
+│   │   ├── admin/                # Admin dashboard
+│   │   └── layout.tsx            # Root layout
+│   ├── components/
+│   │   ├── Auth/
+│   │   │   ├── Login.tsx
+│   │   │   ├── SignUp.tsx
+│   │   │   └── AuthContext.tsx
+│   │   ├── UserProfile/
+│   │   │   └── ProfileCard.tsx
+│   │   ├── Navigation/
+│   │   │   └── Navbar.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── lib/
+│   │   └── supabase.ts           # Supabase client
+│   └── styles/
+│       └── globals.css           # Global styles
+├── sql/
+│   └── schema.sql                # Database schema
+├── package.json
+├── tsconfig.json
+├── tailwind.config.js
+├── next.config.js
+├── .env.local                    # Environment variables
+└── README.md
+```
 
----
+## Database Schema
 
-## 🔒 Security Features
+### profiles table
+```sql
+- id (UUID) - Primary key, references auth.users
+- email (TEXT) - User email
+- full_name (TEXT) - User's full name
+- avatar_url (TEXT) - Avatar image URL
+- role (TEXT) - 'user' or 'admin'
+- created_at (TIMESTAMP) - Account creation date
+- updated_at (TIMESTAMP) - Last update date
+```
 
-- ✅ Supabase Auth with JWT tokens
-- ✅ Secure password hashing
-- ✅ Row-Level Security (RLS) at database level
-- ✅ Protected API endpoints with role verification
-- ✅ CORS configuration for authorized domains
-- ✅ Secure session management
+## RLS Policies
 
----
+**Row Level Security** is enabled to ensure data privacy:
 
-## 📖 API Routes
+- Users can only view their own profile
+- Users can only update their own profile
+- Admins can view all profiles
+- Admins can update all profiles
+
+## API Routes
 
 ### Authentication
-- `POST /auth/signup` - Register new user
-- `POST /auth/login` - User login
-- `POST /auth/logout` - User logout
-- `POST /auth/reset-password` - Password reset
+- `POST /api/auth/signup` - Create new account
+- `POST /api/auth/login` - Login to account
+- `POST /api/auth/logout` - Logout
 
-### User
-- `GET /api/user/profile` - Get current user profile
-- `PUT /api/user/profile` - Update user profile
-- `GET /api/user/me` - Get authenticated user details
+### Protected Routes
+- `/dashboard` - User dashboard (authenticated only)
+- `/profile` - User profile (authenticated only)
+- `/admin` - Admin dashboard (admin only)
 
-### Admin
-- `GET /api/admin/users` - List all users (Admin only)
-- `PUT /api/admin/users/:id/role` - Update user role (Admin only)
+## Key Features Explained
 
----
+### AuthContext
+Global authentication state management using React Context API. Provides:
+- Current user information
+- Loading state
+- Sign out function
 
-## 🎯 Usage Examples
+### ProtectedRoute Component
+Wrapper component that:
+- Checks if user is authenticated
+- Redirects to login if not
+- Shows loading spinner while checking auth
+- Supports optional role-based restrictions
 
-### Sign Up
-```javascript
-// Register a new user
-const { data, error } = await supabase.auth.signUp({
-  email: 'user@example.com',
-  password: 'securepassword123'
-});
-```
+### ProfileCard Component
+User profile management component with:
+- Display user information
+- Edit profile functionality
+- Show user role
+- Update full name
 
-### Protected Dashboard
-The dashboard automatically redirects unauthenticated users to login and displays user-specific data.
+### Admin Dashboard
+Admin-only page with:
+- View all users
+- Toggle user roles
+- User statistics
+- Admin-only features list
 
-### Admin Functions
-Admins can manage users, assign roles, and access administrative features through the protected admin page.
+## Deployment
 
----
+### Deploy to Vercel
 
-## 🧪 Testing
+1. Push to GitHub
+2. Go to [vercel.com](https://vercel.com)
+3. Import your repository
+4. Add environment variables
+5. Deploy
 
+### Deploy to Other Platforms
+
+The project is compatible with any Node.js hosting:
+- AWS Amplify
+- Railway
+- Heroku
+- Netlify
+- etc.
+
+## Security Best Practices
+
+✅ Environment variables for sensitive data
+✅ Row-Level Security (RLS) on database
+✅ Protected routes with authentication checks
+✅ Password hashed by Supabase
+✅ CORS configured
+✅ Session management with Supabase
+✅ Input validation and sanitization
+
+## Troubleshooting
+
+### "Cannot find module '@supabase/supabase-js'"
 ```bash
-# Run tests
-npm run test
-
-# Run tests with coverage
-npm run test:coverage
+npm install @supabase/supabase-js
 ```
 
----
+### "Supabase URL is required"
+Check your `.env.local` file has `NEXT_PUBLIC_SUPABASE_URL`
 
-## 📦 Deployment
+### "User signup not working"
+- Check email authentication is enabled in Supabase
+- Verify the profiles table RLS policies
+- Check browser console for errors
 
-### Deploy to Production
+### "Admin page shows regular user"
+- Manually update the user role in Supabase dashboard
+- User role must be set to 'admin' in profiles table
 
-1. Build the application
-   ```bash
-   npm run build
-   ```
-
-2. Deploy to your hosting platform (Vercel, Netlify, etc.)
-
-3. Set production environment variables
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - feel free to use this project for personal and commercial use.
+
+## Support
+
+For issues and questions:
+- Check the [Supabase Documentation](https://supabase.com/docs)
+- Check the [Next.js Documentation](https://nextjs.org/docs)
+- Open an issue on GitHub
+
+## Roadmap
+
+- [ ] OAuth providers (Google, GitHub, etc.)
+- [ ] Two-factor authentication (2FA)
+- [ ] Email notifications
+- [ ] User activity logging
+- [ ] Advanced admin features
+- [ ] User search and filters
+- [ ] Bulk user management
 
 ---
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🆘 Support & Documentation
-
-- 📚 [Supabase Documentation](https://supabase.com/docs)
-- 🐛 [Report Issues](https://github.com/icessesbiney-glitch/SKILLBRIDGE/issues)
-- 💬 [Discussions](https://github.com/icessesbiney-glitch/SKILLBRIDGE/discussions)
-
----
-
-## 🎓 Learn More
-
-- [Supabase Auth Guide](https://supabase.com/docs/guides/auth)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Row-Level Security in PostgreSQL](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
-
----
-
-**Made with ❤️ by the SKILLBRIDGE Team**
+Made with ❤️ by SkillBridge Team
