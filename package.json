@@ -13,11 +13,12 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.8.0",
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
     "next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@supabase/supabase-js": "^2.38.0",
-    "@supabase/auth-helpers-nextjs": "^0.8.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.2.0"
   },

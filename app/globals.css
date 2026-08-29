@@ -58,7 +58,7 @@ h1, h2, h3, .brand, .display { font-family: 'Space Grotesk', sans-serif; }
 
 .section { padding: 76px 28px; }
 .section-inner { max-width: 1180px; margin: 0 auto; }
-.section-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 30px; }
+.section-heading { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
 .section-heading h2 { max-width: 440px; font-size: 36px; line-height: 1.05; letter-spacing: -1.5px; }
 .section-heading p { max-width: 355px; color: var(--muted); line-height: 1.5; font-size: 14px; }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -95,7 +95,7 @@ h1, h2, h3, .brand, .display { font-family: 'Space Grotesk', sans-serif; }
 .sidebar-bottom { margin-top: auto; padding: 18px 10px 5px; border-top: 1px solid #ffffff1c; color: #aebfbc; font-size: 12px; }
 .sidebar-bottom strong { display: block; margin-bottom: 4px; color: white; }
 .workspace-main { padding: 42px 5vw; max-width: 1250px; width: 100%; }
-.workspace-top { display: flex; align-items: start; justify-content: space-between; margin-bottom: 36px; }
+.workspace-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
 .workspace-top h1 { font-size: 33px; letter-spacing: -1px; }
 .workspace-top p { margin-top: 8px; color: var(--muted); font-size: 14px; }
 .profile-chip { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; }
