@@ -18,7 +18,8 @@ export function useDatabase<T extends TableNames>(
       let query = supabase.from(table).select('*');
 
       if (userId) {
-        query = query.eq('user_id', userId);
+        // Type assertion needed because TypeScript doesn't know all tables have user_id
+        query = (query as any).eq('user_id', userId);
       }
 
       const { data: result, error: err } = await query;

@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
 
 interface UserProfile {
   email?: string;
+  created_at?: string;
   user_metadata?: {
     full_name?: string;
   };

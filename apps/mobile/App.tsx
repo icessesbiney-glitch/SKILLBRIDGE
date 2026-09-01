@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { supabase } from '@skillbridge/shared';
 import HomeScreen from './screens/HomeScreen';
@@ -10,7 +10,7 @@ import AuthScreen from './screens/AuthScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import ProfileScreen from './screens/ProfileScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const styles = StyleSheet.create({
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
 
 function AuthStack() {
   return (
+    // @ts-ignore - react-navigation type compatibility issue
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
@@ -34,6 +35,7 @@ function AuthStack() {
 
 function AppStack() {
   return (
+    // @ts-ignore - react-navigation type compatibility issue
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
