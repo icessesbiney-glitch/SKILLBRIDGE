@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "skipLibCheck": true,
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
@@ -18,16 +17,12 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"]
-    },
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": [
     "node_modules"

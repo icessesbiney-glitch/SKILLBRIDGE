@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/utils/supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
-import SkillBridgeTaskDashboard from '@/components/SkillBridgeTaskDashboard';
+import SkillBridgeTaskDashboard from '../../components/SkillBridgeTaskDashboard';
 
 export default function DashboardPage() {
   const router = useRouter();
