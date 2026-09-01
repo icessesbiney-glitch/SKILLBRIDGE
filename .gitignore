@@ -67,3 +67,4 @@ build-output.txt
 # Cache
 .eslintcache
 .stylelintcache
+.env
