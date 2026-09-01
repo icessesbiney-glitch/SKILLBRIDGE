@@ -1,2 +1,69 @@
-node_modules
-.next
+# Dependencies
+node_modules/
+*.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Electron
+apps/desktop/dist/
+apps/desktop/build/
+apps/desktop/.cache/
+
+# React Native / Expo
+apps/mobile/.expo/
+apps/mobile/.expo-shared/
+apps/mobile/dist/
+apps/mobile/build/
+
+# Mobile signing
+*.jks
+*.keystore
+*.p12
+*.cer
+
+# Artifacts
+build-output.txt
+*.zip
+*.dmg
+*.exe
+*.AppImage
+*.deb
+
+# Cache
+.eslintcache
+.stylelintcache
