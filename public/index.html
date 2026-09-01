@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillBridge — Trade what you know for what you need</title>
+<meta name="description" content="SkillBridge is a members-run exchange where people swap skills directly — no cash, no middlemen.">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .hero {
+    padding: 84px 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero .wrap {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.02;
+    margin: 18px 0 22px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero p.lead {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 460px;
+    margin: 0 0 32px;
+  }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .hero-stack {
+    position: relative;
+    height: 460px;
+  }
+  .skill-card {
+    position: absolute;
+    width: 230px;
+    padding: 20px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+  }
+  .skill-card .sc-icon { width: 30px; height: 30px; color: var(--accent); margin-bottom: 12px; }
+  .skill-card .sc-title { font-family: var(--ff-display); font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+  .skill-card .sc-meta { font-family: var(--ff-mono); font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; }
+  .skill-card.c1 { top: 4px; left: 6%; transform: rotate(-6deg); z-index: 3; animation: floatIn 0.9s ease both; }
+  .skill-card.c2 { top: 150px; left: 40%; transform: rotate(4deg); z-index: 2; animation: floatIn 0.9s 0.12s ease both; }
+  .skill-card.c3 { top: 300px; left: 4%; transform: rotate(3deg); z-index: 1; animation: floatIn 0.9s 0.24s ease both; }
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(24px) rotate(0deg); }
+  }
+
+  section { padding: 76px 0; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 46px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+  }
+  .section-head h2 { font-size: clamp(28px, 3.4vw, 40px); }
+  .section-head p { color: var(--ink-soft); max-width: 320px; margin: 0; font-size: 14.5px; }
+
+  .steps { display: grid; gap: 0; }
+  .step {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 28px;
+    padding: 30px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .step:nth-child(even) { grid-template-columns: 90px 1fr; }
+  .step .num { font-family: var(--ff-mono); font-size: 15px; color: var(--accent-dark); }
+  .step h3 { font-size: 23px; margin-bottom: 8px; }
+  .step p { color: var(--ink-soft); max-width: 520px; margin: 0; }
+  .step:nth-child(2) { padding-left: 8%; }
+  .step:nth-child(3) { padding-left: 16%; }
+
+  .swaps-list { display: flex; flex-direction: column; gap: 0; }
+  .swap-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 22px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .swap-row:nth-child(even) { background: var(--bg-alt); }
+  .swap-row .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    font-family: var(--ff-mono); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .swap-row .who { font-family: var(--ff-display); font-weight: 600; font-size: 16px; }
+  .swap-row .loc { font-size: 12.5px; color: var(--ink-faint); font-family: var(--ff-mono); }
+  .swap-row .arrow { color: var(--ink-faint); margin: 0 6px; }
+  .swap-row .distance { font-family: var(--ff-mono); font-size: 12.5px; color: var(--ink-soft); text-align: right; }
+
+  .cta-band {
+    background: var(--ink);
+    color: var(--bg);
+    text-align: center;
+    padding: 90px 0;
+  }
+  .cta-band h2 { font-size: clamp(30px, 4.4vw, 52px); color: var(--paper); margin-bottom: 22px; }
+  .cta-band p { color: var(--accent-soft); margin: 0 0 34px; font-family: var(--ff-mono); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .cta-band .btn-accent { border-color: var(--accent); }
+
+  .stat-row { display: flex; gap: 60px; flex-wrap: wrap; }
+  .stat-row .num { font-family: var(--ff-display); font-size: 34px; color: var(--accent); }
+  .stat-row .lbl { font-family: var(--ff-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.06em; }
+
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .hero-stack { height: 340px; margin-top: 20px; }
+    .skill-card { width: 190px; }
+    .step, .step:nth-child(2), .step:nth-child(3) { padding-left: 0; grid-template-columns: 56px 1fr; }
+    .swap-row { grid-template-columns: 44px 1fr; grid-template-areas: "a who" "a loc"; }
+    .swap-row .arrow, .swap-row .distance { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">Skill<span>Bridge</span></a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#swaps">Featured swaps</a>
+      <a href="login.html">Log in</a>
+      <a href="login.html" class="btn btn-solid" style="padding:9px 16px;">Join in</a>
+    </div>
+  </div>
+</nav>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>UPRIGHT BASS</span><span>DARKROOM PRINTING</span><span>DRY-STONE WALLING</span><span>REACT + TYPESCRIPT</span><span>SOURDOUGH</span><span>MANDARIN</span><span>MOTORCYCLE TUNE-UPS</span><span>TAX PREP</span>
+    <span>UPRIGHT BASS</span><span>DARKROOM PRINTING</span><span>DRY-STONE WALLING</span><span>REACT + TYPESCRIPT</span><span>SOURDOUGH</span><span>MANDARIN</span><span>MOTORCYCLE TUNE-UPS</span><span>TAX PREP</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">No cash changes hands</span>
+      <h1>Trade what you<br>know for what<br>you <em>need</em>.</h1>
+      <p class="lead">SkillBridge pairs people who have a skill worth teaching with people who have a skill worth trading back. Two hours of bass lessons for two hours of Yoruba practice — everybody leaves ahead.</p>
+      <div class="hero-ctas">
+        <a href="login.html" class="btn btn-accent">Find a swap</a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-stack" aria-hidden="true">
+      <div class="skill-card c1">
+        <svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 21c0-4 1.5-6 4-6s4 2 4 6M9 15c-1-2-1-5 3-9 4 4 4 7 3 9M12 6V2"/></svg>
+        <div class="sc-title">Upright bass</div>
+        <div class="sc-meta">Onyekachi · Providence</div>
+      </div>
+      <div class="skill-card c2">
+        <svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="13" r="7"/><path d="M9 4h6M12 4v3"/></svg>
+        <div class="sc-title">Pottery wheel</div>
+        <div class="sc-meta">Priya · Ann Arbor</div>
+      </div>
+      <div class="skill-card c3">
+        <svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 13a8 8 0 0116 0M2 13h2M20 13h2M12 3v2M6 6l1.4 1.4M18 6l-1.4 1.4"/><circle cx="12" cy="13" r="2.4"/></svg>
+        <div class="sc-title">Sourdough baking</div>
+        <div class="sc-meta">Tobias · Duluth</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How a swap actually works</h2>
+      <p>No points, no credits, no invoices. Just two people and a shared calendar.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num mono">01</div>
+        <div>
+          <h3>Post what you can teach and what you're after</h3>
+          <p>Onyekachi listed upright bass and asked for Yoruba conversation practice. That's the whole listing — no pricing tiers to configure.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num mono">02</div>
+        <div>
+          <h3>SkillBridge finds the other half of the trade</h3>
+          <p>Matches surface when what you offer lines up with what someone else needs, and what you need lines up with what they offer.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num mono">03</div>
+        <div>
+          <h3>Agree on hours, then meet</h3>
+          <p>Most members trade hour-for-hour. Desmond built a dry-stone wall over one Saturday in exchange for six weeks of French drills.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="swaps" style="background: var(--bg-alt);">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Swaps happening this week</h2>
+      <p>A live-feeling sample of the kind of trades members post.</p>
+    </div>
+    <div class="swaps-list card">
+      <div class="swap-row">
+        <div class="avatar">OI</div>
+        <div><div class="who">Onyekachi Idowu</div><div class="loc">Providence, RI</div></div>
+        <div>Upright bass <span class="arrow">⇄</span> Yoruba practice</div>
+        <div class="distance">3.7 mi away</div>
+      </div>
+      <div class="swap-row">
+        <div class="avatar">PR</div>
+        <div><div class="who">Priya Ramanathan</div><div class="loc">Ann Arbor, MI</div></div>
+        <div>React code review <span class="arrow">⇄</span> Pottery basics</div>
+        <div class="distance">1.2 mi away</div>
+      </div>
+      <div class="swap-row">
+        <div class="avatar">TK</div>
+        <div><div class="who">Tobias Krenn</div><div class="loc">Duluth, MN</div></div>
+        <div>Sourdough starter <span class="arrow">⇄</span> 1099 tax help</div>
+        <div class="distance">0.6 mi away</div>
+      </div>
+      <div class="swap-row">
+        <div class="avatar">YC</div>
+        <div><div class="who">Yusra Chowdhury</div><div class="loc">Tempe, AZ</div></div>
+        <div>Mandarin tones <span class="arrow">⇄</span> Motorcycle tune-up</div>
+        <div class="distance">4.9 mi away</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head" style="border-bottom:none; margin-bottom: 30px;">
+      <h2>Members, plainly</h2>
+      <p>A running count from the SkillBridge community.</p>
+    </div>
+    <div class="stat-row">
+      <div><div class="num">2,318</div><div class="lbl">Active members</div></div>
+      <div><div class="num">6,041</div><div class="lbl">Hours traded</div></div>
+      <div><div class="num">4.71</div><div class="lbl">Avg swap rating</div></div>
+      <div><div class="num">94</div><div class="lbl">Cities</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="wrap">
+    <p>It takes about four minutes</p>
+    <h2>Your best skill is<br>someone's missing piece.</h2>
+    <a href="login.html" class="btn btn-accent">Join SkillBridge</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand">Skill<span>Bridge</span></div>
+      <p style="margin-top:8px; max-width:320px;">A members-run skill exchange. This build runs entirely in your browser as a front-end prototype — no accounts leave your device.</p>
+    </div>
+    <div class="mono" style="font-size:12px;">© 2026 SkillBridge Cooperative</div>
+  </div>
+</footer>
+
+</body>
+</html>
