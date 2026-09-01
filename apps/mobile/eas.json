@@ -1,0 +1,17 @@
+eas:
+  projectId: "skillbridge-project"
+
+build:
+  builder: eas-json
+  platforms:
+    - ios
+    - android
+
+submit:
+  ios:
+    secretEnv: [APPLE_ID, APPLE_ID_PASSWORD]
+  android:
+    secretEnv: [GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH]
+
+publish:
+  deploymentEnvironment: production

@@ -1,7 +1,3 @@
-# SKILLBRIDGE
-email/password signup and login 
-user profiles
-server-side database role model
-protected dashboard
-protected admin page
-persistent Supabase authentication
+# My Next.js App
+
+Run `npm run dev` to start the server.
