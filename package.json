@@ -1,4 +1,4 @@
-{
+{"packageManager": "npm@10.8.2",
   "name": "skillbridge",
   "version": "1.0.0",
   "description": "SkillBridge - Complete Multi-Platform Application (Web, Desktop, Mobile, PWA)",
