@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import SiteChrome from '../../components/SiteChrome';
+import { countryOptions, educationLevels } from '../../data/siteContent';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { supabase } from '../../utils/supabaseClient';
 import { getAuthFeedbackMessage } from './authFeedback';
@@ -14,6 +15,11 @@ export default function AuthPage() {
   const router = useRouter();
   const { session } = useAuthSession();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [age, setAge] = useState('22');
+  const [country, setCountry] = useState('Ghana');
+  const [visibility, setVisibility] = useState<'local' | 'public'>('local');
+  const [educationLevel, setEducationLevel] = useState(educationLevels[0]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +47,20 @@ export default function AuthPage() {
       }
 
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              age,
+              country,
+              visibility,
+              education_level: educationLevel,
+              qualification_access: 'Open to all learners',
+            },
+          },
+        });
         if (error) {
           throw error;
         }
@@ -86,10 +105,77 @@ export default function AuthPage() {
           <div className="sb-auth-card">
             <div className="sb-auth-head">
               <h2>{isSignUp ? 'Create your account' : 'Welcome back'}</h2>
-              <p>{isSignUp ? 'Start building from one shared workspace.' : 'Continue with repository operations.'}</p>
+              <p>{isSignUp ? 'Register from any country, with Ghana prioritised, and learn to earn at every level.' : 'Continue with repository operations.'}</p>
             </div>
 
             <form className="sb-form" onSubmit={handleAuth} aria-busy={loading}>
+              {isSignUp && (
+                <>
+                  <label className="sb-field">
+                    <span>Full name</span>
+                    <input
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Ama Mensah"
+                    />
+                  </label>
+
+                  <div className="sb-form-grid">
+                    <label className="sb-field">
+                      <span>Age</span>
+                      <input
+                        type="number"
+                        min="16"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                      />
+                    </label>
+
+                    <label className="sb-field">
+                      <span>Country</span>
+                      <select value={country} onChange={(e) => setCountry(e.target.value)} className="sb-select">
+                        {countryOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="sb-form-grid">
+                    <label className="sb-field">
+                      <span>Education or qualification</span>
+                      <select
+                        value={educationLevel}
+                        onChange={(e) => setEducationLevel(e.target.value)}
+                        className="sb-select"
+                      >
+                        {educationLevels.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="sb-field">
+                      <span>Task visibility</span>
+                      <select
+                        value={visibility}
+                        onChange={(e) => setVisibility(e.target.value as 'local' | 'public')}
+                        className="sb-select"
+                      >
+                        <option value="local">Local</option>
+                        <option value="public">Public</option>
+                      </select>
+                    </label>
+                  </div>
+                </>
+              )}
+
               <label className="sb-field">
                 <span>Email address</span>
                 <input
@@ -134,6 +220,11 @@ export default function AuthPage() {
                 {isSignUp ? 'Sign in' : 'Sign up'}
               </button>
             </p>
+            {isSignUp && (
+              <p className="sb-helper-copy">
+                Registration is open for all education levels, including no formal qualification. Beginner earnings start from ₵80 and can grow past ₵150 as you complete stronger tasks.
+              </p>
+            )}
           </div>
         </div>
       </section>

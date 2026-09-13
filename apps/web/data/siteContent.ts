@@ -101,6 +101,94 @@ export const deploymentSteps = [
   },
 ];
 
+export const learnerBands = [
+  {
+    title: 'Beginner path',
+    range: '₵80 to ₵150',
+    summary: 'A learner in Ghana or any other country can start here, even without formal qualifications.',
+    points: [
+      'Designed for beginners, career changers, and first-time earners',
+      'A 22-year-old starter can begin around ₵80 and progress toward ₵150 through completed tasks',
+      'Education level changes guidance, not access to opportunities',
+    ],
+  },
+  {
+    title: 'Growth path',
+    range: '₵150 to ₵220',
+    summary: 'Learners who finish starter tasks can choose to learn more, take on public tasks, or upgrade into higher-value work.',
+    points: [
+      'Supports local and remote earning paths',
+      'Encourages portfolio building and skill proof uploads',
+      'Keeps task growth based on capability and completion',
+    ],
+  },
+  {
+    title: 'Advanced path',
+    range: '₵220 and above',
+    summary: 'Experienced learners can keep upgrading while still mentoring beginners and sharing downloadable resources.',
+    points: [
+      'Open to every educational background',
+      'Supports public-facing task delivery and advanced submissions',
+      'Builds long-term progression from learning into earning',
+    ],
+  },
+];
+
+export const taskCatalog = [
+  {
+    title: 'Starter digital profile',
+    level: 'Beginner',
+    pay: 80,
+    visibility: 'local',
+    description: 'Create a learner profile, choose local or public visibility, and prepare a first skill summary.',
+  },
+  {
+    title: 'Community task support',
+    level: 'Beginner',
+    pay: 100,
+    visibility: 'all',
+    description: 'Complete a structured practice task and upload evidence for mentor review.',
+  },
+  {
+    title: 'Public portfolio delivery',
+    level: 'Growth',
+    pay: 150,
+    visibility: 'public',
+    description: 'Share a stronger deliverable, publish a profile-ready task outcome, and unlock the next earning band.',
+  },
+  {
+    title: 'Skill upgrade sprint',
+    level: 'Growth',
+    pay: 180,
+    visibility: 'all',
+    description: 'Choose to learn more by taking a guided upgrade task with extra accountability.',
+  },
+  {
+    title: 'Advanced client-ready task',
+    level: 'Advanced',
+    pay: 220,
+    visibility: 'public',
+    description: 'Deliver a more complex task with downloadable outputs and reviewer-ready evidence.',
+  },
+];
+
+export const learningResources = [
+  { href: '/downloads/beginner-ghana-roadmap.csv', label: 'Beginner Ghana roadmap (.csv)' },
+  { href: '/downloads/task-submission-template.txt', label: 'Task submission template (.txt)' },
+  { href: '/downloads/public-profile-checklist.md', label: 'Public profile checklist (.md)' },
+];
+
+export const educationLevels = [
+  'No formal qualification',
+  'Basic education',
+  'Secondary education',
+  'Technical or vocational training',
+  'Tertiary education',
+  'Self-taught or informal learning',
+];
+
+export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
+
 export const courseRoadmap = [
   {
     title: 'Module 1 · Core product base',
