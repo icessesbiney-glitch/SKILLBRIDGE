@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import AuthStatusCard from '../../components/AuthStatusCard';
 import SiteChrome from '../../components/SiteChrome';
 import { deploymentSteps, platforms, teamMembers } from '../../data/siteContent';
 
@@ -25,6 +26,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="sb-card-grid sb-card-grid-compact">
+            <AuthStatusCard />
             <article className="sb-card">
               <span className="sb-status-pill">{readiness.length} completed repair checks</span>
               <h3>Repository readiness</h3>
@@ -90,6 +92,9 @@ export default function DashboardPage() {
             </div>
             <Link href="/team" className="sb-button">
               Open team page
+            </Link>
+            <Link href="/roadmap" className="sb-button-secondary">
+              Open roadmap
             </Link>
           </div>
 

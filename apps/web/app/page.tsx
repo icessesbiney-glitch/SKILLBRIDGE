@@ -15,6 +15,9 @@ export default function HomePage() {
               The web experience now highlights project structure, team ownership, and deployment repair so the repository can move toward reliable releases.
             </p>
             <div className="sb-actions">
+              <Link href="/roadmap" className="sb-button-secondary">
+                Open roadmap
+              </Link>
               <Link href="/dashboard" className="sb-button">
                 Review operations
               </Link>

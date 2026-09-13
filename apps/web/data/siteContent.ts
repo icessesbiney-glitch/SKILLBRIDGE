@@ -1,5 +1,6 @@
 export const navigationLinks = [
   { href: '/', label: 'Overview' },
+  { href: '/roadmap', label: 'Roadmap' },
   { href: '/dashboard', label: 'Operations' },
   { href: '/team', label: 'Team' },
   { href: '/auth', label: 'Access' },
@@ -97,5 +98,74 @@ export const deploymentSteps = [
   {
     title: 'Release execution',
     detail: 'Publish the web app from main, distribute mobile previews through EAS, and cut tagged desktop releases.',
+  },
+];
+
+export const courseRoadmap = [
+  {
+    title: 'Module 1 · Core product base',
+    summary: 'Stabilise the shared workspace so every platform can build from one source of truth.',
+    outcomes: [
+      'Keep shared auth and data logic in the monorepo',
+      'Finish missing scripts and remove fragile placeholders',
+      'Validate every workspace before deployment starts',
+    ],
+  },
+  {
+    title: 'Module 2 · Member access',
+    summary: 'Complete sign-in, create-account, logged-in awareness, and logout across the user journey.',
+    outcomes: [
+      'Use live Supabase auth instead of mock flows',
+      'Surface clear sign-in state in the app shell',
+      'Keep signed-out users moving toward access setup',
+    ],
+  },
+  {
+    title: 'Module 3 · Multi-platform delivery',
+    summary: 'Make web, mobile, and desktop releases follow the same roadmap and ownership model.',
+    outcomes: [
+      'Treat web as the primary product surface',
+      'Keep mobile and desktop aligned with shared logic',
+      'Package desktop and mobile from validated builds only',
+    ],
+  },
+  {
+    title: 'Module 4 · Automated deployment',
+    summary: 'Use repository configuration to automate public and private release flows with review gates.',
+    outcomes: [
+      'Send public production web deploys to Vercel',
+      'Use a private preview channel for Netlify staging builds',
+      'Require secrets and passing checks before release jobs run',
+    ],
+  },
+];
+
+export const mentorGuidance = [
+  {
+    title: 'Protect the core before expanding features',
+    summary: 'Your lifetime project needs a stable release base more than a wide but fragile feature surface.',
+    actions: [
+      'Keep CI green before adding more pages',
+      'Promote only one deployment target to production authority',
+      'Track incomplete work in the roadmap instead of hiding it',
+    ],
+  },
+  {
+    title: 'Separate product work from finance and ownership decisions',
+    summary: 'Revenue share, invoices, and business agreements must stay outside repository automation.',
+    actions: [
+      'Use external billing tools for invoices and payouts',
+      'Keep repository roles technical, not financial',
+      'Review legal and payment terms manually before automation',
+    ],
+  },
+  {
+    title: 'Automate releases, not credentials',
+    summary: 'Deployment should be push-button once secrets and platform settings are correctly stored.',
+    actions: [
+      'Store tokens only in GitHub and hosting provider secrets',
+      'Use separate public and private environments',
+      'Promote staging builds to production only after review',
+    ],
   },
 ];

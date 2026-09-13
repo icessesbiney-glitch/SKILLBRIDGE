@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import SiteChrome from '../../components/SiteChrome';
+import { useAuthSession } from '../../hooks/useAuthSession';
 import { supabase } from '../../utils/supabaseClient';
 import { getAuthFeedbackMessage } from './authFeedback';
 
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default function AuthPage() {
   const router = useRouter();
+  const { session } = useAuthSession();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +20,12 @@ export default function AuthPage() {
   const [message, setMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState<'error' | 'success' | null>(null);
   const isSupabaseConfigured = Boolean(supabase);
+
+  useEffect(() => {
+    if (session?.user) {
+      router.replace('/dashboard');
+    }
+  }, [router, session]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import AuthControls from './AuthControls';
 import { navigationLinks } from '../data/siteContent';
 
 type SiteChromeProps = {
@@ -34,6 +35,7 @@ export default function SiteChrome({ children }: SiteChromeProps) {
               </Link>
             ))}
           </nav>
+          <AuthControls />
         </div>
       </header>
       <main>{children}</main>
