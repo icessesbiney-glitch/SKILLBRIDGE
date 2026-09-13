@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@skillbridge/shared';
 import HomeScreen from './screens/HomeScreen';
 import AuthScreen from './screens/AuthScreen';
@@ -92,7 +93,7 @@ export default function App() {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
         setIsSignedIn(!!session);
       }
     );

@@ -9,6 +9,10 @@
     "apps/mobile",
     "packages/shared"
   ],
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
   "scripts": {
     "dev": "npm run dev --workspace=@skillbridge/web",
     "dev:all": "concurrently \"npm run dev --workspace=@skillbridge/web\" \"npm run dev --workspace=@skillbridge/desktop\" \"npm run dev:web --workspace=@skillbridge/mobile\"",
@@ -32,6 +36,9 @@
     "setup:all": "npm install && npm run build:shared"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "next": "14.2.35",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
 }
