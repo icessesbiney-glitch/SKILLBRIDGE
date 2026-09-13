@@ -11,6 +11,7 @@ type SiteChromeProps = {
 
 export default function SiteChrome({ children }: SiteChromeProps) {
   const pathname = usePathname();
+  const currentPath = pathname ?? '';
 
   return (
     <div className="sb-shell">
@@ -25,7 +26,11 @@ export default function SiteChrome({ children }: SiteChromeProps) {
                 key={link.href}
                 href={link.href}
                 className="sb-nav-link"
-                aria-current={pathname === link.href ? 'page' : undefined}
+                aria-current={
+                  currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+                    ? 'page'
+                    : undefined
+                }
               >
                 {link.label}
               </Link>

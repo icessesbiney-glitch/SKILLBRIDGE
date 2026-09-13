@@ -130,6 +130,11 @@ button:hover {
   color: var(--green);
 }
 
+.sb-nav-link[aria-current='page'] {
+  color: var(--green);
+  font-weight: 700;
+}
+
 .sb-hero,
 .sb-section {
   padding: 5rem 0;

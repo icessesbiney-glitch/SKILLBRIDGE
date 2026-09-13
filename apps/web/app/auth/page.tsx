@@ -8,6 +8,36 @@ import { supabase } from '../../utils/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
+function getAuthFeedbackMessage(error: unknown, isSignUp: boolean) {
+  if (!(error instanceof Error)) {
+    return isSignUp
+      ? 'We could not create your account right now. Please try again in a moment.'
+      : 'Authentication failed. Please try again.';
+  }
+
+  const message = error.message.toLowerCase();
+
+  if (message.includes('invalid login credentials')) {
+    return 'Authentication failed. Check your email and password, then try again.';
+  }
+
+  if (message.includes('email not confirmed')) {
+    return 'Check your inbox and confirm your email before signing in.';
+  }
+
+  if (message.includes('password')) {
+    return isSignUp
+      ? 'Your password does not meet the current requirements. Please choose a stronger password.'
+      : 'Authentication failed. Check your email and password, then try again.';
+  }
+
+  if (message.includes('already registered') || message.includes('already been registered')) {
+    return 'This email already has an account. Sign in instead of creating a new one.';
+  }
+
+  return error.message;
+}
+
 export default function AuthPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -48,11 +78,7 @@ export default function AuthPage() {
     } catch (error) {
       console.error('Authentication request failed', error);
       setFeedbackType('error');
-      setMessage(
-        isSignUp
-          ? 'We could not create your account right now. Please try again in a moment.'
-          : 'Authentication failed. Check your credentials and try again.',
-      );
+      setMessage(getAuthFeedbackMessage(error, isSignUp));
     } finally {
       setLoading(false);
     }
@@ -113,7 +139,12 @@ export default function AuthPage() {
                 </div>
               )}
 
-              <button type="submit" disabled={loading} className="sb-button" aria-busy={loading}>
+              <button
+                type="submit"
+                disabled={loading || !isSupabaseConfigured}
+                className="sb-button"
+                aria-busy={loading}
+              >
                 {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
               </button>
             </form>
