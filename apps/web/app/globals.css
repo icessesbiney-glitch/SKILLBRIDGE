@@ -163,6 +163,10 @@ button:hover {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.sb-auth-layout {
+  display: grid;
+}
+
 .sb-hero-title,
 .sb-section h1,
 .sb-section h2 {
