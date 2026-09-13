@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   deploy-web-production:
@@ -58,27 +58,3 @@ jobs:
           scope: ${{ secrets.VERCEL_ORG_ID }}
           vercel-args: '--prod'
           working-directory: apps/web
-
-      - name: Comment on commit
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '✅ Web app deployed to production (public)\n\n🌐 Visit: https://skillbridge.vercel.app'
-            })
-
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '❌ Web app deployment to production failed\n\nCheck the workflow logs for details.'
-            })

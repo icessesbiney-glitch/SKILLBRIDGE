@@ -47,4 +47,20 @@ describe('web middleware', () => {
 
     expect(response.headers.get('location')).toBe('https://example.com/auth?next=%2Fdashboard');
   });
+
+  it('preserves the protected route query string in the next parameter', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'public-anon-key';
+    (updateSession as jest.Mock).mockResolvedValue({
+      response: new Response(null, { status: 200 }),
+      user: null,
+    });
+
+    const request = new NextRequest('https://example.com/roadmap?tab=advanced');
+    const response = await middleware(request);
+
+    expect(response.headers.get('location')).toBe(
+      'https://example.com/auth?next=%2Froadmap%3Ftab%3Dadvanced',
+    );
+  });
 });

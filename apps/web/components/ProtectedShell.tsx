@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuthSession } from '../hooks/useAuthSession';
 
@@ -16,13 +16,26 @@ export default function ProtectedShell({ title, description, children }: Protect
   const router = useRouter();
   const pathname = usePathname() || '/dashboard';
   const { isConfigured, isLoading, session } = useAuthSession();
-  const authHref = `/auth?next=${encodeURIComponent(pathname)}`;
+  const [authHref, setAuthHref] = useState(`/auth?next=${encodeURIComponent(pathname)}`);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const nextPath = `${window.location.pathname}${window.location.search}`;
+    setAuthHref(`/auth?next=${encodeURIComponent(nextPath)}`);
+  }, [pathname]);
 
   useEffect(() => {
     if (!isLoading && isConfigured && !session?.user) {
-      router.replace('/auth');
+      const nextPath =
+        typeof window === 'undefined'
+          ? pathname
+          : `${window.location.pathname}${window.location.search}`;
+      router.replace(`/auth?next=${encodeURIComponent(nextPath)}`);
     }
-  }, [isConfigured, isLoading, router, session]);
+  }, [isConfigured, isLoading, pathname, router, session]);
 
   if (isLoading) {
     return (
