@@ -37,6 +37,7 @@
     },
     "files": [
       "dist/**/*",
+      "renderer/**/*",
       "node_modules/**/*"
     ],
     "mac": {

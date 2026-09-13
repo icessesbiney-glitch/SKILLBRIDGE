@@ -48,7 +48,11 @@ export default function AuthPage() {
     } catch (error) {
       console.error('Authentication request failed', error);
       setFeedbackType('error');
-      setMessage('Authentication failed. Check your credentials and try again.');
+      setMessage(
+        isSignUp
+          ? 'We could not create your account right now. Please try again in a moment.'
+          : 'Authentication failed. Check your credentials and try again.',
+      );
     } finally {
       setLoading(false);
     }

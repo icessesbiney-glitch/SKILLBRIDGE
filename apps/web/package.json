@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint app components data utils --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit -p tsconfig.typecheck.json",
-    "test": "jest --passWithNoTests"
+    "test": "jest --config jest.config.cjs --passWithNoTests"
   },
   "dependencies": {
     "@skillbridge/shared": "*",
