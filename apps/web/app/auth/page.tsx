@@ -1,105 +1,246 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
+import SiteChrome from '../../components/SiteChrome';
+import { countryOptions, educationLevels } from '../../data/siteContent';
+import { useAuthSession } from '../../hooks/useAuthSession';
+import { supabase } from '../../utils/supabaseClient';
+import { getAuthFeedbackMessage } from './authFeedback';
+import { getSafeNextPath } from './nextPath';
 
 export const dynamic = 'force-dynamic';
 
 export default function AuthPage() {
   const router = useRouter();
+  const { session } = useAuthSession();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [age, setAge] = useState('22');
+  const [country, setCountry] = useState('Ghana');
+  const [visibility, setVisibility] = useState<'local' | 'public'>('local');
+  const [educationLevel, setEducationLevel] = useState(educationLevels[0]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState<'error' | 'success' | null>(null);
+  const [nextPath, setNextPath] = useState('/dashboard');
+  const isSupabaseConfigured = Boolean(supabase);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    setNextPath(getSafeNextPath(window.location.search));
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      router.replace(nextPath);
+    }
+  }, [nextPath, router, session]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setFeedbackType(null);
 
     try {
-      // Mock authentication - replace with actual Supabase logic
+      if (!supabase) {
+        setFeedbackType('error');
+        setMessage('Authentication is not configured yet. Connect the public Supabase settings before signing in.');
+        return;
+      }
+
       if (isSignUp) {
-        setMessage('Registration successful! Please check your email for the confirmation link.');
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              age,
+              country,
+              visibility,
+              education_level: educationLevel,
+              qualification_access: 'Open to all learners',
+            },
+          },
+        });
+        if (error) {
+          throw error;
+        }
+        setFeedbackType('success');
+        setMessage('Registration started. Check your email to confirm your account.');
       } else {
-        setMessage('Login successful! Redirecting...');
-        setTimeout(() => router.push('/dashboard'), 1500);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          throw error;
+        }
+        if (!data.session) {
+          throw new Error('Authentication session was not created.');
+        }
+        router.refresh();
       }
     } catch (error) {
-      setMessage(error instanceof Error ? `Error: ${error.message}` : 'An error occurred');
+      console.error('Authentication request failed', error);
+      setFeedbackType('error');
+      setMessage(getAuthFeedbackMessage(error, isSignUp));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {isSignUp ? 'Create your account' : 'Sign in to SkillBridge'}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {isSignUp ? 'Get started on your learning journey' : 'Welcome back'}
-          </p>
-        </div>
-
-        <form className="space-y-6" onSubmit={handleAuth}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                placeholder="••••••••"
-              />
+    <SiteChrome>
+      <section className="sb-section">
+        <div className="sb-container sb-auth-layout">
+          <div className="sb-panel">
+            <span className="sb-eyebrow">Access and onboarding</span>
+            <h1>{isSignUp ? 'Create a SkillBridge account' : 'Sign in to continue the rebuild'}</h1>
+            <p>
+              This page now uses the configured Supabase client instead of placeholder success messages, and it clearly reports when the deployment environment is still incomplete.
+            </p>
+            <div className="sb-notice">
+              <strong>{isSupabaseConfigured ? 'Supabase detected' : 'Supabase missing'}</strong>
+              <p>
+                {isSupabaseConfigured
+                  ? 'You can use the form below to sign in or create an account.'
+                  : 'Authentication will stay unavailable until the deployment environment is connected to Supabase.'}
+              </p>
             </div>
           </div>
 
-          {message && (
-            <div className={`rounded-lg p-3 text-sm ${message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-              {message}
+          <div className="sb-auth-card">
+            <div className="sb-auth-head">
+              <h2>{isSignUp ? 'Create your account' : 'Welcome back'}</h2>
+              <p>{isSignUp ? 'Register from any country, with Ghana prioritised, and learn to earn at every level.' : 'Continue with repository operations.'}</p>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
-          </button>
-        </form>
+            <form className="sb-form" onSubmit={handleAuth} aria-busy={loading}>
+              {isSignUp && (
+                <>
+                  <label className="sb-field">
+                    <span>Full name</span>
+                    <input
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Ama Mensah"
+                    />
+                  </label>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="font-semibold text-blue-600 hover:text-blue-700"
-            >
-              {isSignUp ? 'Sign in' : 'Sign up'}
-            </button>
-          </p>
+                  <div className="sb-form-grid">
+                    <label className="sb-field">
+                      <span>Age</span>
+                      <input
+                        type="number"
+                        min="16"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                      />
+                    </label>
+
+                    <label className="sb-field">
+                      <span>Country</span>
+                      <select value={country} onChange={(e) => setCountry(e.target.value)} className="sb-select">
+                        {countryOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="sb-form-grid">
+                    <label className="sb-field">
+                      <span>Education or qualification</span>
+                      <select
+                        value={educationLevel}
+                        onChange={(e) => setEducationLevel(e.target.value)}
+                        className="sb-select"
+                      >
+                        {educationLevels.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="sb-field">
+                      <span>Task visibility</span>
+                      <select
+                        value={visibility}
+                        onChange={(e) => setVisibility(e.target.value as 'local' | 'public')}
+                        className="sb-select"
+                      >
+                        <option value="local">Local</option>
+                        <option value="public">Public</option>
+                      </select>
+                    </label>
+                  </div>
+                </>
+              )}
+
+              <label className="sb-field">
+                <span>Email address</span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </label>
+
+              <label className="sb-field">
+                <span>Password</span>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </label>
+
+              {message && (
+                <div className={`sb-feedback ${feedbackType === 'error' ? 'is-error' : 'is-success'}`}>
+                  {message}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || !isSupabaseConfigured}
+                className="sb-button"
+                aria-busy={loading}
+              >
+                {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
+              </button>
+            </form>
+
+            <p className="sb-switch-copy">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="sb-text-button">
+                {isSignUp ? 'Sign in' : 'Sign up'}
+              </button>
+            </p>
+            {isSignUp && (
+              <p className="sb-helper-copy">
+                Registration is open for all education levels, including no formal qualification. Beginner earnings start from ₵80 and can grow past ₵150 as you complete stronger tasks.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </SiteChrome>
   );
 }

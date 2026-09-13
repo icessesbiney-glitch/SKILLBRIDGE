@@ -21,10 +21,10 @@ vercel deploy --prod
 
 ### Alternative: Netlify
 ```bash
-# 1. Connect GitHub
-# 2. Configure build: npm run build
-# 3. Publish directory: .next
-# 4. Auto-deploys on git push
+# 1. Connect GitHub and set the base directory to the repository root
+# 2. Use netlify.toml in this repo
+# 3. Configure NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID in GitHub for preview automation
+# 4. Push to develop to create a private preview deployment
 ```
 
 ### Self-Hosted: AWS, DigitalOcean, Heroku
@@ -44,6 +44,7 @@ npm start
 # .env.production
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_URL=https://your-production-domain.example.com
 ```
 
 ### Set in Hosting Platform
@@ -77,6 +78,12 @@ vercel deploy --prod
 # 4. Update DNS (if custom domain)
 # Point nameservers to Vercel
 ```
+
+## Automated Branch Strategy
+
+- `main` → public production deploy on Vercel
+- `develop` → private preview deploy on Netlify
+- Bolt.new exports should land in this repository first so the same workflows validate and deploy them
 
 ## Performance Optimization
 

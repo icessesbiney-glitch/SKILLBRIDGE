@@ -1,86 +1,135 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import AuthStatusCard from '../../components/AuthStatusCard';
+import ProtectedShell from '../../components/ProtectedShell';
+import SiteChrome from '../../components/SiteChrome';
+import TaskWorkspace from '../../components/TaskWorkspace';
+import { deploymentSteps, platforms, teamMembers } from '../../data/siteContent';
+
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ email: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        // Mock user check - replace with actual Supabase logic
-        const mockUser = { email: 'user@example.com' };
-        setUser(mockUser);
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/auth');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-xl text-gray-600">Redirecting to login...</div>
-      </div>
-    );
-  }
+  const readiness = [
+    'Validation runs without suppressing errors',
+    'Platform assets exist for packaging and installation',
+    'Workflow files now match the repository structure',
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <nav className="bg-white shadow">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">SkillBridge Dashboard</h1>
-            <div className="flex gap-4">
-              <span className="text-gray-600">{user.email}</span>
-              <button
-                onClick={() => router.push('/auth')}
-                className="text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                Logout
-              </button>
+    <SiteChrome>
+      <ProtectedShell
+        title="Protected operations dashboard"
+        description="Sign in to view the task workspace, learner earnings path, and team operations pages."
+      >
+        <section className="sb-section">
+          <div className="sb-container">
+            <div className="sb-section-heading">
+              <div>
+                <span className="sb-eyebrow">Operations dashboard</span>
+                <h1>Repository status and deployment readiness</h1>
+              </div>
+              <p>
+                This page combines protected operations access with learner tasks, earning growth, and deployment visibility.
+              </p>
+            </div>
+
+            <div className="sb-card-grid sb-card-grid-compact">
+              <AuthStatusCard />
+              <article className="sb-card">
+                <span className="sb-status-pill">{readiness.length} completed repair checks</span>
+                <h3>Repository readiness</h3>
+                <ul className="sb-check-list">
+                  {readiness.map((item) => (
+                    <li key={item} className="is-ready">
+                      <span>Ready</span>
+                      <strong>{item}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <article className="sb-card">
+                <span className="sb-status-pill">3 active repair lanes</span>
+                <h3>Immediate priorities</h3>
+                <ul className="sb-simple-list">
+                  <li>Finish replacing mocked auth and placeholder data with live flows.</li>
+                  <li>Connect GitHub secrets so web, mobile, and desktop workflows can ship.</li>
+                  <li>Keep validation strict so broken changes cannot deploy silently.</li>
+                </ul>
+              </article>
             </div>
           </div>
-        </div>
-      </nav>
+        </section>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900">Welcome to your dashboard</h2>
-            <p className="mt-2 text-gray-600">Start your learning journey by creating or joining a skill group.</p>
+        <section className="sb-section sb-section-alt">
+          <div className="sb-container">
+            <TaskWorkspace />
           </div>
+        </section>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-lg bg-white p-6 shadow hover:shadow-lg transition">
-                <h3 className="font-bold text-gray-900">Skill Group {i}</h3>
-                <p className="mt-2 text-sm text-gray-600">Learn and grow with others in this community.</p>
-                <button className="mt-4 text-blue-600 font-semibold hover:text-blue-700">
-                  View Details →
-                </button>
+        <section className="sb-section">
+          <div className="sb-container">
+            <div className="sb-section-heading">
+              <div>
+                <span className="sb-eyebrow">Linked applications</span>
+                <h2>Each platform is tracked inside the same operational view.</h2>
               </div>
-            ))}
+              <p>Use this as the handoff page when deciding what still needs finishing before release.</p>
+            </div>
+            <div className="sb-card-grid">
+              {platforms.map((platform) => (
+                <article key={platform.name} className="sb-card">
+                  <span className="sb-status-pill">{platform.status}</span>
+                  <h3>{platform.name}</h3>
+                  <p>{platform.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </section>
+
+        <section className="sb-section">
+          <div className="sb-container sb-split">
+            <div className="sb-panel">
+              <span className="sb-eyebrow">Team alignment</span>
+              <h2>Owners for the work that remains</h2>
+              <div className="sb-stack">
+                {teamMembers.map((member) => (
+                  <article key={member.name} className="sb-member-row">
+                    <div>
+                      <h3>{member.name}</h3>
+                      <p className="sb-muted">{member.role}</p>
+                    </div>
+                    <p>{member.focus}</p>
+                  </article>
+                ))}
+              </div>
+              <div className="sb-actions">
+                <Link href="/team" className="sb-button">
+                  Open team page
+                </Link>
+                <Link href="/roadmap" className="sb-button-secondary">
+                  Open roadmap
+                </Link>
+              </div>
+            </div>
+
+            <div className="sb-panel">
+              <span className="sb-eyebrow">Deployment sequence</span>
+              <h2>What must happen before direct deployment works</h2>
+              <div className="sb-stack">
+                {deploymentSteps.map((step, index) => (
+                  <article key={step.title} className="sb-step-card">
+                    <div className="sb-roadmap-index">0{index + 1}</div>
+                    <div>
+                      <h3>{step.title}</h3>
+                      <p>{step.detail}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </ProtectedShell>
+    </SiteChrome>
   );
 }

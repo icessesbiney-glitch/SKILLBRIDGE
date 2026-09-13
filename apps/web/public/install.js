@@ -1,3 +1,5 @@
+let deferredInstallPrompt = null;
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
@@ -11,11 +13,14 @@ if ('serviceWorker' in navigator) {
 
 // Handle app installation
 window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
   // Store the event for later use
-  (window as any).installPrompt = e;
+  deferredInstallPrompt = e;
+  console.log('Install prompt captured:', Boolean(deferredInstallPrompt));
 });
 
 window.addEventListener('appinstalled', () => {
   console.log('SkillBridge app installed!');
-  (window as any).installPrompt = null;
+  deferredInstallPrompt = null;
+  console.log('Install prompt cleared:', Boolean(deferredInstallPrompt));
 });

@@ -4,11 +4,12 @@ This guide explains how deployments are configured for all SKILLBRIDGE platforms
 
 ## Overview
 
-SKILLBRIDGE uses GitHub Actions to automate deployments across three platforms:
+SKILLBRIDGE uses GitHub Actions to automate deployments across public and private release channels:
 
 | Platform | Visibility | Trigger | Target | Status |
 |----------|-----------|---------|--------|--------|
-| **Web** | Public | Push to `main` | Vercel (Production) | ✅ Live |
+| **Web** | Public | Push to `main` | Vercel (Production) | ✅ Automated |
+| **Web** | Private | Push to `develop` | Netlify (Preview) | 🔒 Automated |
 | **Mobile** | Private | Push to `main` | EAS (Internal Distribution) | 📱 Internal |
 | **Desktop** | Mixed | Push to `develop` (dev), Tags (prod) | GitHub Releases | 💻 Dev/Prod |
 
@@ -39,6 +40,7 @@ Set in Vercel dashboard (Settings → Environment Variables):
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_URL=https://your-production-domain.example.com
 ```
 
 ### Monitoring
@@ -61,7 +63,32 @@ Comment on commit with live URL
 
 ---
 
-## 2. Mobile App - Private Distribution
+## 2. Web App - Private Preview Deployment
+
+**Files**: `.github/workflows/deploy-web-private.yml`, `netlify.toml`
+
+### How It Works
+- Triggers on every push to `develop`
+- Validates linting, typing, and tests before deploy
+- Deploys a private preview to Netlify when required secrets exist
+- Keeps public production on Vercel and internal review on Netlify
+
+### Prerequisites
+Set these secrets in GitHub:
+
+```
+NETLIFY_AUTH_TOKEN   # From https://app.netlify.com/user/applications
+NETLIFY_SITE_ID      # Site ID for the preview environment
+```
+
+### Notes
+- `netlify.toml` keeps the build rooted in this monorepo
+- This preview channel is intended for internal review, QA, and stakeholder sign-off
+- For Bolt.new projects, export the app to this repository first, then let GitHub Actions handle the deploy
+
+---
+
+## 3. Mobile App - Private Distribution
 
 **File**: `.github/workflows/deploy-mobile-private.yml`
 
@@ -128,7 +155,7 @@ eas build --platform android --profile preview
 
 ---
 
-## 3. Desktop App - Development & Production
+## 4. Desktop App - Development & Production
 
 ### A. Development Builds
 

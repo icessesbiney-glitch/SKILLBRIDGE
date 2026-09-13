@@ -5,6 +5,9 @@ import isDev from 'electron-is-dev';
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
+  const packagedRendererUrl = `file://${path.join(__dirname, '../renderer/index.html')}`;
+  const productionUrl = process.env.SKILLBRIDGE_DESKTOP_WEB_URL || process.env.NEXT_PUBLIC_URL || packagedRendererUrl;
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -20,7 +23,7 @@ function createWindow() {
 
   const startUrl = isDev
     ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, '../../../apps/web/.next/server/pages/index.html')}`;
+    : productionUrl;
 
   mainWindow.loadURL(startUrl);
 
