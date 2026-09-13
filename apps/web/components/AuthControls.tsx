@@ -14,7 +14,7 @@ export default function AuthControls() {
   const authHref =
     typeof window === 'undefined'
       ? '/auth'
-      : `/auth?next=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`;
+      : `/auth?next=${encodeURIComponent(`${window.location.pathname}${window.location.search}${window.location.hash}`)}`;
 
   const handleSignOut = async () => {
     if (!supabase) {

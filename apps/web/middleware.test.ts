@@ -23,7 +23,7 @@ describe('web middleware', () => {
     process.env = originalEnv;
   });
 
-  it('allows protected routes through when Supabase is not configured', async () => {
+  it('redirects protected routes to auth when Supabase is not configured', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -31,7 +31,7 @@ describe('web middleware', () => {
     const request = new NextRequest('https://example.com/roadmap');
     const response = await middleware(request);
 
-    expect(response.headers.get('location')).toBeNull();
+    expect(response.headers.get('location')).toBe('https://example.com/auth?next=%2Froadmap');
   });
 
   it('redirects unauthenticated protected requests with the next parameter', async () => {

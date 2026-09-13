@@ -12,20 +12,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const loginUrl = new URL('/auth', request.url);
+  loginUrl.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+
   const isConfigured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
   );
 
   if (!isConfigured) {
-    return NextResponse.next();
+    return NextResponse.redirect(loginUrl);
   }
 
   const { response, user } = await updateSession(request);
 
   if (!user) {
-    const loginUrl = new URL('/auth', request.url);
-    loginUrl.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
 

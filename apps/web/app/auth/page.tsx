@@ -8,6 +8,7 @@ import { countryOptions, educationLevels } from '../../data/siteContent';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { supabase } from '../../utils/supabaseClient';
 import { getAuthFeedbackMessage } from './authFeedback';
+import { getSafeNextPath } from './nextPath';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,10 +34,7 @@ export default function AuthPage() {
       return;
     }
 
-    const nextValue = new URLSearchParams(window.location.search).get('next');
-    if (nextValue?.startsWith('/')) {
-      setNextPath(nextValue);
-    }
+    setNextPath(getSafeNextPath(window.location.search));
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { getAuthFeedbackMessage } from './authFeedback';
+import { getSafeNextPath } from './nextPath';
 
 describe('getAuthFeedbackMessage', () => {
   it('maps invalid login credentials to a helpful sign-in message', () => {
@@ -17,5 +18,11 @@ describe('getAuthFeedbackMessage', () => {
     expect(getAuthFeedbackMessage(new Error('Password should be at least 6 characters'), true)).toBe(
       'Your password does not meet the current requirements. Please choose a stronger password.',
     );
+  });
+
+  it('allows internal next paths and rejects unsafe redirect targets', () => {
+    expect(getSafeNextPath('?next=%2Froadmap%3Ftab%3Dadvanced')).toBe('/roadmap?tab=advanced');
+    expect(getSafeNextPath('?next=%2F%2Fevil.example')).toBe('/dashboard');
+    expect(getSafeNextPath('?next=roadmap')).toBe('/dashboard');
   });
 });

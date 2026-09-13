@@ -23,7 +23,7 @@ export default function ProtectedShell({ title, description, children }: Protect
       return;
     }
 
-    const nextPath = `${window.location.pathname}${window.location.search}`;
+    const nextPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     setAuthHref(`/auth?next=${encodeURIComponent(nextPath)}`);
   }, [pathname]);
 
@@ -32,7 +32,7 @@ export default function ProtectedShell({ title, description, children }: Protect
       const nextPath =
         typeof window === 'undefined'
           ? pathname
-          : `${window.location.pathname}${window.location.search}`;
+          : `${window.location.pathname}${window.location.search}${window.location.hash}`;
       router.replace(`/auth?next=${encodeURIComponent(nextPath)}`);
     }
   }, [isConfigured, isLoading, pathname, router, session]);
