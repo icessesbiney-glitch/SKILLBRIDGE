@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { useAuthSession } from '../hooks/useAuthSession';
@@ -14,7 +14,9 @@ type ProtectedShellProps = {
 
 export default function ProtectedShell({ title, description, children }: ProtectedShellProps) {
   const router = useRouter();
+  const pathname = usePathname() || '/dashboard';
   const { isConfigured, isLoading, session } = useAuthSession();
+  const authHref = `/auth?next=${encodeURIComponent(pathname)}`;
 
   useEffect(() => {
     if (!isLoading && isConfigured && !session?.user) {
@@ -44,7 +46,7 @@ export default function ProtectedShell({ title, description, children }: Protect
             <span className="sb-eyebrow">Setup required</span>
             <h1>{title}</h1>
             <p>Connect Supabase first so account protection works across the protected pages.</p>
-            <Link href="/auth" className="sb-button">
+            <Link href={authHref} className="sb-button">
               Open access setup
             </Link>
           </div>
@@ -61,7 +63,7 @@ export default function ProtectedShell({ title, description, children }: Protect
             <span className="sb-eyebrow">Sign in required</span>
             <h1>{title}</h1>
             <p>{description}</p>
-            <Link href="/auth" className="sb-button">
+            <Link href={authHref} className="sb-button">
               Continue to sign in
             </Link>
           </div>

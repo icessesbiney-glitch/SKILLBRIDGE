@@ -79,11 +79,15 @@ export default function AuthPage() {
         setFeedbackType('success');
         setMessage('Registration started. Check your email to confirm your account.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           throw error;
         }
-        router.push(nextPath);
+        if (!data.session) {
+          throw new Error('Authentication session was not created.');
+        }
+        router.replace(nextPath);
+        router.refresh();
       }
     } catch (error) {
       console.error('Authentication request failed', error);

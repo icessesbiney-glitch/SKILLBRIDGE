@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate-web-preview:
@@ -56,6 +56,8 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && secrets.NETLIFY_AUTH_TOKEN != '' && secrets.NETLIFY_SITE_ID != '' }}
     runs-on: ubuntu-latest
     environment: web-private-netlify
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 

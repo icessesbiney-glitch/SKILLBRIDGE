@@ -13,6 +13,7 @@ if ('serviceWorker' in navigator) {
 
 // Handle app installation
 window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
   // Store the event for later use
   deferredInstallPrompt = e;
   console.log('Install prompt captured:', Boolean(deferredInstallPrompt));
