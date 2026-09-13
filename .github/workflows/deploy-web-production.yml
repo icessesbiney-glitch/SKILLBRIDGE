@@ -9,10 +9,18 @@ on:
       - '.github/workflows/deploy-web-production.yml'
   workflow_dispatch:
 
+concurrency:
+  group: deploy-web-public-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
   deploy-web-production:
+    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: web-public-vercel
 
     steps:
       - uses: actions/checkout@v4

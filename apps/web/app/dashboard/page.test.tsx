@@ -4,6 +4,10 @@ import DashboardPage from './page';
 
 jest.mock('next/navigation', () => ({
   usePathname: () => '/dashboard',
+  useRouter: () => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  }),
 }));
 
 describe('DashboardPage', () => {
