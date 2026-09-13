@@ -11,6 +11,10 @@ export default function AuthControls() {
   const router = useRouter();
   const { isConfigured, isLoading, session } = useAuthSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const authHref =
+    typeof window === 'undefined'
+      ? '/auth'
+      : `/auth?next=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`;
 
   const handleSignOut = async () => {
     if (!supabase) {
@@ -21,7 +25,7 @@ export default function AuthControls() {
 
     try {
       await supabase.auth.signOut();
-      router.push('/auth');
+      router.push(authHref);
       router.refresh();
     } finally {
       setIsSigningOut(false);
@@ -36,7 +40,7 @@ export default function AuthControls() {
     return (
       <div className="sb-session-actions">
         <p className="sb-session-copy">Supabase setup needed</p>
-        <Link href="/auth" className="sb-button-secondary">
+        <Link href={authHref} className="sb-button-secondary">
           Access setup
         </Link>
       </div>
@@ -46,10 +50,10 @@ export default function AuthControls() {
   if (!session?.user) {
     return (
       <div className="sb-session-actions">
-        <Link href="/auth" className="sb-button-secondary">
+        <Link href={authHref} className="sb-button-secondary">
           Sign in
         </Link>
-        <Link href="/auth" className="sb-button">
+        <Link href={authHref} className="sb-button">
           Create account
         </Link>
       </div>

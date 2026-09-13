@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: web-private-netlify
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -77,15 +77,3 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-
-      - name: Comment on commit
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '✅ Private web preview deployed to Netlify\n\n🔒 This preview is intended for internal review on the develop branch.'
-            })

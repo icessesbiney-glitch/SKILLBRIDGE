@@ -86,7 +86,6 @@ export default function AuthPage() {
         if (!data.session) {
           throw new Error('Authentication session was not created.');
         }
-        router.replace(nextPath);
         router.refresh();
       }
     } catch (error) {
