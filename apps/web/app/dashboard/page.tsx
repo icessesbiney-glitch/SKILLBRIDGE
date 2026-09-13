@@ -1,86 +1,128 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import SiteChrome from '../../components/SiteChrome';
+import { deploymentSteps, platforms, teamMembers } from '../../data/siteContent';
+
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ email: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const readiness = [
+    {
+      label: 'Supabase public URL',
+      ready: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    },
+    {
+      label: 'Supabase anon key',
+      ready: Boolean(
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      ),
+    },
+    {
+      label: 'Vercel production URL',
+      ready: Boolean(process.env.NEXT_PUBLIC_URL),
+    },
+  ];
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        // Mock user check - replace with actual Supabase logic
-        const mockUser = { email: 'user@example.com' };
-        setUser(mockUser);
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/auth');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-xl text-gray-600">Redirecting to login...</div>
-      </div>
-    );
-  }
+  const readyCount = readiness.filter((item) => item.ready).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <nav className="bg-white shadow">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">SkillBridge Dashboard</h1>
-            <div className="flex gap-4">
-              <span className="text-gray-600">{user.email}</span>
-              <button
-                onClick={() => router.push('/auth')}
-                className="text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                Logout
-              </button>
+    <SiteChrome>
+      <section className="sb-section">
+        <div className="sb-container">
+          <div className="sb-section-heading">
+            <div>
+              <span className="sb-eyebrow">Operations dashboard</span>
+              <h1>Repository status and deployment readiness</h1>
             </div>
+            <p>
+              This page replaces placeholder dashboard content with a real repository overview for the unfinished sections that still need coordinated delivery.
+            </p>
+          </div>
+
+          <div className="sb-card-grid sb-card-grid-compact">
+            <article className="sb-card">
+              <span className="sb-status-pill">{readyCount}/{readiness.length} configured</span>
+              <h3>Environment readiness</h3>
+              <ul className="sb-check-list">
+                {readiness.map((item) => (
+                  <li key={item.label} className={item.ready ? 'is-ready' : 'is-blocked'}>
+                    <span>{item.ready ? 'Ready' : 'Missing'}</span>
+                    <strong>{item.label}</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+
+            <article className="sb-card">
+              <span className="sb-status-pill">3 active repair lanes</span>
+              <h3>Immediate priorities</h3>
+              <ul className="sb-simple-list">
+                <li>Finish replacing mocked auth and placeholder data with live flows.</li>
+                <li>Connect GitHub secrets so web, mobile, and desktop workflows can ship.</li>
+                <li>Keep validation strict so broken changes cannot deploy silently.</li>
+              </ul>
+            </article>
           </div>
         </div>
-      </nav>
+      </section>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900">Welcome to your dashboard</h2>
-            <p className="mt-2 text-gray-600">Start your learning journey by creating or joining a skill group.</p>
+      <section className="sb-section sb-section-alt">
+        <div className="sb-container">
+          <div className="sb-section-heading">
+            <div>
+              <span className="sb-eyebrow">Linked applications</span>
+              <h2>Each platform is tracked inside the same operational view.</h2>
+            </div>
+            <p>Use this as the handoff page when deciding what still needs finishing before release.</p>
           </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-lg bg-white p-6 shadow hover:shadow-lg transition">
-                <h3 className="font-bold text-gray-900">Skill Group {i}</h3>
-                <p className="mt-2 text-sm text-gray-600">Learn and grow with others in this community.</p>
-                <button className="mt-4 text-blue-600 font-semibold hover:text-blue-700">
-                  View Details →
-                </button>
-              </div>
+          <div className="sb-card-grid">
+            {platforms.map((platform) => (
+              <article key={platform.name} className="sb-card">
+                <span className="sb-status-pill">{platform.status}</span>
+                <h3>{platform.name}</h3>
+                <p>{platform.description}</p>
+              </article>
             ))}
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="sb-section">
+        <div className="sb-container sb-split">
+          <div className="sb-panel">
+            <span className="sb-eyebrow">Team alignment</span>
+            <h2>Owners for the work that remains</h2>
+            <div className="sb-stack">
+              {teamMembers.map((member) => (
+                <article key={member.name} className="sb-member-row">
+                  <div>
+                    <h3>{member.name}</h3>
+                    <p className="sb-muted">{member.role}</p>
+                  </div>
+                  <p>{member.focus}</p>
+                </article>
+              ))}
+            </div>
+            <Link href="/team" className="sb-button">
+              Open team page
+            </Link>
+          </div>
+
+          <div className="sb-panel">
+            <span className="sb-eyebrow">Deployment sequence</span>
+            <h2>What must happen before direct deployment works</h2>
+            <div className="sb-stack">
+              {deploymentSteps.map((step, index) => (
+                <article key={step.title} className="sb-step-card">
+                  <div className="sb-roadmap-index">0{index + 1}</div>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </SiteChrome>
   );
 }

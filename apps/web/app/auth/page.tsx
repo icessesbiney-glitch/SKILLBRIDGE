@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
+import SiteChrome from '../../components/SiteChrome';
+import { supabase } from '../../utils/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +15,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const isSupabaseConfigured = Boolean(supabase);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,12 +23,24 @@ export default function AuthPage() {
     setMessage('');
 
     try {
-      // Mock authentication - replace with actual Supabase logic
+      if (!supabase) {
+        setMessage('Supabase is not configured yet. Add the public environment variables before signing in.');
+        return;
+      }
+
       if (isSignUp) {
-        setMessage('Registration successful! Please check your email for the confirmation link.');
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          throw error;
+        }
+        setMessage('Registration started. Check your email to confirm your account.');
       } else {
-        setMessage('Login successful! Redirecting...');
-        setTimeout(() => router.push('/dashboard'), 1500);
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          throw error;
+        }
+        setMessage('Login successful. Redirecting to operations...');
+        router.push('/dashboard');
       }
     } catch (error) {
       setMessage(error instanceof Error ? `Error: ${error.message}` : 'An error occurred');
@@ -35,71 +50,74 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {isSignUp ? 'Create your account' : 'Sign in to SkillBridge'}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {isSignUp ? 'Get started on your learning journey' : 'Welcome back'}
-          </p>
-        </div>
-
-        <form className="space-y-6" onSubmit={handleAuth}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                placeholder="••••••••"
-              />
+    <SiteChrome>
+      <section className="sb-section">
+        <div className="sb-container sb-auth-layout">
+          <div className="sb-panel">
+            <span className="sb-eyebrow">Access and onboarding</span>
+            <h1>{isSignUp ? 'Create a SkillBridge account' : 'Sign in to continue the rebuild'}</h1>
+            <p>
+              This page now uses the configured Supabase client instead of placeholder success messages, and it clearly reports when the deployment environment is still incomplete.
+            </p>
+            <div className="sb-notice">
+              <strong>{isSupabaseConfigured ? 'Supabase detected' : 'Supabase missing'}</strong>
+              <p>
+                {isSupabaseConfigured
+                  ? 'You can use the form below to sign in or create an account.'
+                  : 'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before using live authentication.'}
+              </p>
             </div>
           </div>
 
-          {message && (
-            <div className={`rounded-lg p-3 text-sm ${message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-              {message}
+          <div className="sb-auth-card">
+            <div className="sb-auth-head">
+              <h2>{isSignUp ? 'Create your account' : 'Welcome back'}</h2>
+              <p>{isSignUp ? 'Start building from one shared workspace.' : 'Continue with repository operations.'}</p>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
-          </button>
-        </form>
+            <form className="sb-form" onSubmit={handleAuth}>
+              <label className="sb-field">
+                <span>Email address</span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </label>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="font-semibold text-blue-600 hover:text-blue-700"
-            >
-              {isSignUp ? 'Sign in' : 'Sign up'}
-            </button>
-          </p>
+              <label className="sb-field">
+                <span>Password</span>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </label>
+
+              {message && (
+                <div className={`sb-feedback ${message.includes('Error') ? 'is-error' : 'is-success'}`}>
+                  {message}
+                </div>
+              )}
+
+              <button type="submit" disabled={loading} className="sb-button">
+                {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
+              </button>
+            </form>
+
+            <p className="sb-switch-copy">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="sb-text-button">
+                {isSignUp ? 'Sign in' : 'Sign up'}
+              </button>
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </SiteChrome>
   );
 }

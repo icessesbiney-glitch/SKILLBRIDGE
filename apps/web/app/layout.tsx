@@ -4,9 +4,9 @@ import React from 'react';
 
 export const metadata: Metadata = {
   title: 'SkillBridge | Build momentum together',
-  description: 'A focused workspace for learning, sharing, and growing skills.',
+  description: 'A repaired multi-platform workspace for learning, delivery, and deployment.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/icon-192.png',
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
