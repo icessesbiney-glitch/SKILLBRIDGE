@@ -15,16 +15,19 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState<'error' | 'success' | null>(null);
   const isSupabaseConfigured = Boolean(supabase);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setFeedbackType(null);
 
     try {
       if (!supabase) {
-        setMessage('Supabase is not configured yet. Add the public environment variables before signing in.');
+        setFeedbackType('error');
+        setMessage('Authentication is not configured yet. Connect the public Supabase settings before signing in.');
         return;
       }
 
@@ -33,17 +36,19 @@ export default function AuthPage() {
         if (error) {
           throw error;
         }
+        setFeedbackType('success');
         setMessage('Registration started. Check your email to confirm your account.');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           throw error;
         }
-        setMessage('Login successful. Redirecting to operations...');
         router.push('/dashboard');
       }
     } catch (error) {
-      setMessage(error instanceof Error ? `Error: ${error.message}` : 'An error occurred');
+      console.error('Authentication request failed', error);
+      setFeedbackType('error');
+      setMessage('Authentication failed. Check your credentials and try again.');
     } finally {
       setLoading(false);
     }
@@ -64,7 +69,7 @@ export default function AuthPage() {
               <p>
                 {isSupabaseConfigured
                   ? 'You can use the form below to sign in or create an account.'
-                  : 'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before using live authentication.'}
+                  : 'Authentication will stay unavailable until the deployment environment is connected to Supabase.'}
               </p>
             </div>
           </div>
@@ -75,7 +80,7 @@ export default function AuthPage() {
               <p>{isSignUp ? 'Start building from one shared workspace.' : 'Continue with repository operations.'}</p>
             </div>
 
-            <form className="sb-form" onSubmit={handleAuth}>
+            <form className="sb-form" onSubmit={handleAuth} aria-busy={loading}>
               <label className="sb-field">
                 <span>Email address</span>
                 <input
@@ -99,12 +104,12 @@ export default function AuthPage() {
               </label>
 
               {message && (
-                <div className={`sb-feedback ${message.includes('Error') ? 'is-error' : 'is-success'}`}>
+                <div className={`sb-feedback ${feedbackType === 'error' ? 'is-error' : 'is-success'}`}>
                   {message}
                 </div>
               )}
 
-              <button type="submit" disabled={loading} className="sb-button">
+              <button type="submit" disabled={loading} className="sb-button" aria-busy={loading}>
                 {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
               </button>
             </form>

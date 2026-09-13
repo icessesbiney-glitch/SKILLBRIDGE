@@ -29,7 +29,6 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "utils/supabase"
+    "node_modules"
   ]
 }

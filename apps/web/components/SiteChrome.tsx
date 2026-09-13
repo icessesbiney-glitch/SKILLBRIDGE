@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { navigationLinks } from '../data/siteContent';
 
@@ -7,6 +10,8 @@ type SiteChromeProps = {
 };
 
 export default function SiteChrome({ children }: SiteChromeProps) {
+  const pathname = usePathname();
+
   return (
     <div className="sb-shell">
       <header className="sb-topbar">
@@ -16,7 +21,12 @@ export default function SiteChrome({ children }: SiteChromeProps) {
           </Link>
           <nav className="sb-nav" aria-label="Primary">
             {navigationLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="sb-nav-link">
+              <Link
+                key={link.href}
+                href={link.href}
+                className="sb-nav-link"
+                aria-current={pathname === link.href ? 'page' : undefined}
+              >
                 {link.label}
               </Link>
             ))}
