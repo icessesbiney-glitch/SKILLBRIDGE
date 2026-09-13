@@ -213,6 +213,11 @@ button:hover {
   color: #fff;
 }
 
+.sb-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .sb-button-secondary {
   padding: 0.9rem 1.35rem;
   border: 1px solid var(--line);

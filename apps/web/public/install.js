@@ -12,10 +12,10 @@ if ('serviceWorker' in navigator) {
 // Handle app installation
 window.addEventListener('beforeinstallprompt', (e) => {
   // Store the event for later use
-  (window as any).installPrompt = e;
+  window.installPrompt = e;
 });
 
 window.addEventListener('appinstalled', () => {
   console.log('SkillBridge app installed!');
-  (window as any).installPrompt = null;
+  window.installPrompt = null;
 });
