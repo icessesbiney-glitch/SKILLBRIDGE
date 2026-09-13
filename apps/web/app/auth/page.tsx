@@ -25,13 +25,25 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState<'error' | 'success' | null>(null);
+  const [nextPath, setNextPath] = useState('/dashboard');
   const isSupabaseConfigured = Boolean(supabase);
 
   useEffect(() => {
-    if (session?.user) {
-      router.replace('/dashboard');
+    if (typeof window === 'undefined') {
+      return;
     }
-  }, [router, session]);
+
+    const nextValue = new URLSearchParams(window.location.search).get('next');
+    if (nextValue?.startsWith('/')) {
+      setNextPath(nextValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      router.replace(nextPath);
+    }
+  }, [nextPath, router, session]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +83,7 @@ export default function AuthPage() {
         if (error) {
           throw error;
         }
-        router.push('/dashboard');
+        router.push(nextPath);
       }
     } catch (error) {
       console.error('Authentication request failed', error);
