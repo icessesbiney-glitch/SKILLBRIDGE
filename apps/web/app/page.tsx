@@ -18,9 +18,20 @@ export default function HomePage() {
               <Link href="/roadmap" className="sb-button-secondary">
                 Open roadmap
               </Link>
-              <Link href="/dashboard" className="sb-button">
-                Review operations
-              </Link>
+              
+              {/* DODO PAYMENTS LIVE BUTTON */}
+              <a 
+                href="https://dodopayments.com" 
+                className="sb-button"
+                style={{ 
+                  backgroundColor: '#000000', 
+                  color: '#ffffff',
+                  textAlign: 'center'
+                }}
+              >
+                Activate Skillbridge Premium Access
+              </a>
+
               <Link href="/team" className="sb-button sb-button-secondary">
                 Review the team
               </Link>
