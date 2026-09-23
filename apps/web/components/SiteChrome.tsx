@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 import AuthControls from './AuthControls';
 import { navigationLinks } from '../data/siteContent';
-import { supabase } from '../utils/supaBaseClient';
+import { supabase } from '../utils/supabaseClient';
 
 type SiteChromeProps = {
   children: React.ReactNode;
