@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 import AuthControls from './AuthControls';
 import { navigationLinks } from '../data/siteContent';
-import { supabase } from '../utils/supabaseClient'; // Adjust path if your utils location differs
+import { supabase } from '@/utils/supabaseClient'; // Fixed path using global workspace alias
 
 type SiteChromeProps = {
   children: React.ReactNode;
