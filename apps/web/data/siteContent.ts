@@ -550,3 +550,7 @@ export const mentorGuidance = [
   title: 'Incremental stabilization over fast commits',
   summary: 'Address build validation blockades comprehensively at the root layers rather than overriding safety rules.',
   actions: [
+{
+  title: 'Incremental stabilization over fast commits',
+  summary: 'Address build validation blockades comprehensively at the root layers rather than overriding safety rules.',
+  actions: [
