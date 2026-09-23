@@ -1,7 +1,7 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import AuthControls from './AuthControls';
@@ -99,7 +99,7 @@ export default function SiteChrome({ children }: SiteChromeProps) {
                 >
                   {link.label}
                 </Link>
-                {/* Visual Separator Bar between menus (stops before last item) */}
+                {/* Visual Separator Bar between menus */}
                 {index < skillBridgeLinks.length - 1 && (
                   <span style={{ color: '#cbd5e1', userSelect: 'none' }}>|</span>
                 )}
