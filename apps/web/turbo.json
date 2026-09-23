@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build",
+  "extends": ["//"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -7,4 +8,3 @@
     }
   }
 }
-
