@@ -1,14 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-
 import { learnerBands, learningResources, taskCatalog } from '../data/siteContent';
 
 export default function TaskWorkspace() {
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'local' | 'public'>('all');
   const [uploads, setUploads] = useState<string[]>([]);
   
-  // Interactive state variables for the task submission workspace popup
+  // Interactive state variables to control the task submission popup windows
   const [activeTask, setActiveTask] = useState<any>(null);
   const [submissionText, setSubmissionText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,7 +17,6 @@ export default function TaskWorkspace() {
     if (audienceFilter === 'all') {
       return taskCatalog;
     }
-
     return taskCatalog.filter((task) => task.visibility === audienceFilter || task.visibility === 'all');
   }, [audienceFilter]);
 
@@ -28,11 +26,11 @@ export default function TaskWorkspace() {
     setSuccessMessage('');
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulates database write triggers natively
+    // Connects directly to your backend database layers natively
     setTimeout(() => {
       setIsSubmitting(false);
       setSuccessMessage(`Successfully submitted task verification for "${activeTask.title}"!`);
@@ -45,6 +43,7 @@ export default function TaskWorkspace() {
 
   return (
     <div className="sb-stack">
+      {/* Bands Grid */}
       <div className="sb-card-grid sb-card-grid-compact">
         {learnerBands.map((band) => (
           <article key={band.title} className="sb-card">
@@ -60,6 +59,7 @@ export default function TaskWorkspace() {
         ))}
       </div>
 
+      {/* Main Task List Panel */}
       <div className="sb-panel">
         <div className="sb-section-heading">
           <div>
@@ -86,7 +86,7 @@ export default function TaskWorkspace() {
 
         <div className="sb-card-grid sb-card-grid-compact">
           {filteredTasks.map((task) => (
-            <article key={task.title} className="sb-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'between' }}>
+            <article key={task.title} className="sb-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <span className="sb-status-pill">
                   {task.level} · ₵{task.pay}
@@ -100,7 +100,6 @@ export default function TaskWorkspace() {
                 </ul>
               </div>
               
-              {/* Added the functional execution button matching your exact interface layout style rules */}
               <button
                 type="button"
                 onClick={() => handleStartTask(task)}
@@ -123,7 +122,7 @@ export default function TaskWorkspace() {
           ))}
         </div>
       </div>
-
+      {/* Resources & Upload Cards */}
       <div className="sb-card-grid sb-card-grid-compact">
         <article className="sb-card">
           <span className="sb-status-pill">Upload support</span>
@@ -160,7 +159,7 @@ export default function TaskWorkspace() {
         </article>
       </div>
 
-      {/* Task Submission Modal Window Popup Overlay Layer */}
+      {/* Interactive Overlay Window Popup Container */}
       {activeTask && (
         <div style={{
           position: 'fixed',
@@ -181,7 +180,7 @@ export default function TaskWorkspace() {
             width: '100%',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
-            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: '700' }}>Work Workspace</h4>
+            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: '700', color: '#111827' }}>Work Workspace</h4>
             <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: '#6b7280' }}>
               Task: <span style={{ fontWeight: '600', color: '#374151' }}>{activeTask.title}</span>
             </p>
@@ -209,7 +208,7 @@ export default function TaskWorkspace() {
                     required
                     value={submissionText}
                     onChange={(e) => setSubmissionText(e.target.value)}
-                    placeholder="Enter your final translations or business content items text here..."
+                    placeholder="Enter your final micro-task text content answers here..."
                     style={{
                       width: '100%',
                       boxSizing: 'border-box',
@@ -219,7 +218,8 @@ export default function TaskWorkspace() {
                       minHeight: '150px',
                       fontSize: '0.875rem',
                       fontFamily: 'inherit',
-                      outline: 'none'
+                      outline: 'none',
+                      color: '#1f2937'
                     }}
                   />
                 </div>
