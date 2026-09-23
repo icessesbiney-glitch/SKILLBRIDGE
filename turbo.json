@@ -1,4 +1,5 @@
 {
-  "$schema": "https://turbo.build",
+  "$schema": "https://apps/web/
+turbo.build",
   "extends": ["//"]
 }
