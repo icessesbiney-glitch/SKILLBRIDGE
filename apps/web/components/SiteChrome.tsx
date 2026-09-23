@@ -1,10 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 import AuthControls from './AuthControls';
 import { navigationLinks } from '../data/siteContent';
+import { supabase } from '../utils/supabaseClient'; // Adjust path if your utils location differs
 
 type SiteChromeProps = {
   children: React.ReactNode;
@@ -15,6 +17,53 @@ export default function SiteChrome({ children }: SiteChromeProps) {
   const currentPath = pathname ?? '';
   const isActiveLink = (href: string) =>
     currentPath === href || (href !== '/' && currentPath.startsWith(`${href}/`));
+
+  // 1. Establish the interactive live sync hooks for your SkillBridge balance
+  const [balance, setBalance] = useState<string>('0.00');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSkillBridgeBalance() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('skillbridge_balance')
+            .eq('id', user.id)
+            .single();
+
+          if (data && !error) {
+            setBalance(Number(data.skillbridge_balance).toFixed(2));
+          }
+        }
+      } catch (err) {
+        console.error('Error syncing SkillBridge balance ledger:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSkillBridgeBalance();
+
+    // Establish live real-time subscription channels for instant wallet ticks
+    const channel = supabase
+      .channel('sb-balance-channel')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        (payload) => {
+          if (payload.new && 'skillbridge_balance' in payload.new) {
+            setBalance(Number(payload.new.skillbridge_balance).toFixed(2));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <div className="sb-shell">
@@ -35,7 +84,22 @@ export default function SiteChrome({ children }: SiteChromeProps) {
               </Link>
             ))}
           </nav>
-          <AuthControls />
+          
+          {/* 2. Embedded live ledger value wrapper using clean native styles */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              backgroundColor: 'rgba(13, 148, 136, 0.1)',
+              color: '#0d9488',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '0.375rem',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              border: '1px solid rgba(13, 148, 136, 0.2)'
+            }}>
+              {loading ? 'Syncing...' : `${balance} GHS`}
+            </div>
+            <AuthControls />
+          </div>
         </div>
       </header>
       <main>{children}</main>
