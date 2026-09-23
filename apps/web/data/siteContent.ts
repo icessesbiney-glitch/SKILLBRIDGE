@@ -189,6 +189,35 @@ export const educationLevels = [
 
 export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
 
+// LIVE DODO PAYMENTS & MOBILE MONEY FAQ DATA ARRAY
+export const faqs = [
+  {
+    key: "faq-1",
+    question: "What is SkillBridge?",
+    answer: "SkillBridge is an online training and platform ecosystem offering comprehensive practical skill building in areas like export business, studying abroad, personal development, and global marketing. We help individuals unlock premium learning tracks through modern, live transactional tools."
+  },
+  {
+    key: "faq-2",
+    question: "What payment methods are used at Skillbridge?",
+    answer: "We process all financial transactions securely through Dodo Payments. You can securely purchase premium access using local Mobile Money (MTN MoMo, Telecel Cash, AT Money), debit cards, or global currency structures seamlessly with instant processing."
+  },
+  {
+    key: "faq-3",
+    question: "Where can I contact for cooperation information or if I experience problems?",
+    answer: "For system integration questions, support issues, or vendor cooperation queries, you can reach out directly via our official platform email channel at support@skillbridge-nine-mu.vercel.app."
+  },
+  {
+    key: "faq-4",
+    question: "Do I get a certificate after completing the course?",
+    answer: "Yes. Upon successful completion of your tracking modules and platform task assessments, a digital verification certificate is securely authorized and tied to your global profile ledger."
+  },
+  {
+    key: "faq-5",
+    question: "How long can I access the course after purchasing it?",
+    answer: "Once your premium access payment link is processed and verified, you receive fully permanent, lifetime access to all learning content pathways, updates, and matching live tasks."
+  }
+];
+
 export const courseRoadmap = [
   {
     title: 'Module 1 · Core product base',
@@ -239,21 +268,14 @@ export const mentorGuidance = [
     ],
   },
   {
-    title: 'Separate product work from finance and ownership decisions',
-    summary: 'Revenue share, invoices, and business agreements must stay outside repository automation.',
-    actions: [
-      'Use external billing tools for invoices and payouts',
-      'Keep repository roles technical, not financial',
-      'Review legal and payment terms manually before automation',
-    ],
-  },
+    title: 'Incremental stabilization over fast commits',
   {
-    title: 'Automate releases, not credentials',
-    summary: 'Deployment should be push-button once secrets and platform settings are correctly stored.',
+    title: 'Incremental stabilization over fast commits',
+    summary: 'Address build validation blockades comprehensively at the root layers rather than overriding safety rules.',
     actions: [
-      'Store tokens only in GitHub and hosting provider secrets',
-      'Use separate public and private environments',
-      'Promote staging builds to production only after review',
+      'Fix type definitions inside structural files',
+      'Verify schema alignments before scaling platform queries',
+      'Keep infrastructure deployments transparent across production logs',
     ],
-  },
+  }
 ];
