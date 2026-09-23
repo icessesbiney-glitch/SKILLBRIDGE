@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import AuthControls from './AuthControls';
-import { navigationLinks } from '../data/siteContent';
 import { supabase } from '../utils/supabaseClient';
 
 type SiteChromeProps = {
@@ -65,23 +64,46 @@ export default function SiteChrome({ children }: SiteChromeProps) {
     };
   }, []);
 
+  // Defined isolated menu links strictly for SkillBridge
+  const skillBridgeLinks = [
+    { href: '/roadmap', label: 'Business Roadmap' },
+    { href: '/enterprise', label: 'Enterprise Hub' },
+    { href: '/registry', label: 'Skills Registry' },
+    { href: '/portal', label: 'Partner Portal' }
+  ];
+
   return (
     <div className="sb-shell">
       <header className="sb-topbar">
-        <div className="sb-topbar-inner">
-          <Link href="/" className="sb-brand">
+        <div className="sb-topbar-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <Link href="/" className="sb-brand" style={{ fontWeight: '800', color: '#2563eb', fontSize: '1.25rem', textDecoration: 'none' }}>
             SkillBridge
           </Link>
-          <nav className="sb-nav" aria-label="Primary">
-            {navigationLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="sb-nav-link"
-                aria-current={isActiveLink(link.href) ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
+          
+          {/* Separated and centered navigation menus */}
+          <nav className="sb-nav" aria-label="Primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {skillBridgeLinks.map((link, index) => (
+              <React.Fragment key={link.href}>
+                <Link
+                  href={link.href}
+                  className="sb-nav-link"
+                  aria-current={isActiveLink(link.href) ? 'page' : undefined}
+                  style={{
+                    textDecoration: 'none',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    color: isActiveLink(link.href) ? '#1e40af' : '#475569',
+                    fontWeight: isActiveLink(link.href) ? '700' : '500',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  {link.label}
+                </Link>
+                {/* Visual Separator Bar between menus (stops before last item) */}
+                {index < skillBridgeLinks.length - 1 && (
+                  <span style={{ color: '#cbd5e1', userSelect: 'none' }}>|</span>
+                )}
+              </React.Fragment>
             ))}
           </nav>
           
