@@ -7,6 +7,12 @@ import { learnerBands, learningResources, taskCatalog } from '../data/siteConten
 export default function TaskWorkspace() {
   const [audienceFilter, setAudienceFilter] = useState<'all' | 'local' | 'public'>('all');
   const [uploads, setUploads] = useState<string[]>([]);
+  
+  // Interactive state variables for the task submission workspace popup
+  const [activeTask, setActiveTask] = useState<any>(null);
+  const [submissionText, setSubmissionText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const filteredTasks = useMemo(() => {
     if (audienceFilter === 'all') {
@@ -15,6 +21,27 @@ export default function TaskWorkspace() {
 
     return taskCatalog.filter((task) => task.visibility === audienceFilter || task.visibility === 'all');
   }, [audienceFilter]);
+
+  const handleStartTask = (task: any) => {
+    setActiveTask(task);
+    setSubmissionText('');
+    setSuccessMessage('');
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Simulates database write triggers natively
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSuccessMessage(`Successfully submitted task verification for "${activeTask.title}"!`);
+      setTimeout(() => {
+        setActiveTask(null);
+        setSuccessMessage('');
+      }, 2500);
+    }, 1000);
+  };
 
   return (
     <div className="sb-stack">
@@ -59,17 +86,39 @@ export default function TaskWorkspace() {
 
         <div className="sb-card-grid sb-card-grid-compact">
           {filteredTasks.map((task) => (
-            <article key={task.title} className="sb-card">
-              <span className="sb-status-pill">
-                {task.level} · ₵{task.pay}
-              </span>
-              <h3>{task.title}</h3>
-              <p>{task.description}</p>
-              <ul className="sb-simple-list">
-                <li>Audience: {task.visibility}</li>
-                <li>Choose to continue learning or upgrade to the next task band.</li>
-                <li>Open to all education levels, including no formal qualification.</li>
-              </ul>
+            <article key={task.title} className="sb-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'between' }}>
+              <div>
+                <span className="sb-status-pill">
+                  {task.level} · ₵{task.pay}
+                </span>
+                <h3>{task.title}</h3>
+                <p>{task.description}</p>
+                <ul className="sb-simple-list" style={{ marginBottom: '1.5rem' }}>
+                  <li>Audience: {task.visibility}</li>
+                  <li>Choose to continue learning or upgrade to the next task band.</li>
+                  <li>Open to all education levels, including no formal qualification.</li>
+                </ul>
+              </div>
+              
+              {/* Added the functional execution button matching your exact interface layout style rules */}
+              <button
+                type="button"
+                onClick={() => handleStartTask(task)}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#0d9488',
+                  color: '#ffffff',
+                  padding: '0.6rem 1rem',
+                  borderRadius: '0.5rem',
+                  fontWeight: '600',
+                  marginTop: 'auto',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'center'
+                }}
+              >
+                Start Task
+              </button>
             </article>
           ))}
         </div>
@@ -110,6 +159,103 @@ export default function TaskWorkspace() {
           </ul>
         </article>
       </div>
+
+      {/* Task Submission Modal Window Popup Overlay Layer */}
+      {activeTask && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '1rem',
+            padding: '1.5rem',
+            maxWidth: '500px',
+            width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontWeight: '700' }}>Work Workspace</h4>
+            <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: '#6b7280' }}>
+              Task: <span style={{ fontWeight: '600', color: '#374151' }}>{activeTask.title}</span>
+            </p>
+
+            {successMessage ? (
+              <div style={{
+                backgroundColor: '#ecfdf5',
+                color: '#065f46',
+                padding: '1rem',
+                borderRadius: '0.5rem',
+                textAlign: 'center',
+                fontWeight: '600',
+                border: '1px solid #a7f3d0',
+                margin: '1.5rem 0'
+              }}>
+                {successMessage}
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+                    Paste Task Outcome Text:
+                  </label>
+                  <textarea
+                    required
+                    value={submissionText}
+                    onChange={(e) => setSubmissionText(e.target.value)}
+                    placeholder="Enter your final translations or business content items text here..."
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      border: '1px solid #d1d5db',
+                      padding: '0.75rem',
+                      borderRadius: '0.5rem',
+                      minHeight: '150px',
+                      fontSize: '0.875rem',
+                      fontFamily: 'inherit',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'end', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTask(null)}
+                    style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer' }}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    style={{
+                      backgroundColor: '#0d9488',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      opacity: isSubmitting ? 0.7 : 1
+                    }}
+                  >
+                    {isSubmitting ? 'Processing Submission...' : 'Submit Verification'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
