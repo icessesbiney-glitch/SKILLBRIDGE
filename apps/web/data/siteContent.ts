@@ -1,190 +1,153 @@
 export const navigationLinks = [
-  { href: '/', label: 'Overview' },
-  { href: '/roadmap', label: 'Roadmap' },
-  { href: '/dashboard', label: 'Operations' },
-  { href: '/team', label: 'Team' },
-  { href: '/auth', label: 'Access' },
+  { href: '/', label: 'Marketplace' },
+  { href: '/roadmap', label: 'Business Roadmap' },
+  { href: '/dashboard', label: 'Enterprise Hub' },
+  { href: '/team', label: 'Rider Network' },
+  { href: '/auth', label: 'Partner Portal' },
 ];
 
 export const platforms = [
   {
-    name: 'Web application',
-    status: 'Ready for CI validation',
+    name: 'Hyperlocal Marketplace App',
+    status: 'Automated System Active',
     description:
-      'Next.js workspace with a richer landing experience, operational dashboard, and deployment-aware access flow.',
+      'Global multi-vendor ecosystem supporting legal document verification for customers, independent drivers, and retail enterprises across urban and rural zones.',
   },
   {
-    name: 'Desktop application',
-    status: 'Prepared for packaged release',
+    name: 'Vendor & Client Dashboards',
+    status: 'Status-Based Tracking Live',
     description:
-      'Electron now falls back to a stable hosted entry point so packaged builds are not tied to a missing local export.',
+      'Secure dashboards providing specialized transaction reporting, order status monitors, and transparent accounting profiles for all user layers.',
   },
   {
-    name: 'Mobile application',
-    status: 'Prepared for Expo builds',
+    name: 'Rider Fulfillment Matrix',
+    status: 'Real-Time Routing Map Ready',
     description:
-      'Expo configuration and asset references are aligned so EAS can build from valid project metadata.',
+      'Advanced driver dispatch module utilizing status flags for flexible routine schedules, integrated with automated closeness penalties.',
   },
   {
-    name: 'Shared workspace',
-    status: 'Supporting all apps',
+    name: 'Core Multi-Currency Checkout',
+    status: 'Production Payment Terminal',
     description:
-      'Shared auth and data utilities remain centralised for cross-platform features and future Supabase expansion.',
+      'Fully automated financial channel processing secure wholesale deposits, cash collection configurations, and live payment settlements.',
   },
 ];
 
 export const workstreams = [
   {
-    title: 'Structure repair',
-    items: ['Replace placeholder sections', 'Organise app navigation', 'Surface incomplete work clearly'],
+    title: 'Marketplace Categories',
+    items: ['Bespoke and Casual Fashion', 'Smart Devices & Tech Accessories', 'Modern Gadgets & Smart Lighting Systems', 'Premium Foreign Foods & Raw Drinks'],
   },
   {
-    title: 'Team readiness',
-    items: ['Define owners per platform', 'Track blockers and handoffs', 'Expose deployment responsibilities'],
+    title: 'Financial Architecture',
+    items: ['Automated Wholesale Commission Deductions', 'Local Vendor Cash & Mobile Money Rate Escalations', 'Secure Client Deposit Verification Controls'],
   },
   {
-    title: 'Deployment repair',
-    items: ['Stop masking failing builds', 'Repair invalid config files', 'Provide missing required assets'],
+    title: 'Fulfillment Logistics',
+    items: ['Live Driver GPS Tracker Framework', 'Proximity-Based Delivery Decline Fee Automation', 'Flexible Routine Delivery Schedule Management'],
   },
 ];
 
 export const roadmap = [
   {
-    phase: 'Foundation',
-    summary: 'Stabilise builds, assets, and workspace configuration so every app can be validated consistently.',
+    phase: 'Platform Launch',
+    summary: 'Activate multi-scale vendor onboarding channels spanning micro street enterprises to premium global distribution entities.',
   },
   {
-    phase: 'Feature completion',
-    summary: 'Replace mocks with live data flows and finish the remaining account, team, and reporting sections.',
+    phase: 'Ecosystem Expansion',
+    summary: 'Deploy real-time live map tracking dashboards alongside secure, automated delivery confirmation triggers across all operating zones.',
   },
   {
-    phase: 'Launch operations',
-    summary: 'Connect production secrets, run release workflows, and monitor rollout across web, desktop, and mobile.',
+    phase: 'AI-Driven Support Rollout',
+    summary: 'Launch native-language conversational voice synthesis matrices for automated, region-specific customer care response systems.',
   },
 ];
 
 export const teamMembers = [
   {
-    name: 'Product coordination',
-    role: 'Scope and release owner',
-    focus: 'Keeps incomplete sections, rollout order, and stakeholder feedback aligned.',
+    name: 'Global Management Authority',
+    role: 'System Operations & Fees Administrator',
+    focus: 'Directs system commissions, platform operational balances, global release channels, and corporate vendor integrations.',
   },
   {
-    name: 'Web delivery',
-    role: 'Next.js experience owner',
-    focus: 'Maintains customer-facing pages, auth flow messaging, and operational visibility.',
+    name: 'Logistics Coordination Layer',
+    role: 'Rider Proximity & Status Dispatcher',
+    focus: 'Manages driver registration data, physical address systems compliance, and automated fee processing routines.',
   },
   {
-    name: 'Mobile delivery',
-    role: 'Expo and EAS owner',
-    focus: 'Owns native build configuration, internal distribution, and asset compliance.',
-  },
-  {
-    name: 'Desktop delivery',
-    role: 'Electron release owner',
-    focus: 'Keeps packaged builds stable and aligned with the deployed web experience.',
+    name: 'Support & Interaction Engineering',
+    role: 'Voice Interface & Language Specialist',
+    focus: 'Maintains regional localized terminology arrays, customer assistance workflows, and automated communication matrices.',
   },
 ];
 
 export const deploymentSteps = [
   {
-    title: 'Repository validation',
-    detail: 'Run lint, type-check, tests, and the production web build without suppressing failures.',
+    title: 'Verification Setup',
+    detail: 'Enforce strict registration gates requiring standard legal documentation checks for every partner entity.',
   },
   {
-    title: 'Platform secrets',
-    detail: 'Configure Supabase, Vercel, and Expo credentials in GitHub before enabling automatic releases.',
+    title: 'Integration Layer Bindings',
+    detail: 'Securely authenticate production backend API keys to coordinate real transactional money flows across target apps.',
   },
   {
-    title: 'Release execution',
-    detail: 'Publish the web app from main, distribute mobile previews through EAS, and cut tagged desktop releases.',
+    title: 'System Launch Operations',
+    detail: 'Activate the live map tracking nodes, publish mobile client access layouts, and open global distribution networks.',
   },
 ];
 
 export const learnerBands = [
   {
-    title: 'Beginner path',
-    range: '₵80 to ₵150',
-    summary: 'A learner in Ghana or any other country can start here, even without formal qualifications.',
+    title: 'Micro-Enterprise Tier',
+    range: 'Flexible Pricing Models',
+    summary: 'Tailored for independent street vendors, small retailers, and part-time regional operators looking to build an digital presence.',
     points: [
-      'Designed for beginners, career changers, and first-time earners',
-      'A 22-year-old starter can begin around ₵80 and progress toward ₵150 through completed tasks',
-      'Education level changes guidance, not access to opportunities',
+      'Zero barrier entry for local marketplace signups',
+      'Configurable price parameters accommodating cash or mobile money transactions',
+      'Full access to automated client notification layers',
     ],
   },
   {
-    title: 'Growth path',
-    range: '₵150 to ₵220',
-    summary: 'Learners who finish starter tasks can choose to learn more, take on public tasks, or upgrade into higher-value work.',
+    title: 'Elite Enterprise Track',
+    range: 'Premium Distribution scale',
+    summary: 'Engineered for high-volume wholesale networks, established merchant houses, and global brand imports.',
     points: [
-      'Supports local and remote earning paths',
-      'Encourages portfolio building and skill proof uploads',
-      'Keeps task growth based on capability and completion',
-    ],
-  },
-  {
-    title: 'Advanced path',
-    range: '₵220 and above',
-    summary: 'Experienced learners can keep upgrading while still mentoring beginners and sharing downloadable resources.',
-    points: [
-      'Open to every educational background',
-      'Supports public-facing task delivery and advanced submissions',
-      'Builds long-term progression from learning into earning',
+      'Advanced wholesale inventory bulk import support',
+      'Specialized commission parameters calculated automatically per wholesale transaction',
+      'Premium positioning flags across search indexes',
     ],
   },
 ];
 
 export const taskCatalog = [
   {
-    title: 'Starter digital profile',
-    level: 'Beginner',
-    pay: 80,
-    visibility: 'local',
-    description: 'Create a learner profile, choose local or public visibility, and prepare a first skill summary.',
+    title: 'Retail Vendor Registration',
+    level: 'Standard Signup',
+    pay: 0,
+    visibility: 'Region-Wide',
+    description: 'Establish a partner company dashboard, submit legal address details, and configure local transaction preferences.',
   },
   {
-    title: 'Community task support',
-    level: 'Beginner',
-    pay: 100,
-    visibility: 'all',
-    description: 'Complete a structured practice task and upload evidence for mentor review.',
-  },
-  {
-    title: 'Public portfolio delivery',
-    level: 'Growth',
-    pay: 150,
-    visibility: 'public',
-    description: 'Share a stronger deliverable, publish a profile-ready task outcome, and unlock the next earning band.',
-  },
-  {
-    title: 'Skill upgrade sprint',
-    level: 'Growth',
-    pay: 180,
-    visibility: 'all',
-    description: 'Choose to learn more by taking a guided upgrade task with extra accountability.',
-  },
-  {
-    title: 'Advanced client-ready task',
-    level: 'Advanced',
-    pay: 220,
-    visibility: 'public',
-    description: 'Deliver a more complex task with downloadable outputs and reviewer-ready evidence.',
+    title: 'Fulfillment Partner Activation',
+    level: 'Rider Setup',
+    pay: 0,
+    visibility: 'Proximity-Mapped',
+    description: 'Verify rider license documentation, authorize live tracking links, and configure part-time routine availability flags.',
   },
 ];
 
 export const learningResources = [
-  { href: '/downloads/beginner-ghana-roadmap.csv', label: 'Beginner Ghana roadmap (.csv)' },
-  { href: '/downloads/task-submission-template.txt', label: 'Task submission template (.txt)' },
-  { href: '/downloads/public-profile-checklist.md', label: 'Public profile checklist (.md)' },
+  { href: '/docs/vendor-onboarding-guide.pdf', label: 'Vendor onboarding documentation (.pdf)' },
+  { href: '/docs/rider-fulfillment-policy.md', label: 'Rider operations framework (.md)' },
 ];
 
 export const educationLevels = [
-  'No formal qualification',
-  'Basic education',
-  'Secondary education',
-  'Technical or vocational training',
-  'Tertiary education',
-  'Self-taught or informal learning',
+  'Independent Street Retailer',
+  'Part-Time Fulfillment Driver',
+  'Full-Time Contract Rider',
+  'Micro-Enterprise Owner',
+  'Wholesale Distribution Representative',
+  'Global Importer Operations Manager',
 ];
 
 export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
@@ -192,87 +155,51 @@ export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'Uni
 export const faqs = [
   {
     key: "faq-1",
-    question: "What is SkillBridge?",
-    answer: "SkillBridge is an online training and platform ecosystem offering comprehensive practical skill building in areas like export business, studying abroad, personal development, and global marketing. We help individuals unlock premium learning tracks through modern, live transactional tools."
+    question: "What is Brukina Marketplace?",
+    answer: "Brukina Marketplace is a comprehensive hyperlocal e-commerce platform built to seamlessly connect micro-enterprises, wholesale distributors, independent riders, and customers across both urban centers and rural communities."
   },
   {
     key: "faq-2",
-    question: "What payment methods are used at Skillbridge?",
-    answer: "We process all financial transactions securely through Dodo Payments. You can securely purchase premium access using local Mobile Money (MTN MoMo, Telecel Cash, AT Money), debit cards, or global currency structures seamlessly with instant processing."
+    question: "What local transaction systems are supported?",
+    answer: "Our system natively accommodates versatile processing channels, allowing buyers to select comfortable pricing standards, while empowering local vendors to securely scale rates for physical cash or Mobile Money options."
   },
   {
     key: "faq-3",
-    question: "Where can I contact for cooperation information or if I experience problems?",
-    answer: "For system integration questions, support issues, or vendor cooperation queries, you can reach out directly via our official platform email channel at support@skillbridge-nine-mu.vercel.app."
+    question: "How is delivery security handled across locations?",
+    answer: "We ensure absolute transactional safety through a fully automated deposit verification pipeline that tracks live driver positions, enforces automatic fulfillment milestones, and securely releases merchant balances upon final receipt confirmation."
   },
   {
     key: "faq-4",
-    question: "Do I get a certificate after completing the course?",
-    answer: "Yes. Upon successful completion of your tracking modules and platform task assessments, a digital verification certificate is securely authorized and tied to your global profile ledger."
+    question: "What are the rules for delivery riders?",
+    answer: "Independent riders operate on flexible personal schedules. To maintain system reliability, the app tracks active coordinates and applies an automated penalty fee if a rider repeatedly declines close assignments while active."
   },
   {
     key: "faq-5",
-    question: "How long can I access the course after purchasing it?",
-    answer: "Once your premium access payment link is processed and verified, you receive fully permanent, lifetime access to all learning content pathways, updates, and matching live tasks."
+    question: "How does the built-in customer support operate?",
+    answer: "Our interface integrates intelligent, localized conversational customer care support units configured to answer inquiries and process voice calls using native localized languages."
   }
 ];
 
 export const courseRoadmap = [
   {
-    title: 'Module 1 · Core product base',
-    summary: 'Stabilise the shared workspace so every platform can build from one source of truth.',
+    title: 'Phase 1 · Base Infrastructure',
+    summary: 'Coordinate multi-app directory architectures to link global checkout rules and partner accounts seamlessly from one source of truth.',
     outcomes: [
-      'Keep shared auth and data logic in the monorepo',
-      'Finish missing scripts and remove fragile placeholders',
-      'Validate every workspace before deployment starts',
-    ],
-  },
-  {
-    title: 'Module 2 · Member access',
-    summary: 'Complete sign-in, create-account, logged-in awareness, and logout across the user journey.',
-    outcomes: [
-      'Use live Supabase auth instead of mock flows',
-      'Surface clear sign-in state in the app shell',
-      'Keep signed-out users moving toward access setup',
-    ],
-  },
-  {
-    title: 'Module 3 · Multi-platform delivery',
-    summary: 'Make web, mobile, and desktop releases follow the same roadmap and ownership model.',
-    outcomes: [
-      'Treat web as the primary product surface',
-      'Keep mobile and desktop aligned with shared logic',
-      'Package desktop and mobile from validated builds only',
-    ],
-  },
-  {
-    title: 'Module 4 · Automated deployment',
-    summary: 'Use repository configuration to automate public and private release flows with review gates.',
-    outcomes: [
-      'Send public production web deploys to Vercel',
-      'Use a private preview channel for Netlify staging builds',
-      'Require secrets and passing checks before release jobs run',
+      'Establish clean routing maps spanning all application folders',
+      'Remove diagnostic placeholders to activate real merchant layouts',
+      'Verify pipeline stability before scaling registration channels',
     ],
   },
 ];
 
 export const mentorGuidance = [
   {
-    title: 'Protect the core before expanding features',
-    summary: 'Your lifetime project needs a stable release base more than a wide but fragile feature surface.',
+    title: 'System Stability Focus',
+    summary: 'Every core transaction module requires absolute verification routing metrics before expanding surface visual options.',
     actions: [
-      'Keep CI green before adding more pages',
-      'Promote only one deployment target to production authority',
-      'Track incomplete work in the roadmap instead of hiding it',
-    ],
-  },
-  {
-    title: 'Incremental stabilization over fast commits',
-    summary: 'Address build validation blockades comprehensively at the root layers rather than overriding safety rules.',
-    actions: [
-      'Fix type definitions inside structural files',
-      'Verify schema alignments before scaling platform queries',
-      'Keep infrastructure deployments transparent across production logs',
+      'Maintain clean error logs across the distribution stack',
+      'Keep secure validation rules active on backend access interfaces',
+      'Verify schema adjustments before scaling data queries',
     ],
   }
 ];
