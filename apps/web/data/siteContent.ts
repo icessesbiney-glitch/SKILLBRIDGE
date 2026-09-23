@@ -646,3 +646,56 @@ export const mentorGuidance = [
     ],
   }
 ];
+shared auth and data logic in the monorepo',
+      'Finish missing scripts and remove fragile placeholders',
+      'Validate every workspace before deployment starts',
+    ],
+  },
+  {
+    title: 'Module 2 · Member access',
+    summary: 'Complete sign-in, create-account, logged-in awareness, and logout across the user journey.',
+    outcomes: [
+      'Use live Supabase auth instead of mock flows',
+      'Surface clear sign-in state in the app shell',
+      'Keep signed-out users moving toward access setup',
+    ],
+  },
+  {
+    title: 'Module 3 · Multi-platform delivery',
+    summary: 'Make web, mobile, and desktop releases follow the same roadmap and ownership model.',
+    outcomes: [
+      'Treat web as the primary product surface',
+      'Keep mobile and desktop aligned with shared logic',
+      'Package desktop and mobile from validated builds only',
+    ],
+  },
+  {
+    title: 'Module 4 · Automated deployment',
+    summary: 'Use repository configuration to automate public and private release flows with review gates.',
+    outcomes: [
+      'Send public production web deploys to Vercel',
+      'Use a private preview channel for Netlify staging builds',
+      'Require secrets and passing checks before release jobs run',
+    ],
+  },
+];
+export const mentorGuidance = [
+  {
+    title: 'Protect the core before expanding features',
+    summary: 'Your lifetime project needs a stable release base more than a wide but fragile feature surface.',
+    actions: [
+      'Keep CI green before adding more pages',
+      'Promote only one deployment target to production authority',
+      'Track incomplete work in the roadmap instead of hiding it',
+    ],
+  },
+  {
+    title: 'Incremental stabilization over fast commits',
+    summary: 'Address build validation blockades comprehensively at the root layers rather than overriding safety rules.',
+    actions: [
+      'Fix type definitions inside structural files',
+      'Verify schema alignments before scaling platform queries',
+      'Keep infrastructure deployments transparent across production logs',
+    ],
+  }
+];
