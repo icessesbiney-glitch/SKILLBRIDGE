@@ -1,153 +1,152 @@
 export const navigationLinks = [
-  { href: '/', label: 'Marketplace' },
+  { href: '/', label: 'SkillBridge Academy' },
   { href: '/roadmap', label: 'Business Roadmap' },
   { href: '/dashboard', label: 'Enterprise Hub' },
-  { href: '/team', label: 'Rider Network' },
-  { href: '/auth', label: 'Partner Portal' },
+  { href: '/team', label: 'Skills Registry' },
+  { href: '/auth', label: 'Instructor Portal' },
 ];
 
 export const platforms = [
   {
-    name: 'Hyperlocal Marketplace App',
-    status: 'Automated System Active',
+    name: 'SkillBridge Development Academy',
+    status: 'Learning Infrastructure Online',
     description:
-      'Global multi-vendor ecosystem supporting legal document verification for customers, independent drivers, and retail enterprises across urban and rural zones.',
+      'Global educational infrastructure optimizing technical upskilling workflows, real-money execution labs, and production-ready application tracking pathways.',
   },
   {
-    name: 'Vendor & Client Dashboards',
-    status: 'Status-Based Tracking Live',
+    name: 'Enterprise Tech Dashboards',
+    status: 'Metrics Framework Operational',
     description:
-      'Secure dashboards providing specialized transaction reporting, order status monitors, and transparent accounting profiles for all user layers.',
+      'Secure performance portals tracking live database schema changes, authentication tokens, and user progression logs.',
   },
   {
-    name: 'Rider Fulfillment Matrix',
-    status: 'Real-Time Routing Map Ready',
+    name: 'CI/CD Automation Matrix',
+    status: 'Automated Pipeline Active',
     description:
-      'Advanced driver dispatch module utilizing status flags for flexible routine schedules, integrated with automated closeness penalties.',
+      'Advanced software distribution module built on Next.js structures, handling continuous cloud deployments without repository data bleeding.',
   },
   {
-    name: 'Core Multi-Currency Checkout',
-    status: 'Production Payment Terminal',
+    name: 'Live Payment Integrations',
+    status: 'Dodo Payments Active',
     description:
-      'Fully automated financial channel processing secure wholesale deposits, cash collection configurations, and live payment settlements.',
+      'Fully operational production financial configurations handling live regional checkout structures and real transactional values.',
   },
 ];
 
 export const workstreams = [
   {
-    title: 'Marketplace Categories',
-    items: ['Bespoke and Casual Fashion', 'Smart Devices & Tech Accessories', 'Modern Gadgets & Smart Lighting Systems', 'Premium Foreign Foods & Raw Drinks'],
+    title: 'Academy Departments',
+    items: ['Software Engineering & Architecture', 'Cloud Services & Deployment', 'Database Systems Configuration', 'Production Gateways Integration'],
   },
   {
-    title: 'Financial Architecture',
-    items: ['Automated Wholesale Commission Deductions', 'Local Vendor Cash & Mobile Money Rate Escalations', 'Secure Client Deposit Verification Controls'],
+    title: 'Technical Frameworks',
+    items: ['Supabase Integration & RLS Rules', 'Continuous Workspace Version Tracking', 'Environment Variable Security Seals'],
   },
   {
-    title: 'Fulfillment Logistics',
-    items: ['Live Driver GPS Tracker Framework', 'Proximity-Based Delivery Decline Fee Automation', 'Flexible Routine Delivery Schedule Management'],
+    title: 'Fulfillment Milestones',
+    items: ['Live Code Pipeline Executions', 'Error Log Identification & Diagnostic Scans', 'Isolated App Architecture Splitting'],
   },
 ];
 
 export const roadmap = [
   {
-    phase: 'Platform Launch',
-    summary: 'Activate multi-scale vendor onboarding channels spanning micro street enterprises to premium global distribution entities.',
+    phase: 'Infrastructure Mastery',
+    summary: 'Master configuration schemas across monorepos to run isolated environments securely from clean codebases.',
   },
   {
-    phase: 'Ecosystem Expansion',
-    summary: 'Deploy real-time live map tracking dashboards alongside secure, automated delivery confirmation triggers across all operating zones.',
+    phase: 'Ecosystem Deployment',
+    summary: 'Publish verified live application builds to individual domains while implementing encrypted database triggers.',
   },
   {
-    phase: 'AI-Driven Support Rollout',
-    summary: 'Launch native-language conversational voice synthesis matrices for automated, region-specific customer care response systems.',
+    phase: 'AI-Assisted Diagnostics',
+    summary: 'Employ advanced contextual layout modeling to safely review compilation metrics and fix structural bugs.',
   },
 ];
 
 export const teamMembers = [
   {
-    name: 'Global Management Authority',
-    role: 'System Operations & Fees Administrator',
-    focus: 'Directs system commissions, platform operational balances, global release channels, and corporate vendor integrations.',
+    name: 'Technical Systems Specialist',
+    role: 'Repository & Build Administrator',
+    focus: 'Directs repository optimization, code structure alignment, deployment error mitigation, and workspace isolation tools.',
   },
   {
-    name: 'Logistics Coordination Layer',
-    role: 'Rider Proximity & Status Dispatcher',
-    focus: 'Manages driver registration data, physical address systems compliance, and automated fee processing routines.',
+    name: 'Database Operations Engineer',
+    role: 'Supabase Matrix Coordinator',
+    focus: 'Manages live environment credentials, authentication logic parameters, and real-time data sync channel routing.',
   },
   {
-    name: 'Support & Interaction Engineering',
-    role: 'Voice Interface & Language Specialist',
-    focus: 'Maintains regional localized terminology arrays, customer assistance workflows, and automated communication matrices.',
+    name: 'Interface Layout Consultant',
+    role: 'Chrome Framework Specialist',
+    focus: 'Maintains design layouts, global styling patterns, layout separation constraints, and navigation bar components.',
   },
 ];
 
 export const deploymentSteps = [
   {
-    title: 'Verification Setup',
-    detail: 'Enforce strict registration gates requiring standard legal documentation checks for every partner entity.',
+    title: 'Code Architecture Audit',
+    detail: 'Enforce perfect file casing rules and eliminate bad global shortcuts inside the local component files.',
   },
   {
-    title: 'Integration Layer Bindings',
-    detail: 'Securely authenticate production backend API keys to coordinate real transactional money flows across target apps.',
+    title: 'Secret Credential Binding',
+    detail: 'Securely map production access tokens into host panels to bridge live databases with interface logic.',
   },
   {
-    title: 'System Launch Operations',
-    detail: 'Activate the live map tracking nodes, publish mobile client access layouts, and open global distribution networks.',
+    title: 'Production Site Trigger',
+    detail: 'Initiate targeted cloud container builds to output clean, separate web apps with direct link configurations.',
   },
 ];
 
 export const learnerBands = [
   {
-    title: 'Micro-Enterprise Tier',
-    range: 'Flexible Pricing Models',
-    summary: 'Tailored for independent street vendors, small retailers, and part-time regional operators looking to build an digital presence.',
+    title: 'Technical Upskilling Track',
+    range: 'Practical Project Building',
+    summary: 'Tailored for builders seeking absolute comprehension of modern software pipelines and deployment mechanics.',
     points: [
-      'Zero barrier entry for local marketplace signups',
-      'Configurable price parameters accommodating cash or mobile money transactions',
-      'Full access to automated client notification layers',
+      'Zero fluff interactive source code configuration tracks',
+      'Configurable environment layers using private tokens',
+      'Full control over automated build logs',
     ],
   },
   {
-    title: 'Elite Enterprise Track',
-    range: 'Premium Distribution scale',
-    summary: 'Engineered for high-volume wholesale networks, established merchant houses, and global brand imports.',
+    title: 'Elite Creator Matrix',
+    range: 'Production Grade Standards',
+    summary: 'Engineered for individuals aiming to launch live global products running on independent domain servers.',
     points: [
-      'Advanced wholesale inventory bulk import support',
-      'Specialized commission parameters calculated automatically per wholesale transaction',
-      'Premium positioning flags across search indexes',
+      'Advanced production workspace data splitting rules',
+      'Specialized application balance tracking systems',
+      'Premium standalone project presence guarantees',
     ],
   },
 ];
 
 export const taskCatalog = [
   {
-    title: 'Retail Vendor Registration',
-    level: 'Standard Signup',
+    title: 'Repository Structure Fix',
+    level: 'Build Management',
     pay: 0,
-    visibility: 'Region-Wide',
-    description: 'Establish a partner company dashboard, submit legal address details, and configure local transaction preferences.',
+    visibility: 'Workspace-Wide',
+    description: 'Reorganize local import statements, verify path depths, and correct lowercase name discrepancies.',
   },
   {
-    title: 'Fulfillment Partner Activation',
-    level: 'Rider Setup',
+    title: 'Database Pipeline Awakening',
+    level: 'Infrastructure Link',
     pay: 0,
-    visibility: 'Proximity-Mapped',
-    description: 'Verify rider license documentation, authorize live tracking links, and configure part-time routine availability flags.',
+    visibility: 'Secure Dashboard',
+    description: 'Confirm live database availability flags, connect public keys, and save secret web values.',
   },
 ];
 
 export const learningResources = [
-  { href: '/docs/vendor-onboarding-guide.pdf', label: 'Vendor onboarding documentation (.pdf)' },
-  { href: '/docs/rider-fulfillment-policy.md', label: 'Rider operations framework (.md)' },
+  { href: '/docs/skillbridge-onboarding-guide.pdf', label: 'SkillBridge System Blueprint (.pdf)' },
+  { href: '/docs/monorepo-deployment-policy.md', label: 'Isolated Repository Framework (.md)' },
 ];
 
 export const educationLevels = [
-  'Independent Street Retailer',
-  'Part-Time Fulfillment Driver',
-  'Full-Time Contract Rider',
-  'Micro-Enterprise Owner',
-  'Wholesale Distribution Representative',
-  'Global Importer Operations Manager',
+  'Independent Application Builder',
+  'Technical Interface Manager',
+  'Database Workspace Controller',
+  'Software Project Director',
+  'Cloud Infrastructure Strategist',
 ];
 
 export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
@@ -155,28 +154,18 @@ export const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'Uni
 export const faqs = [
   {
     key: "faq-1",
-    question: "What is Brukina Marketplace?",
-    answer: "Brukina Marketplace is a comprehensive hyperlocal e-commerce platform built to seamlessly connect micro-enterprises, wholesale distributors, independent riders, and customers across both urban centers and rural communities."
+    question: "What is SkillBridge Academy?",
+    answer: "SkillBridge Academy is a dedicated professional platform centered on structural upskilling, workspace management, deployment diagnostics, and real project scaling operations."
   },
   {
     key: "faq-2",
-    question: "What local transaction systems are supported?",
-    answer: "Our system natively accommodates versatile processing channels, allowing buyers to select comfortable pricing standards, while empowering local vendors to securely scale rates for physical cash or Mobile Money options."
+    question: "How are live database engines integrated?",
+    answer: "Our pipeline links dedicated production engines with interface components, using environment secrets to safely handle authentication data streams."
   },
   {
     key: "faq-3",
-    question: "How is delivery security handled across locations?",
-    answer: "We ensure absolute transactional safety through a fully automated deposit verification pipeline that tracks live driver positions, enforces automatic fulfillment milestones, and securely releases merchant balances upon final receipt confirmation."
-  },
-  {
-    key: "faq-4",
-    question: "What are the rules for delivery riders?",
-    answer: "Independent riders operate on flexible personal schedules. To maintain system reliability, the app tracks active coordinates and applies an automated penalty fee if a rider repeatedly declines close assignments while active."
-  },
-  {
-    key: "faq-5",
-    question: "How does the built-in customer support operate?",
-    answer: "Our interface integrates intelligent, localized conversational customer care support units configured to answer inquiries and process voice calls using native localized languages."
+    question: "How do we preserve zero-error build health?",
+    answer: "We ensure compilation stability by testing file casings, mapping clean directory steps, and strictly separating business definitions from software code."
   }
 ];
 
@@ -187,19 +176,6 @@ export const courseRoadmap = [
     outcomes: [
       'Establish clean routing maps spanning all application folders',
       'Remove diagnostic placeholders to activate real merchant layouts',
-      'Verify pipeline stability before scaling registration channels',
-    ],
-  },
-];
-
-export const mentorGuidance = [
-  {
-    title: 'System Stability Focus',
-    summary: 'Every core transaction module requires absolute verification routing metrics before expanding surface visual options.',
-    actions: [
-      'Maintain clean error logs across the distribution stack',
-      'Keep secure validation rules active on backend access interfaces',
-      'Verify schema adjustments before scaling data queries',
     ],
   }
 ];
