@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '@skillbridge/shared'; // Aligns cleanly with your shared monorepo package layer
 
 type AuthSessionState = {
   isConfigured: boolean;
@@ -31,17 +30,22 @@ export function useAuthSession(): AuthSessionState {
     let mounted = true;
 
     const loadSession = async () => {
-      const { data } = await supabase.auth.getSession();
+      try {
+        const { data } = await supabase.auth.getSession();
 
-      if (!mounted) {
-        return;
+        if (!mounted) return;
+
+        setState({
+          isConfigured: true,
+          isLoading: false,
+          session: data.session,
+        });
+      } catch (error) {
+        console.error('SkillBridge Hook Error: Failed to fetch auth session context.', error);
+        if (mounted) {
+          setState((prev) => ({ ...prev, isLoading: false }));
+        }
       }
-
-      setState({
-        isConfigured: true,
-        isLoading: false,
-        session: data.session,
-      });
     };
 
     void loadSession();
@@ -49,9 +53,7 @@ export function useAuthSession(): AuthSessionState {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       setState({
         isConfigured: true,
