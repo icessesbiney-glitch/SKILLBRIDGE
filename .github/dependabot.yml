@@ -1,15 +1,31 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  # 1. Main Workspace Level Check
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
+      interval: "weekly"
+      day: "monday"
       time: "03:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     reviewers:
-      - icessesbiney-glitch
+      - "icessesbiney-glitch"
     commit-message:
       prefix: "chore"
       prefix-scope: "deps"
+      include: "scope"
+
+  # 2. SkillBridge Web Application Level Check
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "icessesbiney-glitch"
+    commit-message:
+      prefix: "chore"
+      prefix-scope: "web-deps"
       include: "scope"
