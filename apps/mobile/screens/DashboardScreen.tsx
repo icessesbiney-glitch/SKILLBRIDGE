@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,63 +6,102 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { supabase } from '@skillbridge/shared';
 
-interface Task {
+// Explicit alignment with the global Course Progression parameters
+interface ProgressionItem {
   id: string;
-  task_name: string;
-  payout_amount: number;
-  payment_status: string;
-  created_at: string;
+  user_id: string;
+  course_id: string;
+  sessions_attended: number;
+  total_sessions: number;
+  assessments_completed: number;
+  total_assessments: number;
+  is_certified: boolean;
+  updated_at: string;
+  course_catalog?: {
+    title: string;
+    category: string;
+  };
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  listContainer: {
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   taskCard: {
     backgroundColor: '#fff',
     padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
+    marginBottom: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     borderLeftWidth: 4,
+    borderLeftColor: '#2563eb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.01,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  taskCardCertified: {
     borderLeftColor: '#10b981',
   },
   taskTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#0f172a',
   },
-  taskInfo: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
+  taskCategory: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
   },
-  taskPayout: {
-    fontSize: 14,
+  metricsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  metricBlock: {
+    flex: 1,
+  },
+  metricLabel: {
+    fontSize: 11,
+    color: '#94a3b8',
+    textTransform: 'uppercase',
     fontWeight: '600',
-    color: '#10b981',
-    marginTop: 8,
+  },
+  metricValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#334155',
+    marginTop: 2,
   },
   statusBadge: {
-    marginTop: 8,
+    marginTop: 12,
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 4,
+    borderRadius: 6,
     alignSelf: 'flex-start',
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
-  submitButton: {
-    backgroundColor: '#1a56db',
+  refreshButton: {
+    backgroundColor: '#0f172a',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 10,
     margin: 16,
     alignItems: 'center',
   },
@@ -75,62 +114,86 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  emptyCard: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
   },
   emptyText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#64748b',
     textAlign: 'center',
-    marginTop: 32,
-    fontSize: 16,
-    color: '#999',
+  },
+  emptySubtext: {
+    fontSize: 13,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 4,
   },
 });
 
 export default function DashboardScreen() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [progression, setProgression] = useState<ProgressionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchTasks = async () => {
+  // Memoized fetch tasks using the exact schema definitions we created
+  const fetchAcademicProgression = useCallback(async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw authError || new Error('No valid user token context');
 
       const { data, error } = await supabase
-        .from('student_tasks')
-        .select('*')
-        .eq('student_id', user.id)
-        .order('created_at', { ascending: false });
+        .from('course_progression')
+        .select(`
+          id,
+          user_id,
+          course_id,
+          sessions_attended,
+          total_sessions,
+          assessments_completed,
+          total_assessments,
+          is_certified,
+          updated_at,
+          course_catalog (
+            title,
+            category
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setTasks(data || []);
+      setProgression((data as any) || []);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('SkillBridge Mobile Dashboard Fetch Failure:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    fetchTasks();
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '#10b981';
-      case 'pending':
-        return '#f59e0b';
-      case 'rejected':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
+  useEffect(() => {
+    fetchAcademicProgression();
+  }, [fetchAcademicProgression]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchAcademicProgression();
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a56db" />
+        <ActivityIndicator size="large" color="#2563eb" />
       </View>
     );
   }
@@ -138,29 +201,52 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={tasks}
+        data={progression}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.taskCard}>
-            <Text style={styles.taskTitle}>{item.task_name}</Text>
-            <Text style={styles.taskInfo}>ID: {item.id}</Text>
-            <Text style={styles.taskPayout}>💰 {item.payout_amount} GHS</Text>
-            <View
-              style={[
-                styles.statusBadge,
-                { backgroundColor: getStatusColor(item.payment_status) },
-              ]}
-            >
-              <Text style={styles.statusText}>{item.payment_status}</Text>
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item }) => {
+          const attendancePercent = Math.round((item.sessions_attended / item.total_sessions) * 100);
+          return (
+            <View style={[styles.taskCard, item.is_certified && styles.taskCardCertified]}>
+              <Text style={styles.taskTitle}>{item.course_catalog?.title || 'Academy Curriculum Track'}</Text>
+              <Text style={styles.taskCategory}>{item.course_catalog?.category || 'Syllabus Block'}</Text>
+              
+              <View style={styles.metricsRow}>
+                <View style={styles.metricBlock}>
+                  <Text style={styles.metricLabel}>Attendance</Text>
+                  <Text style={styles.metricValue}>{item.sessions_attended}/{item.total_sessions} ({attendancePercent}%)</Text>
+                </View>
+                <View style={styles.metricBlock}>
+                  <Text style={styles.metricLabel}>Portfolios</Text>
+                  <Text style={styles.metricValue}>{item.assessments_completed}/{item.total_assessments}</Text>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: item.is_certified ? '#dcfce7' : '#fef3c7' },
+                ]}
+              >
+                <Text style={[styles.statusText, { color: item.is_certified ? '#166534' : '#92400e' }]}>
+                  {item.is_certified ? '🏆 Certified Graduate' : '⏳ Course In Progress'}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No tasks yet. Start earning!</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>No active courses yet</Text>
+            <Text style={styles.emptySubtext}>Enroll in a curriculum path from the web app to view parameters here.</Text>
+          </View>
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#2563eb" />
         }
       />
-      <TouchableOpacity style={styles.submitButton} onPress={fetchTasks}>
-        <Text style={styles.buttonText}>+ New Task</Text>
+      <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh} activeOpacity={0.8}>
+        <Text style={styles.buttonText}>Sync Academic Progress</Text>
       </TouchableOpacity>
     </View>
   );
