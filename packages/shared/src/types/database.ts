@@ -4,79 +4,128 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
-          user_id: string;
           full_name: string | null;
-          bio: string | null;
           avatar_url: string | null;
-          created_at: string;
+          skillbridge_balance: number;
           updated_at: string;
         };
         Insert: {
-          id?: string;
-          user_id: string;
+          id: string;
           full_name?: string | null;
-          bio?: string | null;
           avatar_url?: string | null;
-          created_at?: string;
+          skillbridge_balance?: number;
           updated_at?: string;
         };
         Update: {
           full_name?: string | null;
-          bio?: string | null;
           avatar_url?: string | null;
+          skillbridge_balance?: number;
           updated_at?: string;
         };
       };
-      todos: {
+      course_catalog: {
         Row: {
           id: string;
-          user_id: string;
           title: string;
+          category: string;
+          instructor_name: string;
+          price: number;
+          currency: string;
           description: string | null;
-          completed: boolean;
+          thumbnail_url: string | null;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
           title: string;
+          category: string;
+          instructor_name?: string;
+          price?: number;
+          currency?: string;
           description?: string | null;
-          completed?: boolean;
+          thumbnail_url?: string | null;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           title?: string;
+          category?: string;
+          instructor_name?: string;
+          price?: number;
+          currency?: string;
           description?: string | null;
-          completed?: boolean;
-          updated_at?: string;
+          thumbnail_url?: string | null;
         };
       };
-      student_tasks: {
+      skillbridge_admin_registry: {
         Row: {
           id: string;
-          student_id: string;
-          task_name: string;
-          payout_amount: number;
-          payment_status: 'pending' | 'completed' | 'rejected';
-          created_at: string;
+          user_id: string;
+          role: 'academy_admin' | 'course_instructor' | 'technical_mentor';
+          assigned_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          role: 'academy_admin' | 'course_instructor' | 'technical_mentor';
+          assigned_at?: string;
+        };
+        Update: {
+          role?: 'academy_admin' | 'course_instructor' | 'technical_mentor';
+        };
+      };
+      course_progression: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          sessions_attended: number;
+          total_sessions: number;
+          assessments_completed: number;
+          total_assessments: number;
+          is_certified: boolean;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          student_id: string;
-          task_name: string;
-          payout_amount: number;
-          payment_status?: 'pending' | 'completed' | 'rejected';
-          created_at?: string;
+          user_id: string;
+          course_id: string;
+          sessions_attended?: number;
+          total_sessions?: number;
+          assessments_completed?: number;
+          total_assessments?: number;
+          is_certified?: boolean;
           updated_at?: string;
         };
         Update: {
-          task_name?: string;
-          payout_amount?: number;
-          payment_status?: 'pending' | 'completed' | 'rejected';
+          sessions_attended?: number;
+          total_sessions?: number;
+          assessments_completed?: number;
+          total_assessments?: number;
+          is_certified?: boolean;
           updated_at?: string;
+        };
+      };
+      dodo_payments_log: {
+        Row: {
+          id: string;
+          transaction_id: string;
+          user_id: string | null;
+          amount: number;
+          currency: string;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          transaction_id: string;
+          user_id?: string | null;
+          amount: number;
+          currency?: string;
+          status: string;
+          created_at?: string;
+        };
+        Update: {
+          status?: string;
         };
       };
     };
