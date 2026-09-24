@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import SiteChrome from '../components/SiteChrome';
 import { supabase } from '../utils/supabaseClient';
 
@@ -62,6 +61,33 @@ export default function CatalogPage() {
     loadCatalogAndSecurity();
   }, []);
 
+  // Built-in Checkout Trigger Logic to process payments via Dodo
+  const handleEnrollmentCheckout = async (course: Course) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('Please sign in or create a SkillBridge account to enroll in this module.');
+        window.location.href = '/auth';
+        return;
+      }
+
+      console.log('Initializing secure SkillBridge checkout session...', {
+        product_id: course.id,
+        user_id: user.id,
+        amount: course.price
+      });
+
+      // Redirect the student straight to the live Dodo checkout hosted payment page.
+      // It binds the user_id context so your webhook endpoint credits the correct wallet.
+      window.location.href = `https://dodopayments.com{course.id}&user_id=${user.id}&customer_email=${encodeURIComponent(user.email || '')}&redirect_url=${encodeURIComponent(window.location.origin + '/dashboard?checkout=success')}`;
+
+    } catch (err) {
+      console.error('Dodo execution gateway failure context:', err);
+      alert('Failed to connect to the Dodo payment terminal. Please try again.');
+    }
+  };
+
   const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newCategory || !newPrice) return;
@@ -89,7 +115,7 @@ export default function CatalogPage() {
   if (loading) {
     return (
       <SiteChrome>
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#475569' }}>
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#475569', fontWeight: '500' }}>
           Syncing SkillBridge Catalog Infrastructure...
         </div>
       </SiteChrome>
@@ -100,7 +126,7 @@ export default function CatalogPage() {
     <SiteChrome>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem 0' }}>
         <div style={{ marginBottom: '2.5rem' }}>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#1e3a8a', marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>
             Available Learning Curriculums
           </h1>
           <p style={{ color: '#475569', fontSize: '1.1rem' }}>
@@ -108,30 +134,30 @@ export default function CatalogPage() {
           </p>
         </div>
 
-        {/* ADMIN CONTROLS INTERFACE PANEL */}
+        {/* INSTRUCTOR CONTROLS INTERFACE PANEL */}
         {isAdmin && (
           <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', padding: '1.5rem', marginBottom: '3rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1d4ed8', marginBottom: '1rem' }}>
               ⚙️ Instructor Course Management Console
             </h2>
             <form onSubmit={handleAddCourse} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', alignItems: 'end' }}>
-              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
-                Course Title
-                <input type="text" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g. Full-Stack Engineering" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
-              </label>
-              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
-                Department Category
-                <input type="text" required value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Cloud Architecture" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
-              </label>
-              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
-                Tuition Fee (GHS)
-                <input type="number" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="200" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
-              </label>
-              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
-                Brief Description
-                <input type="text" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter details..." style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
-              </label>
-              <button type="submit" style={{ backgroundColor: '#2563eb', color: '#fff', fontWeight: '600', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Course Title</span>
+                <input type="text" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g. Full-Stack Engineering" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Department Category</span>
+                <input type="text" required value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Cloud Architecture" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Tuition Fee (GHS)</span>
+                <input type="number" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="200" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Brief Description</span>
+                <input type="text" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter details..." style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+              </div>
+              <button type="submit" style={{ backgroundColor: '#2563eb', color: '#fff', fontWeight: '600', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', cursor: 'pointer', height: '38px', fontSize: '0.9rem' }}>
                 Publish Module
               </button>
             </form>
@@ -143,7 +169,7 @@ export default function CatalogPage() {
           {courses.map((course) => (
             <div key={course.id} style={{ backgroundColor: '#fff', borderRadius: '1rem', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', tracking: '0.05em', color: '#2563eb', backgroundColor: '#eff6ff', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#2563eb', backgroundColor: '#eff6ff', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
                   {course.category}
                 </span>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginTop: '0.75rem', marginBottom: '0.5rem', color: '#0f172a' }}>
@@ -163,7 +189,10 @@ export default function CatalogPage() {
                     {course.price.toFixed(2)} <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#64748b' }}>{course.currency}</span>
                   </span>
                 </div>
-                <button style={{ backgroundColor: '#0f172a', color: '#fff', fontSize: '0.875rem', fontWeight: '600', padding: '0.625rem 1.25rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}>
+                <button 
+                  onClick={() => handleEnrollmentCheckout(course)}
+                  style={{ backgroundColor: '#0f172a', color: '#fff', fontSize: '0.875rem', fontWeight: '600', padding: '0.625rem 1.25rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                >
                   Enroll via Dodo
                 </button>
               </div>
