@@ -1,105 +1,176 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
 import SiteChrome from '../components/SiteChrome';
-import { platforms, roadmap, workstreams } from '../data/siteContent';
+import { supabase } from '../utils/supabaseClient';
 
-export default function HomePage() {
+interface Course {
+  id: string;
+  title: string;
+  category: string;
+  instructor_name: string;
+  price: number;
+  currency: string;
+  description: string;
+}
+
+export default function CatalogPage() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Form states for adding a new course (Only visible to Admins/Instructors)
+  const [newTitle, setNewTitle] = useState('');
+  const [newCategory, setNewCategory] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+
+  useEffect(() => {
+    async function loadCatalogAndSecurity() {
+      try {
+        // 1. Fetch real course modules from your Supabase catalog table
+        const { data: catalogData, error: catalogError } = await supabase
+          .from('course_catalog')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (catalogData && !catalogError) {
+          setCourses(catalogData);
+        }
+
+        // 2. Inspect logged-in session user's administrative level keys
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: adminRole, error: adminError } = await supabase
+            .from('skillbridge_admin_registry')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+
+          if (adminRole && (adminRole.role === 'academy_admin' || adminRole.role === 'course_instructor')) {
+            setIsAdmin(true);
+          }
+        }
+      } catch (err) {
+        console.error('Error establishing connection with catalog nodes:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCatalogAndSecurity();
+  }, []);
+
+  const handleAddCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newCategory || !newPrice) return;
+
+    const { data, error } = await supabase
+      .from('course_catalog')
+      .insert({
+        title: newTitle,
+        category: newCategory,
+        price: parseFloat(newPrice),
+        description: newDescription
+      })
+      .select()
+      .single();
+
+    if (data && !error) {
+      setCourses([...courses, data]);
+      setNewTitle('');
+      setNewCategory('');
+      setNewPrice('');
+      setNewDescription('');
+    }
+  };
+
+  if (loading) {
+    return (
+      <SiteChrome>
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#475569' }}>
+          Syncing SkillBridge Catalog Infrastructure...
+        </div>
+      </SiteChrome>
+    );
+  }
+
   return (
     <SiteChrome>
-      <section className="sb-hero">
-        <div className="sb-container sb-hero-grid">
-          <div>
-            <span className="sb-eyebrow">Repository recovery in progress</span>
-            <h1 className="sb-hero-title">Build the full SkillBridge structure without hiding the broken parts.</h1>
-            <p className="sb-hero-copy">
-              The web experience now highlights project structure, team ownership, and deployment repair so the repository can move toward reliable releases.
-            </p>
-            <div className="sb-actions">
-              <Link href="/roadmap" className="sb-button-secondary">
-                Open roadmap
-              </Link>
-              
-              {/* DODO PAYMENTS LIVE BUTTON */}
-              <a 
-                href="https://dodopayments.com" 
-                className="sb-button"
-                style={{ 
-                  backgroundColor: '#000000', 
-                  color: '#ffffff',
-                  textAlign: 'center'
-                }}
-              >
-                Activate Skillbridge Premium Access
-              </a>
-
-              <Link href="/team" className="sb-button sb-button-secondary">
-                Review the team
-              </Link>
-            </div>
-          </div>
-          <div className="sb-panel">
-            <h2>What this rebuild covers</h2>
-            <div className="sb-bullet-list">
-              {workstreams.map((stream) => (
-                <div key={stream.title} className="sb-bullet-card">
-                  <h3>{stream.title}</h3>
-                  <ul>
-                    {stream.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem 0' }}>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+            Available Learning Curriculums
+          </h1>
+          <p style={{ color: '#475569', fontSize: '1.1rem' }}>
+            Select an elite upskilling track to process via your production Dodo Payments terminal account.
+          </p>
         </div>
-      </section>
 
-      <section className="sb-section">
-        <div className="sb-container">
-          <div className="sb-section-heading">
-            <div>
-              <span className="sb-eyebrow">Platform structure</span>
-              <h2>Every linked app now has a clearer place in the release flow.</h2>
-            </div>
-            <p>
-              The repository is organised around one web surface, one Electron delivery path, one Expo mobile project, and one shared package.
-            </p>
+        {/* ADMIN CONTROLS INTERFACE PANEL */}
+        {isAdmin && (
+          <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', padding: '1.5rem', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1d4ed8', marginBottom: '1rem' }}>
+              ⚙️ Instructor Course Management Console
+            </h2>
+            <form onSubmit={handleAddCourse} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', alignItems: 'end' }}>
+              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
+                Course Title
+                <input type="text" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g. Full-Stack Engineering" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
+              </label>
+              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
+                Department Category
+                <input type="text" required value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Cloud Architecture" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
+              </label>
+              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
+                Tuition Fee (GHS)
+                <input type="number" required value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="200" style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
+              </label>
+              <label style={{ display: 'flex', flexHorizontal: 'column', gap: '0.25rem', fontSize: '0.85rem', fontWeight: '600' }}>
+                Brief Description
+                <input type="text" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Enter details..." style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }} />
+              </label>
+              <button type="submit" style={{ backgroundColor: '#2563eb', color: '#fff', fontWeight: '600', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                Publish Module
+              </button>
+            </form>
           </div>
-          <div className="sb-card-grid">
-            {platforms.map((platform) => (
-              <article key={platform.name} className="sb-card">
-                <span className="sb-status-pill">{platform.status}</span>
-                <h3>{platform.name}</h3>
-                <p>{platform.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+        )}
 
-      <section className="sb-section sb-section-alt">
-        <div className="sb-container">
-          <div className="sb-section-heading">
-            <div>
-              <span className="sb-eyebrow">Next sections</span>
-              <h2>Continue the unfinished work in a controlled order.</h2>
-            </div>
-            <p>Finish stability first, then complete features, then turn on automated releases.</p>
-          </div>
-          <div className="sb-roadmap">
-            {roadmap.map((step, index) => (
-              <article key={step.phase} className="sb-roadmap-step">
-                <div className="sb-roadmap-index">0{index + 1}</div>
+        {/* RENDER PRODUCT CATALOG TILES GRID */}
+        <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+          {courses.map((course) => (
+            <div key={course.id} style={{ backgroundColor: '#fff', borderRadius: '1rem', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', tracking: '0.05em', color: '#2563eb', backgroundColor: '#eff6ff', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
+                  {course.category}
+                </span>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginTop: '0.75rem', marginBottom: '0.5rem', color: '#0f172a' }}>
+                  {course.title}
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
+                  Lead Instructor: <strong style={{ color: '#475569' }}>{course.instructor_name}</strong>
+                </p>
+                <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: '1.5', marginBottom: '1.5rem' }}>
+                  {course.description || 'No syllabus outline detailed for this training block yet.'}
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '1rem', marginTop: 'auto' }}>
                 <div>
-                  <h3>{step.phase}</h3>
-                  <p>{step.summary}</p>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: '500' }}>TUITION FEE</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>
+                    {course.price.toFixed(2)} <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#64748b' }}>{course.currency}</span>
+                  </span>
                 </div>
-              </article>
-            ))}
-          </div>
+                <button style={{ backgroundColor: '#0f172a', color: '#fff', fontSize: '0.875rem', fontWeight: '600', padding: '0.625rem 1.25rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}>
+                  Enroll via Dodo
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
     </SiteChrome>
   );
 }
