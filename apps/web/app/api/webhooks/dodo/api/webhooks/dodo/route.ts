@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../../../../../utils/supaBaseClient';
+import { supabase } from 'utils/supaBaseClient';
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         return new NextResponse('Missing learner ID mapping in metadata', { status: 400 });
       }
 
-      // 2. Insert transaction directly into your new table. Your trigger function handles the balance credit!
+      // 2. Insert transaction directly into your new table
       const { error } = await supabase
         .from('dodo_payments_log')
         .insert({
