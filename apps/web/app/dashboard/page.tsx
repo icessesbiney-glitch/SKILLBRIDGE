@@ -1,5 +1,6 @@
-import Link from 'next/link';
+'use client';
 
+import Link from 'next/link';
 import AuthStatusCard from '../../components/AuthStatusCard';
 import ProtectedShell from '../../components/ProtectedShell';
 import SiteChrome from '../../components/SiteChrome';
