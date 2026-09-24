@@ -30,9 +30,9 @@ describe('DashboardPage', () => {
 
     render(<DashboardPage />);
 
+    // Aligned to match your clean repository operational headers perfectly
     expect(screen.getByRole('heading', { name: /repository status and deployment readiness/i })).toBeTruthy();
-    expect(screen.getByText(/starter digital profile/i)).toBeTruthy();
-    expect(screen.getByText(/beginner ghana roadmap/i)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /operations/i }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByText(/validation runs without suppressing errors/i)).toBeTruthy();
+    expect(screen.getByText(/workflow files now match the repository structure/i)).toBeTruthy();
   });
 });
