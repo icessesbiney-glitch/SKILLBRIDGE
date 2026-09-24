@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu } from 'electron';
-import path from 'path';
-import isDev from 'electron-is-dev';
+import * as path from 'path';
+
+// Fixes the CommonJS interoperability compilation loop for electron-is-dev
+import isDev = require('electron-is-dev');
 
 let mainWindow: BrowserWindow | null = null;
 
