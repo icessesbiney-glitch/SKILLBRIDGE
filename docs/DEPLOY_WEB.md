@@ -1,144 +1,99 @@
-# Web Deployment Guide
+# SkillBridge Repository Web Deployment Guide
+
+## Core Project Mission & Architecture
+SkillBridge is architected as an automated, global multi-vendor marketplace hub. To preserve security, strict data isolation, and transactional integrity, all deploying applications must align with this infrastructure. This guide ensures that our shared workspaces deploy only clean, isolated SkillBridge application modules.
+
+## Automated Branch Strategy
+* **`main` Branch:** Deploys automatically to **Vercel** for public production use.
+* **`develop` Branch:** Deploys automatically to **Netlify** for private preview testing.
+
+All code exports (including those from Bolt.new) must land in this repository first so that our customized workspace validation pipelines can execute checks before passing bundles to production.
+
+---
 
 ## Hosting Options
 
-### Recommended: Vercel (Easiest)
-- Free tier available
-- Automatic deployments from Git
-- Built-in analytics
-- CDN included
-- Perfect for Next.js
+### 1. Production Hosting: Vercel (Public Deploy)
+Vercel handles our live public user layers, processing speed diagnostics, and automated secure connection seals.
+
+#### Monorepo Dashboard Settings
+* **Root Directory:** Set explicitly to `apps/web` inside the Vercel project panel to avoid scanning unrelated workspace components.
+* **Production Build Command:** Executed automatically via `npx turbo run build --filter=@skillbridge/web`.
 
 ```bash
-# 1. Install Vercel CLI
-npm install -g vercel
-
-# 2. Deploy
-vercel deploy --prod
-
-# Your app is live at https://skillbridge.vercel.app
+# Verify the build mechanics locally before pushing changes
+npx turbo run build --filter=@skillbridge/web
 ```
 
-### Alternative: Netlify
-```bash
-# 1. Connect GitHub and set the base directory to the repository root
-# 2. Use netlify.toml in this repo
-# 3. Configure NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID in GitHub for preview automation
-# 4. Push to develop to create a private preview deployment
-```
+### 2. Alternative Hosting: Netlify (Private Previews)
+Netlify acts as our secure sandbox environment for the `develop` branch.
 
-### Self-Hosted: AWS, DigitalOcean, Heroku
-```bash
-# Build
-npm run build
+#### Automated Configuration
+* Base directory must point directly to the repository root.
+* Ensure `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` are configured in your GitHub Repository Secrets to allow `deploy-web-private.yml` to trigger preview builds automatically.
 
-# Run
-npm start
-# Opens on http://localhost:3000
-```
+---
 
-## Environment Variables
+## Workspace Environment Variables
+The following credential arrays are strictly required to be mapped inside your hosting dashboards. **Do not commit these variables directly to your open source codebase.**
 
-### Required for Production
-```bash
-# .env.production
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_URL=https://your-production-domain.example.com
-```
+### Required Infrastructure Tokens
+```text
+# Supabase Core Access Layers
+NEXT_PUBLIC_SUPABASE_URL=https://supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-secure-public-anon-key-string
 
-### Set in Hosting Platform
-- Vercel: Project Settings → Environment Variables
-- Netlify: Site Settings → Build & Deploy → Environment
-- Self-hosted: Export in .env file (don't commit)
-
-## Pre-Deployment Checklist
-
-- [ ] All tests pass: `npm test`
-- [ ] No lint errors: `npm run lint`
-- [ ] TypeScript clean: `npm run type-check`
-- [ ] Build succeeds: `npm run build`
-- [ ] Environment variables set
-- [ ] Supabase authentication working
-- [ ] Database migrations complete
-
-## Deployment Steps (Vercel)
-
-```bash
-# 1. Commit code
-git add .
-git commit -m "Release v1.0.0"
-
-# 2. Deploy to production
-vercel deploy --prod
-
-# 3. Verify deployment
-# Open https://your-app.vercel.app
-
-# 4. Update DNS (if custom domain)
-# Point nameservers to Vercel
-```
-
-## Automated Branch Strategy
-
-- `main` → public production deploy on Vercel
-- `develop` → private preview deploy on Netlify
-- Bolt.new exports should land in this repository first so the same workflows validate and deploy them
-
-## Performance Optimization
-
-### Already Configured
-- ✅ Image optimization (Next.js Image)
-- ✅ Code splitting
-- ✅ CSS minification
-- ✅ Compression
-- ✅ CDN caching
-
-### Monitor Performance
-```bash
-# Check page speed
-# Visit: https://web.dev/measure
-# Input: https://your-app.com
-
-# Expected scores:
-# Performance: 90+
-# Accessibility: 95+
-# Best Practices: 95+
-# SEO: 95+
-```
-
-## Analytics Setup
-
-### Vercel Analytics (Free)
-Automatically enabled in Vercel dashboard
-
-### Google Analytics
-```typescript
-// Add to app/layout.tsx
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_ID"></script>
-```
-
-## SSL/HTTPS
-
-- ✅ Automatic on Vercel
-- ✅ Automatic on Netlify  
-- ✅ Free with Let's Encrypt (self-hosted)
-
-## Monitoring & Errors
-
-### Vercel Dashboard
-- Deployments
-- Analytics
-- Error logs
-- Performance metrics
-
-### Sentry Integration (Optional)
-```bash
-npm install @sentry/nextjs
-# Connect to Sentry account
-# Auto-track errors
+# Financial Gateway Connection Ledger
+DODO_WEBHOOK_SECRET=your-dodo-payments-live-signature-key
 ```
 
 ---
 
-See `README-MULTIPLATFORM.md` for complete guide.
+## Pre-Deployment Verification Checklist
+Before saving or merging any changes into your active workflow branches, execute these verification layers sequentially from your terminal to guarantee a 100% build pass metric:
+
+1. **Dependency Alignment:** Mismatched packages must bypass peer lock blocks:
+   ```bash
+   npm ci --legacy-peer-deps
+   ```
+2. **Workspace Linter Check:**
+   ```bash
+   npm run lint --workspace=@skillbridge/web
+   ```
+3. **Workspace Type Security:**
+   ```bash
+   npm run type-check --workspace=@skillbridge/web
+   ```
+4. **Workspace Compilation Pass:**
+   ```bash
+   npx turbo run build --filter=@skillbridge/web
+   ```
+
+---
+
+## Deployment Steps (Vercel Production)
+
+### 1. Commit Your Code Changes
+```bash
+git add .
+git commit -m "chore: optimize skillbridge deployment pipelines"
+git push origin main
+```
+*(GitHub Actions will instantly intercept this commit and trigger `deploy-web-production.yml` to push the build to production)*.
+
+### 2. Verify Your Live Deployment
+Open your production URL panel (`https://skillbridge-nine-mu.vercel.app`) and confirm that the navigation chrome layer fetches the live ledger wallet values accurately.
+
+---
+
+## Performance, Analytics & Telemetry
+
+### Monitored Performance Goals
+Our custom platform utilizes image optimization, code splitting, and strict workspace filters to guarantee elite web performance across modern mobile, desktop, and feature phone browsers.
+* **Performance:** 90+
+* **Accessibility:** 95+
+* **Best Practices:** 95+
+* **SEO:** 95+
+
+### Real-Time Error Auditing
+Track active transactional paths, database handshakes, and event codes directly through your **Vercel Project Logs** and your **Supabase Query Terminal** to ensure incoming real-money webhooks match your profile columns flawlessly.
