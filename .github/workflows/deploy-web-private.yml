@@ -28,7 +28,8 @@ jobs:
   validate-web-preview:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -37,19 +38,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
-      - name: Build shared package
-        run: npm run build:shared
-
-      - name: Lint web app
-        run: npm run lint --workspace=@skillbridge/web
-
-      - name: Type check web app
-        run: npm run type-check --workspace=@skillbridge/web
-
-      - name: Test web app
-        run: npm run test --workspace=@skillbridge/web
+      - name: Run Turborepo Validation Pipeline
+        run: npx turbo run build lint test
 
   deploy-web-private:
     needs: validate-web-preview
@@ -59,7 +51,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -68,7 +61,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Deploy to Netlify preview
         uses: netlify/actions/cli@master
