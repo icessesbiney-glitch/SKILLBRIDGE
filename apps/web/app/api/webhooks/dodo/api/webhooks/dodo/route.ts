@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../../../../../utils/supabaseClient';
+import { supabase } from '../../../utils/supabaseClient';
 
 export async function POST(request: Request) {
   try {
-    // 1. Read the secure payload event data sent over from Dodo Payments
     const payload = await request.json();
     
-    // Verify that the event is a successful payment capture
     if (payload.type === 'payment.succeeded' && payload.data) {
       const transactionId = payload.data.id;
-      const amount = payload.data.total_amount / 100; // Convert to standard GHS decimal value
-      const userId = payload.data.metadata?.user_id; // Read the target learner ID bound to the checkout session
+      const amount = payload.data.total_amount / 100; 
+      const userId = payload.data.metadata?.user_id; 
 
       if (!userId) {
         return new NextResponse('Missing learner ID mapping in metadata', { status: 400 });
       }
 
-      // 2. Insert transaction directly into your new table
       const { error } = await supabase
         .from('dodo_payments_log')
         .insert({
