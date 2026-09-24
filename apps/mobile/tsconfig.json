@@ -5,7 +5,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "target": "esnext",
     "module": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -13,10 +13,10 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "@skillbridge/shared": ["../../packages/shared/src"],
+      "@skillbridge/shared": ["../../packages/shared/src/index.ts"],
       "@skillbridge/shared/*": ["../../packages/shared/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".expo"]
+  "exclude": ["node_modules", ".expo", "dist"]
 }
