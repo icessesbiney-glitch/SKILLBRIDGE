@@ -3,7 +3,6 @@
  */
 
 import { NextRequest } from 'next/server';
-
 import { middleware } from './middleware';
 import { updateSession } from './utils/supabase/middleware';
 
@@ -26,7 +25,6 @@ describe('web middleware', () => {
   it('redirects protected routes to auth when Supabase is not configured', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
     const request = new NextRequest('https://example.com/roadmap');
     const response = await middleware(request);
@@ -37,6 +35,8 @@ describe('web middleware', () => {
   it('redirects unauthenticated protected requests with the next parameter', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'public-anon-key';
+    
+    // Aligns perfectly with the new defensive session wrapper layer check
     (updateSession as jest.Mock).mockResolvedValue({
       response: new Response(null, { status: 200 }),
       user: null,
@@ -51,6 +51,7 @@ describe('web middleware', () => {
   it('preserves the protected route query string in the next parameter', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'public-anon-key';
+    
     (updateSession as jest.Mock).mockResolvedValue({
       response: new Response(null, { status: 200 }),
       user: null,
