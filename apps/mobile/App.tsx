@@ -1,115 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { supabase } from '@skillbridge/shared';
-import HomeScreen from './screens/HomeScreen';
-import AuthScreen from './screens/AuthScreen';
-import DashboardScreen from './screens/DashboardScreen';
-import ProfileScreen from './screens/ProfileScreen';
 
-const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
+const ExpoSecureStoreAdapter = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+export const supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY', {
+  auth: {
+    storage: ExpoSecureStoreAdapter,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false, // Disables web URL scraping crashes on mobile devices
   },
 });
-
-function AuthStack() {
-  return (
-    // @ts-ignore - react-navigation type compatibility issue
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        cardStyle: { backgroundColor: 'white' },
-      }}
-    >
-      <Stack.Screen name="Auth" component={AuthScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function AppStack() {
-  return (
-    // @ts-ignore - react-navigation type compatibility issue
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#1a56db',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'SkillBridge',
-        }}
-      />
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{
-          title: 'Tasks',
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: 'Profile',
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
-export default function App() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setIsSignedIn(!!data.session);
-      } catch (error) {
-        console.error('Auth check error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        setIsSignedIn(!!session);
-      }
-    );
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  if (loading) {
-    return <SafeAreaView style={styles.container} />;
-  }
-
-  return (
-    <NavigationContainer>
-      {isSignedIn ? <AppStack /> : <AuthStack />}
-    </NavigationContainer>
-  );
-}
