@@ -1,6 +1,7 @@
 import { contextBridge } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  getVersion: () => process.versions.electron,
-  getAppVersion: () => process.env.npm_package_version,
+  getVersion: (): string => process.versions.electron || 'Unknown',
+  getAppVersion: (): string => process.env.npm_package_version || '1.0.0',
+  isDesktop: true, // Let's your frontend web components know they are running natively
 });
