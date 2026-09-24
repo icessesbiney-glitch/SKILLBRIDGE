@@ -3,16 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "packages/shared",
     "apps/web",
     "apps/desktop",
-    "apps/mobile",
-    "packages/shared"
+    "apps/mobile"
   ],
   "scripts": {
     "install-all": "npm install",
     "lint": "npm run lint --workspaces",
     "type-check": "npm run type-check --workspaces",
-    "build": "npm run build --workspaces",
+    "build:shared": "cd packages/shared && npm run build",
+    "build:web": "cd apps/web && npm run build",
+    "build:desktop": "cd apps/desktop && npm run build",
+    "build:mobile": "cd apps/mobile && npm run build",
+    "build": "npm run build:shared && npm run build:web && npm run build:desktop",
+    "build:all": "npm run build:shared && npm run build:web && npm run build:desktop && npm run build:mobile",
     "test": "npm run test --workspaces"
   },
   "devDependencies": {
