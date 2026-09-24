@@ -1,50 +1,21 @@
 {
-  "name": "skillbridge",
+  "name": "skillbridge-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "SkillBridge - Complete Multi-Platform Application (Web, Desktop, Mobile, PWA)",
-  "packageManager": "npm@10.8.2",
-  "engines": {
-    "node": ">=22.0.0",
-    "npm": ">=10.8.2"
-  },
   "workspaces": [
     "apps/web",
     "apps/desktop",
     "apps/mobile",
     "packages/shared"
   ],
-  "overrides": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
   "scripts": {
-    "dev": "turbo run dev --filter=@skillbridge/web",
-    "dev:all": "turbo run dev",
-    "build": "turbo run build --filter=@skillbridge/web",
-    "build:web": "turbo run build --filter=@skillbridge/web",
-    "build:desktop": "turbo run build --filter=@skillbridge/desktop",
-    "build:mobile": "turbo run build --filter=@skillbridge/mobile",
-    "build:shared": "turbo run build --filter=@skillbridge/shared",
-    "build:all": "turbo run build",
-    "dist:desktop": "npm run dist --workspace=@skillbridge/desktop",
-    "dist:desktop:mac": "npm run dist:mac --workspace=@skillbridge/desktop",
-    "dist:desktop:win": "npm run dist:win --workspace=@skillbridge/desktop",
-    "dist:desktop:linux": "npm run dist:linux --workspace=@skillbridge/desktop",
-    "build:mobile:ios": "npm run build:ios --workspace=@skillbridge/mobile",
-    "build:mobile:android": "npm run build:android --workspace=@skillbridge/mobile",
-    "submit:mobile:ios": "npm run submit:ios --workspace=@skillbridge/mobile",
-    "submit:mobile:android": "npm run submit:android --workspace=@skillbridge/mobile",
-    "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
-    "test": "turbo run test --filter=@skillbridge/web",
-    "setup:all": "npm install --legacy-peer-deps && turbo run build"
+    "install-all": "npm install",
+    "lint": "npm run lint --workspaces",
+    "type-check": "npm run type-check --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "next": "14.2.35",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "turbo": "^2.1.2"
+    "typescript": "5.6.3"
   }
 }
