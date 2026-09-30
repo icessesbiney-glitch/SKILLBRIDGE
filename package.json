@@ -2,28 +2,20 @@
   "name": "skillbridge-monorepo",
   "version": "1.0.3",
   "private": true,
+  "packageManager": "npm@11.19.0",
   "workspaces": [
-    "packages/shared",
-    "apps/web",
-    "apps/desktop",
-    "apps/mobile"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "install-all": "npm install",
-    "lint": "npm run lint --workspaces",
-    "type-check": "npm run type-check --workspaces",
+    "build": "npm run build:shared && npm run build:web",
     "build:shared": "cd packages/shared && npm run build",
     "build:web": "cd apps/web && npm run build",
-    "build:desktop": "cd apps/desktop && npm run build",
-    "build:mobile": "cd apps/mobile && npm run build",
-    "build": "npm run build:shared && npm run build:web",
-    "test": "npm run test --workspaces"
-  },
-  "engines": {
-    "node": ">=18.0.0 <23.0.0",
-    "npm": ">=9.0.0"
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:mobile": "cd apps/mobile && npm run dev"
   },
   "devDependencies": {
-    "typescript": "5.6.3"
+    "turbo": "^2.11.5",
+    "typescript": "^5.0.0"
   }
 }
