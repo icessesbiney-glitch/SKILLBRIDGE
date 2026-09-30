@@ -1,70 +1,28 @@
-import SiteChrome from '../../components/SiteChrome';
-import AuthStatusCard from '../../components/AuthStatusCard';
-import ProtectedShell from '../../components/ProtectedShell';
-import { courseRoadmap, mentorGuidance } from '../../data/siteContent';
+import React from "react";
+import * as siteContent from "../../data/siteContent";
 
 export default function RoadmapPage() {
+  const mentorGuidance = (siteContent as any).mentorGuidance || [];
+
   return (
-    <SiteChrome>
-      <ProtectedShell
-        title="Protected roadmap workspace"
-        description="Sign in to view the full course roadmap, mentor guidance, and the protected project delivery plan."
-      >
-        <section className="sb-section">
-          <div className="sb-container">
-            <div className="sb-section-heading">
-              <div>
-                <span className="sb-eyebrow">One course roadmap</span>
-                <h1>Run the whole project from one roadmap.</h1>
-              </div>
-              <p>
-                This page turns the repository into one delivery roadmap across web, mobile, desktop, and deployment operations.
-              </p>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">SkillBridge Project Roadmap Matrix</h1>
+      <p className="text-gray-600 mb-6">Live and active development milestones tracking interface console.</p>
+      
+      <div className="space-y-4">
+        {mentorGuidance && mentorGuidance.length > 0 ? (
+          mentorGuidance.map((item: any, index: number) => (
+            <div key={index} className="p-4 border rounded shadow-sm bg-white">
+              <h3 className="font-semibold text-lg">{item?.title || "Milestone Item"}</h3>
+              <p className="text-gray-500 mt-1">{item?.description || "No description provided."}</p>
             </div>
-
-            <div className="sb-card-grid sb-card-grid-compact">
-              {courseRoadmap.map((item, index) => (
-                <article key={item.title} className="sb-card">
-                  <div className="sb-roadmap-index">0{index + 1}</div>
-                  <h2>{item.title}</h2>
-                  <p>{item.summary}</p>
-                  <ul className="sb-simple-list">
-                    {item.outcomes.map((outcome) => (
-                      <li key={outcome}>{outcome}</li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
+          ))
+        ) : (
+          <div className="p-8 border border-dashed rounded text-center text-gray-400">
+            No active roadmap data structures found in siteContent files.
           </div>
-        </section>
-
-        <section className="sb-section sb-section-alt">
-          <div className="sb-container sb-split">
-            <div className="sb-panel">
-              <span className="sb-eyebrow">Mentor guidance</span>
-              <h2>Feedback on what to do next</h2>
-              <div className="sb-stack">
-                {mentorGuidance.map((item) => (
-                  <article key={item.title} className="sb-step-card">
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p className="sb-muted">{item.summary}</p>
-                    </div>
-                    <ul className="sb-simple-list">
-                      {item.actions.map((action) => (
-                        <li key={action}>{action}</li>
-                      ))}
-                    </ul>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <AuthStatusCard />
-          </div>
-        </section>
-      </ProtectedShell>
-    </SiteChrome>
+        )}
+      </div>
+    </div>
   );
 }
