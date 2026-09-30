@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  "https://supabase.co",
+  "https://lhpdxsnsepvlhwkwsvel.supabase.co",
   process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
 );
 
 export async function GET() {
   try {
-    // Executes direct SQL commands to build the withdrawal requests ledger table, auditing tracking tables, and atomic balance deduction triggers
     const { error } = await supabase.rpc("exec_sql", {
       sql_query: `
-        -- 1. Create the withdrawal requests transaction table grid if it does not exist
         CREATE TABLE IF NOT EXISTS public.withdrawal_requests (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
           email TEXT NOT NULL,
@@ -20,23 +18,20 @@ export async function GET() {
           created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone("utc"::text, now()) NOT NULL
         );
 
-        -- 2. Build the secure database ledger function to automate balance checking and deductions atomically
         CREATE OR REPLACE FUNCTION public.process_automated_withdrawal_ledger()
         RETURNS TRIGGER AS $$
         DECLARE
           current_balance NUMERIC(10, 2);
         BEGIN
-          -- Retrieve the active user balance and apply an exclusive row lock to prevent race condition balance hacks
           SELECT wallet_balance INTO current_balance
           FROM public.user_profiles
           WHERE email = NEW.email
           FOR UPDATE;
 
           IF current_balance IS NULL OR current_balance < NEW.amount THEN
-            RAISE EXCEPTION "Insufficient funds balance to execute this withdrawal transaction ledger allocation loop.";
+            RAISE EXCEPTION "Insufficient funds balance.";
           END IF;
 
-          -- Atomically deduct the transaction balance allocation from the user live profile balance grid
           UPDATE public.user_profiles
           SET wallet_balance = wallet_balance - NEW.amount
           WHERE email = NEW.email;
@@ -45,7 +40,6 @@ export async function GET() {
         END;
         $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-        -- 3. Bind the trigger to fire instantly BEFORE any row insertion happens on the withdrawal grid
         DROP TRIGGER IF EXISTS trigger_withdrawal_ledger_sync ON public.withdrawal_requests;
         CREATE TRIGGER trigger_withdrawal_ledger_sync
         BEFORE INSERT ON public.withdrawal_requests
