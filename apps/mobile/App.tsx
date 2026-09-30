@@ -1,17 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
+import React from "react";
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
+import MobileRiderDashboard from "./components/MobileRiderDashboard";
 
-const ExpoSecureStoreAdapter = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-};
+export default function App() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f9f9f9" />
+      <MobileRiderDashboard />
+    </SafeAreaView>
+  );
+}
 
-export const supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY', {
-  auth: {
-    storage: ExpoSecureStoreAdapter,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false, // Disables web URL scraping crashes on mobile devices
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f9f9f9",
   },
 });
