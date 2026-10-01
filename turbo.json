@@ -1,26 +1,10 @@
 {
   "$schema": "https://turbo.build",
-  "globalDependencies": [".env.local"],
-  "globalEnv": [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "DODO_PAYMENTS_WEBHOOK_SECRET",
-    "DODO_SECRET_KEY",
-    "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY",
-    "PAYSTACK_SECRET_KEY",
-    "PAYSTACK_LIVE_WEBHOOK_URL"
-  ],
+  "globalEnv": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "PAYSTACK_SECRET_KEY", "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
+      "outputs": [".next/**", "!.next/cache/**"]
     }
   }
 }
