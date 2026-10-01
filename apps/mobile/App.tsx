@@ -1,14 +1,230 @@
-SmporSSReacS,S{SuSeSSaSe,SuSeESSecSS}SSromS"reacS";
-SmporSS{SSaSeAreaVSew,SSSyleSSeeS,STexS,SVSew,SToucSableOpacSSy,SSSyleSSeeS,SSSaSuSBar,SAcSSvSSyISdScaSorS}SSromS"reacS-SaSSve";
-SmporSSMapVSew,S{SMarkerS}SSromS"reacS-SaSSve-mapS";
-SmporSS*SaSSLocaSSoSSSromS"expo-locaSSoS";
-SmporSS{ScreaSeClSeSSS}SSromS"@SupabaSe/SupabaSe-jS";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import MapView, { Marker, Region } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { supabase } from '@skillbridge/shared';
 
-coSSSSSupabaSeS=ScreaSeClSeSS("SSSpS://lSpdxSSSepvlSwkwSvel.SupabaSe.co",S"SbW‹Xõ\⁄XõWŸååT€Ãﬁí‹å[ÿ^Qê’^Wﬁ[çêÕ‘€»äNSÇô^‹ùYò][ù[ò›[€à\
+const TRACKED_USER_EMAIL = 'customer@skillbridge.club';
 
-HSà€€ú›‹›]\ÀŸ]›]\◊HH\ŸT›]Jì€õ[ôHäNSà€€ú›ÿò[[òŸWHH\ŸT›]Jå
-NSà€€ú›ÿ€€‹ôÀŸ]€€‹ô◊HH\ŸT›]Jù[
-NSÇà\ŸQYôôX›
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
 
+export default function App() {
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [currentStatus, setCurrentStatus] = useState('offline');
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
-HOä∞¢ƒS&R7V"“ÁV∆√∞¢7ñÊ2SVÊ7Fñˆ‚7F'EG&6∂ñÊrÇí∞¢∆WB≤7FGW2““vóB∆ˆ6Fñˆ‚Á&WVW7DS˜&Vw&˜VÊEW&÷ó76ñˆÁ47ñÊ2Çì∞¢ñbá7FGW2”“&w&ÁFVB"í&WGW&„∞¢∆WB∆ˆ2“vóB∆ˆ6Fñˆ‚ÊvWD7W'&VÁE˜6óFñˆ‰7ñÊ2Çì∞¢6WD6ˆ˜&G2Ü∆ˆ2Ê6ˆ˜&G2ì∞S¢7V"“vóB∆ˆ6Fñˆ‚ÁvF6Ö˜6óFñˆ‰7ñÊ2Ä¢≤67W&7ì¢∆ˆ6Fñˆ‚‰67W&7í‰ÜñvÇSFñ÷TñÁFW'S√¢SSFó7FÊ6TñÁFW'S√¢R“¿¢7ñÊ2ÜÊWS∆ˆ2í”‚∞¢6WD6ˆ˜&G2ÜÊWS∆ˆ2Ê6ˆ˜&G2ì∞¢vóB7W&6RÊS&ˆ“Ç'&ˆSñ∆W2"íÁWFFRá∞¢∆FóGVFS¢ÊWS∆ˆ2Ê6ˆ˜&G2Ê∆FóGVFR¿¢∆ˆÊvóGVFS¢ÊWS∆ˆ2Ê6ˆ˜&G2Ê∆ˆÊvóGVFP¢“íÊWÇ&V÷ñS"S&7W7Fˆ÷W$6∂ñ∆∆'&ñFvRÊ6«V""ì∞¢–¢ì∞¢–¢7F'EG&6∂ñÊrÇì∞¢&WGW&‚Çí”‚≤ñbá7V"í7V"Á&V÷˜SRÇì≤”∞¢“Sµ“ì∞S¢6ˆÁ7B6ÜÊvU7FGW2“7ñÊ2Ü“í”‚∞¢6WE7FGW2Ü“ì∞¢vóB7W&6RÊS&ˆ“Ç'&ˆSñ∆W2"íÁWFFRá≤7W'&VÁE˜7FGW3¢““íÊWÇ&V÷ñS"S&7W7Fˆ÷W$6∂ñ∆∆'&ñFvRÊ6«V""ì∞¢”∞S¢&WGW&‚Ä¢≈6ST&VSñWr7Gñ∆S◊∑2ÁvñÁ”‡¢≈7FGW4&"&%7Gñ∆S“&F&≤÷6ˆÁFVÁB"Û‡¢≈SñWr7Gñ∆S◊∑2Ê&˜á”‡¢≈FWáB7Gñ∆S◊∑2ÁG”Â6∂ñ∆ƒ'&ñFvR&ñFW"ÊˆFSSıFWáC‡¢≈FWáB7Gñ∆S◊∑2Á7V'”‰áóW&∆ˆ6Su
+  const syncLocationToSupabase = async (coords: Coordinates, status: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          current_status: status,
+        })
+        .eq('email', TRACKED_USER_EMAIL);
+
+      if (error) {
+        setErrorMessage(`Failed to sync location: ${error.message}`);
+      }
+    } catch (err: any) {
+      setErrorMessage(`Failed to sync location: ${err.message ?? 'Unknown error'}`);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const startTracking = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== 'granted') {
+          if (isMounted) {
+            setPermissionDenied(true);
+            setCurrentStatus('permission_denied');
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        const subscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5000,
+            distanceInterval: 10,
+          },
+          (location) => {
+            if (!isMounted) return;
+
+            const coords: Coordinates = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            };
+
+            setCoordinates(coords);
+            setCurrentStatus('online');
+            setErrorMessage('');
+            setIsLoading(false);
+            syncLocationToSupabase(coords, 'online');
+          }
+        );
+
+        subscriptionRef.current = subscription;
+      } catch (err: any) {
+        if (isMounted) {
+          setErrorMessage(err.message ?? 'Unable to track location.');
+          setCurrentStatus('error');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    startTracking();
+
+    return () => {
+      isMounted = false;
+      subscriptionRef.current?.remove();
+    };
+  }, []);
+
+  const region: Region | undefined = coordinates
+    ? {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : undefined;
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
+      {isLoading && (
+        <View style={styles.centeredOverlay}>
+          <ActivityIndicator size="large" color="#1a56db" />
+          <Text style={styles.statusText}>Locating you...</Text>
+        </View>
+      )}
+
+      {permissionDenied && (
+        <View style={styles.centeredOverlay}>
+          <Text style={styles.errorTitle}>Location permission denied</Text>
+          <Text style={styles.statusText}>
+            SkillBridge needs location access to track your position on the map.
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              setPermissionDenied(false);
+              setIsLoading(true);
+            }}
+          >
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {!permissionDenied && region && (
+        <MapView style={styles.map} region={region} showsUserLocation>
+          <Marker coordinate={coordinates!} title="You" description={currentStatus} />
+        </MapView>
+      )}
+
+      {!permissionDenied && coordinates && (
+        <View style={styles.infoPanel}>
+          <Text style={styles.coordinatesText}>
+            Lat: {coordinates.latitude.toFixed(6)}, Lng: {coordinates.longitude.toFixed(6)}
+          </Text>
+          <Text style={styles.statusLabel}>Status: {currentStatus}</Text>
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  map: {
+    flex: 1,
+  },
+  centeredOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#4b5563',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#dc2626',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: '#1a56db',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  infoPanel: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    right: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  coordinatesText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '600',
+  },
+  statusLabel: {
+    fontSize: 14,
+    color: '#1a56db',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#dc2626',
+    marginTop: 8,
+  },
+});
