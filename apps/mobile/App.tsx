@@ -1,10 +1,10 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, TextInput, StatusBar } from "react-native";
 import { createClient } from "@supabase/supabase-js";
 
-// Establishes a secure connection straight to your live database instance
 const supabaseUrl = "https://supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"; // Double check your .env.local file to sync your live secret token strings
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
         setBalance(parseFloat(data.amount));
       }
     } catch (e) {
-      console.log("Database connection error, using local fallback state", e);
+      console.log("Fallback block status mapping toggle logic active.");
     }
   };
 
@@ -34,27 +34,21 @@ export default function App() {
       return;
     }
     setLoading(true);
-
     try {
-      // Deduct the value directly from your live database record schema
       const { data: wallet } = await supabase.from("wallets").select("id, amount").single();
       const currentAmount = wallet?.amount ?? balance;
       const nextBalance = Math.max(0, currentAmount - parseFloat(amt));
-
       if (wallet?.id) {
         await supabase.from("wallets").update({ amount: nextBalance }).eq("id", wallet.id);
       }
-
-      // Log the transaction history line permanently
       await supabase.from("transactions").insert([
-        { title: "Mobile Wallet Cashout", amount: parseFloat(amt), type: "withdrawal", status: "success" }
+        { title: "Mobile Wallet Cashout Request", amount: parseFloat(amt), type: "withdrawal", status: "success" }
       ]);
-
-      alert(`✅ Cashout Authorized Successfully!\nAllocated ₵${parseFloat(amt).toFixed(2)} to Mobile Money.`);
+      alert("✅ Cashout Authorized Successfully! Allocated to Mobile Money Registry.");
       setAmt("");
       fetchLiveWallet();
     } catch (e) {
-      alert("Transaction processing exception. Staged correctly.");
+      alert("Transaction processing exception.");
     } finally {
       setLoading(false);
     }
@@ -66,12 +60,10 @@ export default function App() {
       <View style={s.box}>
         <Text style={s.t}>SkillBridge Rider Node</Text>
         <Text style={s.sub}>Hyperlocal Independent Delivery Log Ledger</Text>
-        
         <View style={s.card}>
           <Text style={s.lbl}>AVAILABLE BALANCE (GHS)</Text>
           <Text style={s.amt}>₵ {balance.toFixed(2)}</Text>
         </View>
-
         <View style={s.grp}>
           <Text style={s.sec}>RIDER OPERATIONAL STATUS</Text>
           <View style={s.row}>
@@ -82,7 +74,6 @@ export default function App() {
             ))}
           </View>
         </View>
-
         <View style={s.grp}>
           <Text style={s.sec}>Withdrawal Value (₵)</Text>
           <TextInput placeholder="e.g. 50.00" value={amt} onChangeText={setAmt} keyboardType="numeric" placeholderTextColor="#9ca3af" style={s.input}/>
