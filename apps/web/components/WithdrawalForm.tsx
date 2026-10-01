@@ -1,8 +1,10 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 
 export default function WithdrawalForm() {
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState("");
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
 
@@ -15,9 +17,9 @@ export default function WithdrawalForm() {
       .catch((err) => console.error(err));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading("true");
+    setLoading(true);
     setMessage("");
 
     try {
@@ -36,7 +38,7 @@ export default function WithdrawalForm() {
     } catch (err) {
       setMessage("? Connection Error");
     } finally {
-      setLoading("");
+      setLoading(false);
     }
   };
 
@@ -60,7 +62,7 @@ export default function WithdrawalForm() {
           </div>
           <button
             type="submit"
-            disabled={loading ? true : false}
+            disabled={loading}
             className="w-full bg-blue-600 text-white font-bold p-2.5 rounded-lg text-sm transition hover:bg-blue-700 disabled:bg-gray-400"
           >
             {loading ? "Verifying Balances..." : "Request Instant Withdrawal"}
@@ -73,7 +75,7 @@ export default function WithdrawalForm() {
         <h3 className="text-sm font-bold text-gray-900 mb-3">Recent Withdrawal History Logs</h3>
         {history && history.length > 0 ? (
           <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-            {history.map((tx) => (
+            {history.map((tx: any) => (
               <div key={tx.id} className="flex justify-between items-center text-xs p-2 bg-gray-50 border rounded-lg">
                 <div>
                   <p className="font-bold text-gray-800">${tx.amount} USD</p>
