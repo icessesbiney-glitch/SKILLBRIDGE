@@ -28,7 +28,6 @@ export default function WithdrawalForm() {
     setMessage("");
 
     try {
-      // Points straight into your local server router to eliminate all browser fetch exceptions
       const res = await fetch("/api/cashout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
