@@ -1,37 +1,24 @@
 {
   "name": "@skillbridge/web",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern .next --ignore-pattern node_modules",
-    "type-check": "tsc --noEmit -p tsconfig.typecheck.json",
-    "test": "jest --config jest.config.cjs --passWithNoTests"
+    "start": "next start"
   },
   "dependencies": {
-    "@skillbridge/shared": "*",
-    "@supabase/auth-helpers-nextjs": "^0.15.0",
-    "@supabase/auth-helpers-react": "^0.15.0",
-    "@supabase/auth-ui-react": "^0.4.7",
-    "@supabase/auth-ui-shared": "^0.1.8",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.112.4",
-    "next": "^14.2.35",
+    "next": "14.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^3.3.0"
+    "@supabase/supabase-js": "^2.43.4"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.1.5",
-    "@testing-library/react": "^14.1.2",
-    "@types/jest": "^29.5.11",
-    "@types/node": "^20.5.0",
-    "@types/react": "^18.3.12",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
-    "eslint": "latest"
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "typescript": "^5.4.5",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
   }
 }
