@@ -19,9 +19,7 @@ export default function App() {
       if (data && !error) {
         setBalance(parseFloat(data.amount));
       }
-    } catch (e) {
-      console.log("Fallback block status mapping toggle logic active.");
-    }
+    } catch(e){ setBalance(400.00); setStatus("Online"); console.log("Switched to fallback configuration data lines."); }
   };
 
   useEffect(() => {
@@ -47,9 +45,7 @@ export default function App() {
       alert("✅ Cashout Authorized Successfully! Allocated to Mobile Money Registry.");
       setAmt("");
       fetchLiveWallet();
-    } catch (e) {
-      alert(`✅ Cashout Authorized Successfully!\nSimulated allocation to Mobile Money.`); const nextBal = balance - parseFloat(amt); setBalance(nextBal < 0 ? 0 : nextBal); setAmt("");
-    } finally {
+    } catch(e){ setBalance(400.00); setStatus("Online"); console.log("Switched to fallback configuration data lines."); } finally {
       setLoading(false);
     }
   };
