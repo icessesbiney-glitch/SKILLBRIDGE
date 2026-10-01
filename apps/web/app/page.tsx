@@ -1,74 +1,46 @@
 "use client";
-
 import React, { useState } from "react";
-import DodoCheckoutButton from "../components/DodoCheckoutButton";
-import WithdrawalForm from "../components/WithdrawalForm";
 
-export default function HomePage() {
-  const [momoAmount, setMomoAmount] = useState("");
+export default function Home() {
   const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState("");
 
-  const handlePaystackMoMo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!momoAmount || parseFloat(momoAmount) <= 0) return;
+  const handleDeposit = async () => {
+    if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount.");
     setLoading(true);
-
     try {
       const res = await fetch("/api/paystack-init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: momoAmount })
+        body: JSON.stringify({ amount: parseFloat(amount), email: "customer@skillbridge.club" }),
       });
-
-      const result = await res.json();
-      if (result?.data?.authorization_url) {
-        window.location.href = result.data.authorization_url;
+      const data = await res.json();
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
       } else {
-        alert("Failed to initialize mobile money checkout session.");
+        alert("Failed to initialize Paystack session.");
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      alert("Error reaching checkout servers.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6 text-center">
-      <div className="max-w-xl w-full bg-white border rounded-2xl p-8 shadow-sm mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">SkillBridge Ecosystem</h1>
-        <p className="text-sm text-gray-600 mb-8">Hyperlocal multi-gateway transaction routing interface hub node.</p>
-
-        <div className="flex flex-col gap-4 items-center">
-          <div className="w-full border p-4 rounded-xl bg-gray-50 text-left">
-            <h3 className="text-xs font-bold uppercase text-gray-400 mb-2 tracking-wider">Debit / Credit Card Gateway</h3>
-            <DodoCheckoutButton />
-          </div>
-
-          <div className="w-full border p-4 rounded-xl bg-gray-50 text-left">
-            <h3 className="text-xs font-bold uppercase text-gray-400 mb-3 tracking-wider">Ghana Mobile Money (MTN, Telecel, AT)</h3>
-            <form onSubmit={handlePaystackMoMo} className="flex gap-2">
-              <input
-                type="number"
-                value={momoAmount}
-                onChange={(e) => setMomoAmount(e.target.value)}
-                placeholder="Amount (GHS ¢)"
-                required
-                className="flex-1 p-2 border rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition disabled:bg-gray-400"
-              >
-                {loading ? "Loading..." : "Deposit MoMo"}
-              </button>
-            </form>
-          </div>
+    <main style={{ minHeight: "100vh", backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+      <div style={{ backgroundColor: "#fff", padding: "32px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0,1)", width: "100%", maxWidth: "400px", textAlign: "center" }}>
+        <h1 style={{ fontSize: "24px", fontWeight: "900", color: "#111827", marginBottom: "4px" }}>SkillBridge Core Hub</h1>
+        <p style={{ fontSize: "14px", color: "#4b5563", marginBottom: "24px" }}>Live Mobile Money & Card Gateway Node</p>
+        <div style={{ backgroundColor: "#f0fdf4", padding: "16px", borderRadius: "12px", border: "1px solid #bbf7d0", marginBottom: "24px" }}>
+          <span style={{ fontSize: "12px", fontWeight: "800", color: "#16a34a" }}>GATEWAY STATUS</span>
+          <p style={{ fontSize: "18px", fontWeight: "700", color: "#14532d", margin: "4px 0 0" }}>● Operational (Live Mode)</p>
         </div>
+        <input type="number" placeholder="Enter Deposit Amount (₵)" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ width: "100%", padding: "12px", borderWidth: "1px", borderColor: "#d1d5db", borderRadius: "8px", marginBottom: "16px", fontSize: "16px", color: "#111" }} />
+        <button onClick={handleDeposit} disabled={loading} style={{ width: "100%", backgroundColor: "#3b82f6", color: "#fff", padding: "14px", borderRadius: "8px", fontWeight: "700", border: "none", cursor: "pointer" }}>
+          {loading ? "Opening Secure Gateway..." : "Deposit via Mobile Money"}
+        </button>
       </div>
-
-      <WithdrawalForm />
     </main>
   );
 }
