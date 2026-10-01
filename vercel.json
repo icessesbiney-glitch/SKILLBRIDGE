@@ -1,5 +1,0 @@
-{
-  "rootDirectory": "apps/web",
-  "buildCommand": "npx next build",
-  "framework": "nextjs"
-}
