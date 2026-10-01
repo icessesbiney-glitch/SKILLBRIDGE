@@ -1,24 +1,16 @@
 {
   "name": "skillbridge-monorepo",
-  "version": "1.0.3",
   "private": true,
-  "packageManager": "npm@11.19.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build:shared && npm run build:web",
-    "build:shared": "cd packages/shared && npm run build",
-    "build:web": "cd apps/web && npm run build",
-    "dev:web": "cd apps/web && npm run dev",
-    "dev:mobile": "cd apps/mobile && npm run dev"
+    "build": "turbo run build",
+    "dev": "turbo run dev"
   },
+  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.11.5",
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "dodopayments": "^2.52.0"
+    "turbo": "^2.0.0"
   }
 }
