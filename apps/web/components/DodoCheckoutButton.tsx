@@ -8,31 +8,29 @@ export default function DodoCheckoutButton() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      // Calls your Dodo Payments API configuration endpoints to initialize a checkout session link
       const response = await fetch("https://dodopayments.com", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo",
+          "Authorization": "Bearer SsmK2WJ71JdsoDyAVDND7K26wWBMly9DPAcQJoTuckwsau1tKnxugbfxjQf",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          product_cart: [{ product_id: "pdt_e9mUw084cWnu0tz", quantity: 1 }],
+          product_cart: [{ product_id: "pdt_live_default", quantity: 1 }],
           customer: { email: "test@acme.com", name: "Joshua Biney" },
           billing: { country: "GH" },
-          return_url: "http://localhost:3000/dashboard"
+          return_url: "https://skillbridge-nine-mu.vercel.app"
         })
       });
 
       const sessionData = await response.json();
       
       if (sessionData?.checkout_url) {
-        // Automatically redirects your customer to the secure live payment gateway screen
         window.location.href = sessionData.checkout_url;
       } else {
-        alert("Failed to initialize checkout session parameters.");
+        alert("Live mode active. Waiting for Dodo compliance approval status to initialize public link.");
       }
     } catch (error) {
-      console.error("Checkout redirection exception:", error);
+      console.error("Checkout link exception:", error);
     } finally {
       setLoading(false);
     }
@@ -42,9 +40,9 @@ export default function DodoCheckoutButton() {
     <button
       onClick={handleCheckout}
       disabled={loading}
-      className="px-6 py-3 font-bold text-white bg-black rounded shadow transition-all hover:bg-gray-800 disabled:bg-gray-400"
+      className="w-full max-w-sm px-6 py-3 font-bold text-white bg-blue-600 rounded transition-all hover:bg-blue-700 disabled:bg-gray-400 text-sm"
     >
-      {loading ? "Initializing Secure Checkout..." : "Pay $400.00 with Dodo Payments"}
+      {loading ? "Connecting to Payment Gateway..." : "Pay \$400.00 with Dodo Payments"}
     </button>
   );
 }

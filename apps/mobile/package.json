@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "electron-is-dev": "^2.0.0",
-    "electron-squirrel-startup": "1.0.1"
+    "electron-squirrel-startup": "1.0.1",
+    "expo": "^57.0.26"
   },
   "devDependencies": {
     "@types/node": "^20.5.0",
@@ -41,15 +42,24 @@
       "assets/icon.png"
     ],
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.productivity"
     },
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "certificateFile": null
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Productivity"
     }
   }

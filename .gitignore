@@ -68,3 +68,5 @@ build-output.txt
 .eslintcache
 .stylelintcache
 .env
+.vercel
+.env*

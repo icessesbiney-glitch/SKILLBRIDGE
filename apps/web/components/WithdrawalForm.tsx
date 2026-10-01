@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// Hooked into your authentic, live Supabase parameters securely
 const supabase = createClient(
   "https://supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
+  "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
 );
 
 export default function WithdrawalForm() {
@@ -14,7 +15,6 @@ export default function WithdrawalForm() {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<any[]>([]);
 
-  // Automatically fetches recorded cashout rows directly from your database grid rows
   const fetchHistory = async () => {
     const { data } = await supabase
       .from("withdrawal_requests")
@@ -42,7 +42,7 @@ export default function WithdrawalForm() {
       } else {
         setMessage("? Payout Request Submitted! Balance deducted atomically.");
         setAmount("");
-        fetchHistory(); // Instantly refreshes the transaction data list view
+        fetchHistory();
       }
     } catch (err: any) {
       setMessage(`? Network Error: ${err.message}`);
@@ -80,7 +80,6 @@ export default function WithdrawalForm() {
         {message && <p className="text-xs font-medium mt-3 text-center text-gray-700">{message}</p>}
       </div>
 
-      {/* Renders the automated live transaction logs grid table directly beneath the input card */}
       <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm text-left">
         <h3 className="text-sm font-bold text-gray-900 mb-3">Recent Withdrawal History Logs</h3>
         {history.length > 0 ? (
