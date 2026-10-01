@@ -4,6 +4,6 @@ const nextConfig = {
   transpilePackages: ["@skillbridge/shared"],
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  env: { NEXT_PUBLIC_SUPABASE_URL: "https://lhpdxsnsepvlhwkwsvel.supabase.co" }
+  images: { unoptimized: true }
 };
 export default nextConfig;
