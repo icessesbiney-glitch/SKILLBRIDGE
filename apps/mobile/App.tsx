@@ -4,7 +4,7 @@ import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, TextInput, Stat
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = "https://supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
+const supabaseAnonKey = "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function App() {
