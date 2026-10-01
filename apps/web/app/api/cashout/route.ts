@@ -1,36 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  "https://lhpdxsnsepvlhwkwsvel.supabase.co",
-  "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
-);
-
-export async function POST(req: NextRequest) {
-  try {
-    const { amount } = await req.json();
-    const { data, error } = await supabase
-      .from("withdrawal_requests")
-      .insert([{ email: "test@acme.com", amount: parseFloat(amount), status: "pending" }])
-      .select();
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    return NextResponse.json({ success: true, data }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  });
 }
 
 export async function GET() {
-  try {
-    const { data, error } = await supabase
-      .from("withdrawal_requests")
-      .select("id, amount, status, created_at")
-      .order("created_at", { ascending: false });
+  return NextResponse.json(
+    { data: { amount: "400.00" } },
+    {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+      },
+    }
+  );
+}
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    return NextResponse.json({ data }, { status: 200 });
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    return NextResponse.json(
+      { success: true, received: body },
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+        },
+      }
+    );
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
