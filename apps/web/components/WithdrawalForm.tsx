@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 
 export default function WithdrawalForm() {
@@ -12,9 +10,11 @@ export default function WithdrawalForm() {
     try {
       const res = await fetch("/api/cashout");
       const result = await res.json();
-      if (result.data) setHistory(result.data);
+      if (result && result.data) {
+        setHistory(result.data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("History fetch error:", err);
     }
   };
 
@@ -39,7 +39,7 @@ export default function WithdrawalForm() {
       if (result.error) {
         setMessage(`? Ledger Error: ${result.error}`);
       } else {
-        setMessage("? Payout Request Submitted! Balance deducted atomically.");
+        setMessage("? Payout Request Submitted Successfully!");
         setAmount("");
         fetchHistory();
       }
@@ -81,18 +81,16 @@ export default function WithdrawalForm() {
 
       <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm text-left">
         <h3 className="text-sm font-bold text-gray-900 mb-3">Recent Withdrawal History Logs</h3>
-        {history.length > 0 ? (
+        {history && history.length > 0 ? (
           <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-            {history.map((tx) => (
+            {history.map((tx: any) => (
               <div key={tx.id} className="flex justify-between items-center text-xs p-2 bg-gray-50 border rounded-lg">
                 <div>
                   <p className="font-bold text-gray-800">\${parseFloat(tx.amount).toFixed(2)} USD</p>
                   <p className="text-[10px] text-gray-400">{new Date(tx.created_at).toLocaleTimeString()}</p>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full font-semibold text-[10px] \${
-                  tx.status === "completed" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                }\`}>
-                  {tx.status}
+                <span className="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-amber-100 text-amber-700">
+                  {tx.status || "pending"}
                 </span>
               </div>
             ))}
