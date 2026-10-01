@@ -1,5 +1,4 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npx turbo run build --filter=@skillbridge/web",
-  "crons": []
+  "buildCommand": "next build",
+  "framework": "nextjs"
 }
