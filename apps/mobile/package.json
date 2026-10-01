@@ -1,66 +1,21 @@
 {
-  "name": "@skillbridge/mobile",
+  "name": "skillbridge-mobile",
   "version": "1.0.0",
-  "private": true,
-  "main": "dist/main.js",
-  "homepage": "./",
+  "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:3000 && npm run dev:main\"",
-    "dev:main": "electron .",
-    "dev:renderer": "cd ../web && npm run dev",
-    "build": "npm run build:main",
-    "build:main": "tsc",
-    "type-check": "tsc --noEmit",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run dist -- --mac",
-    "dist:win": "npm run dist -- --win",
-    "dist:linux": "npm run dist -- --linux"
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
   },
   "dependencies": {
-    "electron-is-dev": "^2.0.0",
-    "electron-squirrel-startup": "1.0.1",
-    "expo": "^57.0.26"
+    "expo": "~51.0.0",
+    "expo-status-bar": "~1.12.1",
+    "react": "18.2.0",
+    "react-native": "0.74.1"
   },
   "devDependencies": {
-    "@types/node": "^20.5.0",
-    "concurrently": "^8.2.2",
-    "electron": "^27.0.0",
-    "electron-builder": "^24.6.4",
-    "typescript": "5.6.3",
-    "wait-on": "^7.0.1"
+    "@babel/core": "^7.20.0"
   },
-  "build": {
-    "appId": "com.skillbridge.app",
-    "productName": "SkillBridge",
-    "directories": {
-      "buildResources": "assets"
-    },
-    "files": [
-      "dist/**/*",
-      "renderer/**/*",
-      "node_modules/**/*",
-      "assets/icon.png"
-    ],
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "category": "public.app-category.productivity"
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "certificateFile": null
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Productivity"
-    }
-  }
+  "private": true
 }
