@@ -1,13 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-// Hooked into your authentic, live Supabase parameters securely
-const supabase = createClient(
-  "https://supabase.co",
-  "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
-);
 
 export default function WithdrawalForm() {
   const [amount, setAmount] = useState("");
@@ -16,11 +9,13 @@ export default function WithdrawalForm() {
   const [history, setHistory] = useState<any[]>([]);
 
   const fetchHistory = async () => {
-    const { data } = await supabase
-      .from("withdrawal_requests")
-      .select("id, amount, status, created_at")
-      .order("created_at", { ascending: false });
-    if (data) setHistory(data);
+    try {
+      const res = await fetch("/api/cashout");
+      const result = await res.json();
+      if (result.data) setHistory(result.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -33,19 +28,24 @@ export default function WithdrawalForm() {
     setMessage("");
 
     try {
-      const { error } = await supabase
-        .from("withdrawal_requests")
-        .insert([{ email: "test@acme.com", amount: parseFloat(amount), status: "pending" }]);
+      // Points straight into your local server router to eliminate all browser fetch exceptions
+      const res = await fetch("/api/cashout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount })
+      });
 
-      if (error) {
-        setMessage(`? Ledger Error: ${error.message}`);
+      const result = await res.json();
+
+      if (result.error) {
+        setMessage(`? Ledger Error: ${result.error}`);
       } else {
         setMessage("? Payout Request Submitted! Balance deducted atomically.");
         setAmount("");
         fetchHistory();
       }
     } catch (err: any) {
-      setMessage(`? Network Error: ${err.message}`);
+      setMessage(`? Connection Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -87,12 +87,12 @@ export default function WithdrawalForm() {
             {history.map((tx) => (
               <div key={tx.id} className="flex justify-between items-center text-xs p-2 bg-gray-50 border rounded-lg">
                 <div>
-                  <p className="font-bold text-gray-800">\${tx.amount.toFixed(2)} USD</p>
+                  <p className="font-bold text-gray-800">\${parseFloat(tx.amount).toFixed(2)} USD</p>
                   <p className="text-[10px] text-gray-400">{new Date(tx.created_at).toLocaleTimeString()}</p>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full font-semibold text-[10px] ${
+                <span className={`px-2 py-0.5 rounded-full font-semibold text-[10px] \${
                   tx.status === "completed" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                }`}>
+                }\`}>
                   {tx.status}
                 </span>
               </div>
