@@ -1,14 +1,282 @@
-SmporSSReacS,S{SuSeSSaSe,SuSeESSecSS}SSromS"reacS";
-SmporSS{SSaSeAreaVSew,SSSyleSSeeS,STexS,SVSew,SToucSableOpacSSy,SSSyleSSeeS,SSSaSuSBar,SAcSSvSSyISdScaSorS}SSromS"reacS-SaSSve";
-SmporSSMapVSew,S{SMarkerS}SSromS"reacS-SaSSve-mapS";
-SmporSS*SaSSLocaSSoSSSromS"expo-locaSSoS";
-SmporSS{ScreaSeClSeSSS}SSromS"@SupabaSe/SupabaSe-jS";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import * as Location from 'expo-location';
+import MapView, { Marker, type Region } from 'react-native-maps';
+import { StatusBar } from 'expo-status-bar';
+import { supabase } from '@skillbridge/shared';
 
-coSSSSSupabaSeS=ScreaSeClSeSS("SSSpS://lSpdxSSSepvlSwkwSvel.SupabaSe.co",S"SbWÜX›\ÚX›WÙŒŒTÛÌŞ’ÜŒ[Ø^QÕ^WŞ[ÍÔÛÈŠNS‚™^ÜY˜][[˜İ[Ûˆ\
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
 
-HSˆÛÛœİÜİ]\ËÙ]İ]\×HH\ÙTİ]J“Û›[™HŠNSˆÛÛœİØ˜[[˜ÙWHH\ÙTİ]JŒ
-NSˆÛÛœİØÛÛÜ™ËÙ]ÛÛÜ™×HH\ÙTİ]J[
-NS‚ˆ\ÙQY™™Xİ
+type TrackingStatus = 'online' | 'offline';
 
+const DEFAULT_REGION: Region = {
+  latitude: 5.6037,
+  longitude: -0.187,
+  latitudeDelta: 0.08,
+  longitudeDelta: 0.08,
+};
 
-HOŠ°¢ÄS&R7V"ÒçVÆÃ°¢7–æ2SVæ7F–öâ7F'EG&6¶–ær‚’°¢ÆWB²7FGW2ÒÒv—BÆö6F–öâç&WVW7DS÷&Vw&÷VæEW&Ö—76–öç47–æ2‚“°¢–b‡7FGW2ÓÒ&w&çFVB"’&WGW&ã°¢ÆWBÆö2Òv—BÆö6F–öâævWD7W'&VçE÷6—F–öä7–æ2‚“°¢6WD6ö÷&G2†Æö2æ6ö÷&G2“°S¢7V"Òv—BÆö6F–öâçvF6…÷6—F–öä7–æ2€¢²67W&7“¢Æö6F–öâä67W&7’ä†–v‚SF–ÖT–çFW'SÃ¢SSF—7Fæ6T–çFW'SÃ¢RÒÀ¢7–æ2†æWSÆö2’Óâ°¢6WD6ö÷&G2†æWSÆö2æ6ö÷&G2“°¢v—B7W&6RæS&öÒ‚'&öS–ÆW2"’çWFFR‡°¢ÆF—GVFS¢æWSÆö2æ6ö÷&G2æÆF—GVFRÀ¢Æöæv—GVFS¢æWSÆö2æ6ö÷&G2æÆöæv—GVFP¢Ò’æW‚&VÖ–S"S&7W7FöÖW$6¶–ÆÆ'&–FvRæ6ÇV""“°¢Ğ¢“°¢Ğ¢7F'EG&6¶–ær‚“°¢&WGW&â‚’Óâ²–b‡7V"’7V"ç&VÖ÷SR‚“²Ó°¢ÒSµÒ“°S¢6öç7B6†ævU7FGW2Ò7–æ2†Ò’Óâ°¢6WE7FGW2†Ò“°¢v—B7W&6RæS&öÒ‚'&öS–ÆW2"’çWFFR‡²7W'&VçE÷7FGW3¢ÒÒ’æW‚&VÖ–S"S&7W7FöÖW$6¶–ÆÆ'&–FvRæ6ÇV""“°¢Ó°S¢&WGW&â€¢Å6ST&VS–Wr7G–ÆS×·2çv–çÓà¢Å7FGW4&"&%7G–ÆSÒ&F&²Ö6öçFVçB"óà¢ÅS–Wr7G–ÆS×·2æ&÷‡Óà¢ÅFW‡B7G–ÆS×·2çGÓå6¶–ÆÄ'&–FvR&–FW"æöFSSõFW‡Cà¢ÅFW‡B7G–ÆS×·2ç7V'Óä‡—W&Æö6Su
+export default function App() {
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [tracking, setTracking] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('Start tracking to share your location.');
+  const subscription = useRef<Location.LocationSubscription | null>(null);
+  const userId = useRef<string | null>(null);
+  const map = useRef<MapView | null>(null);
+
+  const syncLocation = async (
+    userIdToSync: string,
+    nextCoordinates: Coordinates,
+    currentStatus: TrackingStatus,
+  ) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        latitude: nextCoordinates.latitude,
+        longitude: nextCoordinates.longitude,
+        current_status: currentStatus,
+      })
+      .eq('id', userIdToSync);
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  const updateLocation = (location: Location.LocationObject) => {
+    const nextCoordinates = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+
+    setCoordinates(nextCoordinates);
+    map.current?.animateToRegion(
+      { ...nextCoordinates, latitudeDelta: 0.01, longitudeDelta: 0.01 },
+      500,
+    );
+
+    if (userId.current) {
+      void syncLocation(userId.current, nextCoordinates, 'online').catch((error: Error) => {
+        setMessage(`Location sync failed: ${error.message}`);
+      });
+    }
+  };
+
+  const startTracking = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        throw new Error('Sign in before starting location tracking.');
+      }
+      userId.current = data.user.id;
+
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        throw new Error('Location permission is required to start tracking.');
+      }
+
+      const initialLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      updateLocation(initialLocation);
+
+      subscription.current = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          distanceInterval: 10,
+          timeInterval: 5000,
+        },
+        updateLocation,
+      );
+      setTracking(true);
+      setMessage('Your location is being shared.');
+    } catch (error) {
+      subscription.current?.remove();
+      subscription.current = null;
+      userId.current = null;
+      setMessage(error instanceof Error ? error.message : 'Unable to start location tracking.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stopTracking = async () => {
+    setLoading(true);
+    subscription.current?.remove();
+    subscription.current = null;
+    setTracking(false);
+
+    try {
+      if (userId.current) {
+        if (coordinates) {
+          await syncLocation(userId.current, coordinates, 'offline');
+        } else {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ current_status: 'offline' })
+            .eq('id', userId.current);
+          if (error) throw error;
+        }
+      }
+      setMessage('Tracking stopped. Your status is offline.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to update your status.');
+    } finally {
+      userId.current = null;
+      setLoading(false);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      subscription.current?.remove();
+    },
+    [],
+  );
+
+  return (
+    <View style={styles.container}>
+      <StatusBar style="dark" />
+      <MapView
+        ref={map}
+        style={StyleSheet.absoluteFill}
+        initialRegion={DEFAULT_REGION}
+        showsUserLocation={tracking}
+        showsMyLocationButton={tracking}
+      >
+        {coordinates ? (
+          <Marker coordinate={coordinates} title="Your location" />
+        ) : null}
+      </MapView>
+
+      <View style={styles.dashboard}>
+        <Text style={styles.eyebrow}>SKILLBRIDGE RIDER</Text>
+        <Text style={styles.title}>Location tracking</Text>
+        <View style={styles.statusRow}>
+          <View style={[styles.statusDot, tracking ? styles.online : styles.offline]} />
+          <Text style={styles.statusText}>{tracking ? 'Online' : 'Offline'}</Text>
+        </View>
+
+        {coordinates ? (
+          <Text style={styles.coordinates}>
+            {coordinates.latitude.toFixed(5)}, {coordinates.longitude.toFixed(5)}
+          </Text>
+        ) : null}
+
+        {message ? <Text style={styles.message}>{message}</Text> : null}
+
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={[styles.button, tracking && styles.stopButton]}
+          onPress={tracking ? stopTracking : startTracking}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.buttonText}>
+              {tracking ? 'Stop tracking' : 'Start tracking'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#e8eef5',
+  },
+  dashboard: {
+    position: 'absolute',
+    top: 64,
+    left: 20,
+    right: 20,
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: '#ffffff',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  eyebrow: {
+    color: '#2563eb',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  title: {
+    marginTop: 6,
+    color: '#0f172a',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  statusDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  online: {
+    backgroundColor: '#16a34a',
+  },
+  offline: {
+    backgroundColor: '#94a3b8',
+  },
+  statusText: {
+    color: '#334155',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  coordinates: {
+    marginTop: 10,
+    color: '#64748b',
+    fontSize: 13,
+    fontVariant: ['tabular-nums'],
+  },
+  message: {
+    marginTop: 10,
+    color: '#64748b',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  button: {
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    borderRadius: 10,
+    backgroundColor: '#2563eb',
+  },
+  stopButton: {
+    backgroundColor: '#dc2626',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});
