@@ -19,3 +19,10 @@ BEGIN
   WHERE email = user_email AND wallet_balance >= amount_to_sub;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. Lock the wallet functions down so only the server (service role key) can call them.
+-- Without this, anyone holding the public publishable key could credit or debit any wallet.
+REVOKE EXECUTE ON FUNCTION increment_wallet_balance(TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION decrement_wallet_balance(TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION increment_wallet_balance(TEXT, NUMERIC) TO service_role;
+GRANT EXECUTE ON FUNCTION decrement_wallet_balance(TEXT, NUMERIC) TO service_role;

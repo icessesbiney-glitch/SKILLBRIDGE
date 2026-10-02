@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import AuthStatusCard from '../../components/AuthStatusCard';
+import PaystackCheckoutButton from '../../components/PaystackCheckoutButton';
 import ProtectedShell from '../../components/ProtectedShell';
 import SiteChrome from '../../components/SiteChrome';
 import TaskWorkspace from '../../components/TaskWorkspace';
@@ -34,6 +35,7 @@ export default function DashboardPage() {
 
             <div className="sb-card-grid sb-card-grid-compact">
               <AuthStatusCard />
+              <PaystackCheckoutButton />
               <article className="sb-card">
                 <span className="sb-status-pill">{readiness.length} completed repair checks</span>
                 <h3>Repository readiness</h3>
