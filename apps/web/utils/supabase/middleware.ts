@@ -6,9 +6,11 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export const updateSession = async (request: NextRequest) => {
-  // 1. Build defensive baseline fallbacks for your deployment server compilation pass
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
-  const clientKey = supabaseKey || "placeholder-anon-key";
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      "Missing Supabase configuration: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set."
+    );
+  }
 
   // Create the baseline response stream
   let supabaseResponse = NextResponse.next({
@@ -19,8 +21,8 @@ export const updateSession = async (request: NextRequest) => {
 
   // 2. Initialize your secure server-side workspace middleware client
   const supabase = createServerClient(
-    clientUrl,
-    clientKey,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {

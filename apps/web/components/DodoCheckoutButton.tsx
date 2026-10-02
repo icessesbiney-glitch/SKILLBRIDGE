@@ -2,28 +2,33 @@
 
 import React, { useState } from "react";
 
+// NOTE: This component previously made a direct client-side fetch to Dodo
+// Payments with a hardcoded "Bearer" token in the Authorization header. That
+// token was committed to git history and must be treated as compromised --
+// rotate it in the Dodo Payments dashboard. The checkout request is now
+// proxied through a server-side route (/api/checkout) that reads the Dodo
+// key from the server-only DODO_API_KEY environment variable, so no secret
+// is ever shipped to the browser.
 export default function DodoCheckoutButton() {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://dodopayments.com", {
+      const response = await fetch("/api/checkout", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer SsmK2WJ71JdsoDyAVDND7K26wWBMly9DPAcQJoTuckwsau1tKnxugbfxjQf",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          product_cart: [{ product_id: "pdt_live_default", quantity: 1 }],
-          customer: { email: "test@acme.com", name: "Joshua Biney" },
-          billing: { country: "GH" },
-          return_url: "https://skillbridge-nine-mu.vercel.app"
-        })
+          email: "test@acme.com",
+          name: "Joshua Biney",
+          country: "GH",
+        }),
       });
 
       const sessionData = await response.json();
-      
+
       if (sessionData?.checkout_url) {
         window.location.href = sessionData.checkout_url;
       } else {

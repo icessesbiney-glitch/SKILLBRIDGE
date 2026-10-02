@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-const supabase = createClient("https://supabase.co", "sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE");
+import React, { useState, useEffect } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function SkillBridgeHub() {
   const [userTier, setUserTier] = useState("Beginner");
@@ -10,8 +10,21 @@ export default function SkillBridgeHub() {
 
   useEffect(() => {
     async function checkTier() {
-      const { data } = await supabase.from("profiles").select("account_tier").eq("email", "customer@skillbridge.club").single();
-      if (data && data.account_tier) setUserTier(data.account_tier);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("account_tier")
+        .eq("id", user.id)
+        .single();
+
+      if (data && !error && data.account_tier) {
+        setUserTier(data.account_tier);
+      }
     }
     checkTier();
   }, []);
@@ -21,7 +34,7 @@ export default function SkillBridgeHub() {
       setMsg("🎉 Access Granted! Task learning modules are 100% FREE for Beginners.");
       return;
     }
-    setMsg("Processing Premium Maximal verification checkout...");
+    setMsg("Processing Premium verification checkout...");
   };
 
   return (
@@ -29,7 +42,7 @@ export default function SkillBridgeHub() {
       <div style={{ background: "#fff", padding: "32px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxWidth: "400px", width: "100%", textAlign: "center", border: "1px solid #e5e7eb" }}>
         <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#111827", margin: "0 0 8px 0" }}>SkillBridge Core Hub</h2>
         <p style={{ fontSize: "14px", color: "#4b5563", margin: "0 0 24px 0" }}>Account Status: <strong style={{ color: userTier === "Beginner" ? "#16a34a" : "#2563eb" }}>{userTier}</strong></p>
-        
+
         {userTier === "Beginner" ? (
           <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "16px", borderRadius: "12px", marginBottom: "24px" }}>
             <p style={{ color: "#166534", fontSize: "14px", fontWeight: "600", margin: 0 }}>You are on the Free Beginner Tier. Enjoy unlimited basic tasks!</p>
@@ -39,7 +52,7 @@ export default function SkillBridgeHub() {
         )}
 
         <button onClick={handleAction} style={{ width: "100%", background: "#2563eb", color: "#fff", padding: "14px", border: "none", borderRadius: "10px", fontWeight: "700", cursor: "pointer" }}>
-          {userTier === "Beginner" ? "Launch Learning Tasks" : "Authorize Premaximal Upgrade"}
+          {userTier === "Beginner" ? "Launch Learning Tasks" : "Authorize Premium Upgrade"}
         </button>
         {msg && <p style={{ marginTop: "16px", fontSize: "13px", color: "#374151", fontWeight: "600" }}>{msg}</p>}
       </div>
