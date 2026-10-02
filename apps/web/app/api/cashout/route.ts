@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = "https://supabase.co";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { cookies } from "next/headers";
+import { createClient } from "../../../utils/supabase/server";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,16 +14,38 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from("wallets").select("amount").single();
-    const currentAmount = data?.amount ?? 400.00;
+    const supabase = createClient(await cookies());
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "You must be signed in." }, { status: 401, headers: corsHeaders });
+    }
+
+    const { data } = await supabase
+      .from("wallets")
+      .select("amount")
+      .eq("user_id", user.id)
+      .single();
+    const currentAmount = data?.amount ?? 0;
     return NextResponse.json({ data: { amount: currentAmount } }, { headers: corsHeaders });
   } catch (err) {
-    return NextResponse.json({ data: { amount: 400.00 } }, { headers: corsHeaders });
+    return NextResponse.json({ data: { amount: 0 } }, { headers: corsHeaders });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createClient(await cookies());
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "You must be signed in." }, { status: 401, headers: corsHeaders });
+    }
+
     const { amount } = await req.json();
     const subAmount = parseFloat(amount || "0");
 
@@ -34,18 +53,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid transaction amount" }, { status: 400, headers: corsHeaders });
     }
 
-    // Pull down current live ledger settings sequence
-    const { data: wallet } = await supabase.from("wallets").select("id, amount").single();
-    const existingBalance = wallet?.amount ?? 400.00;
+    // Pull down this user's own wallet row only.
+    const { data: wallet } = await supabase
+      .from("wallets")
+      .select("id, amount")
+      .eq("user_id", user.id)
+      .single();
+    const existingBalance = wallet?.amount ?? 0;
+
+    if (subAmount > existingBalance) {
+      return NextResponse.json({ error: "Insufficient balance" }, { status: 400, headers: corsHeaders });
+    }
+
     const nextBalance = Math.max(0, existingBalance - subAmount);
 
     if (wallet?.id) {
-      await supabase.from("wallets").update({ amount: nextBalance }).eq("id", wallet.id);
+      await supabase.from("wallets").update({ amount: nextBalance }).eq("id", wallet.id).eq("user_id", user.id);
     }
 
-    // Injects a permanent ledger log transaction trace tracking parameter block record row row line
     await supabase.from("transactions").insert([
-      { title: "Mobile Wallet Cashout Request", amount: subAmount, type: "withdrawal", status: "success" }
+      {
+        user_id: user.id,
+        title: "Mobile Wallet Cashout Request",
+        amount: subAmount,
+        type: "withdrawal",
+        status: "success",
+      },
     ]);
 
     return NextResponse.json({ success: true, balance: nextBalance }, { headers: corsHeaders });

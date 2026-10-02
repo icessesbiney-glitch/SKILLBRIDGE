@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-const supabase = createClient("https://supabase.co", "sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE");
+import React, { useState, useEffect } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function SkillBridgeHub() {
   const [userTier, setUserTier] = useState("Beginner");
@@ -10,7 +10,21 @@ export default function SkillBridgeHub() {
 
   useEffect(() => {
     async function checkTier() {
-      const { data } = await supabase.from("profiles").select("account_tier").eq("email", "customer@skillbridge.club").single();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Global visitors who are not signed in stay on the free Beginner tier.
+      if (!user) {
+        setUserTier("Beginner");
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("account_tier")
+        .eq("id", user.id)
+        .single();
       if (data && data.account_tier) setUserTier(data.account_tier);
     }
     checkTier();
