@@ -1,0 +1,9 @@
+
+> @skillbridge/desktop@1.0.0 build
+> npm run build:main
+
+
+> @skillbridge/desktop@1.0.0 build:main
+> tsc
+
+⠙[1G[0K⠙[1G[0K
