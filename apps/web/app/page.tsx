@@ -2,22 +2,23 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import Courses, { CATALOG, buildChecklist } from "../components/dashboard/Courses";
 
 const supabase = createClient(
   "https://aolfuonsuaeoitumuvqc.supabase.co",
   "sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE"
 );
 
-type View = "Dashboard" | "Learn" | "Practice" | "Projects" | "Paid Tasks" | "Earnings" | "Opportunities" | "Mentors" | "Messages";
-
-type CatalogCourse = {
-  id: string;
-  title: string;
-  cat: string;
-  lvl: string;
-  lessons: number;
-  time: string;
-};
+type View =
+  | "Dashboard"
+  | "Learn"
+  | "Practice"
+  | "Projects"
+  | "Paid Tasks"
+  | "Earnings"
+  | "Opportunities"
+  | "Mentors"
+  | "Messages";
 
 type Wallet = {
   available_balance: number;
@@ -38,28 +39,28 @@ const SIDEBAR_LINKS: View[] = [
   "Messages",
 ];
 
-const CATALOG: CatalogCourse[] = [
-  { id: "ux-ui", title: "UX/UI Design Foundations", cat: "UI/UX", lvl: "Beginner", lessons: 24, time: "6 weeks" },
-  { id: "canva", title: "Canva Graphics Masterclass", cat: "Graphic Design", lvl: "Beginner", lessons: 12, time: "2 weeks" },
-  { id: "freelance", title: "Global Freelancing Essentials", cat: "Career Building", lvl: "Beginner", lessons: 10, time: "2 weeks" },
+// Design-sample values shown until live data is available.
+const SAMPLE_LEARNING_PROGRESS = 72;
+const SAMPLE_PAID_TASKS_COMPLETED = 8;
+const SAMPLE_VERIFIED_TASKS = 3;
+const SAMPLE_WALLET_TOTAL = 1240;
+const SAMPLE_TREND = [120, 180, 150, 260, 310, 280, 420];
+const SAMPLE_FEATURED_TASKS = [
+  { id: "s1", title: "Design a Mobile App Onboarding Flow", payout: 250, tag: "UI/UX" },
+  { id: "s2", title: "Create a Brand Logo Pack", payout: 180, tag: "Graphic Design" },
+  { id: "s3", title: "Build a Landing Page for a Local Business", payout: 320, tag: "Web Design" },
 ];
-
-const LESSON_TITLES = ["Introduction", "Core Fundamentals", "Practical Deliverable Assignment"];
+const PORTFOLIO_ITEMS = [
+  { id: "p1", title: "Mobile Tracking App", note: "UI/UX case study", icon: "📱" },
+  { id: "p2", title: "Restaurant Website", note: "Responsive web design", icon: "🍽️" },
+];
 
 // Resolves the current site origin at runtime (localhost in dev, the live domain on Vercel).
 const getAppOrigin = () => (typeof window !== "undefined" ? window.location.origin : "");
 
-function buildChecklist(course: CatalogCourse) {
-  const total = Math.min(course.lessons, 12);
-  return Array.from({ length: total }, (_, i) => ({
-    key: `${course.id}-lesson-${i + 1}`,
-    label: `Lesson ${i + 1}: ${LESSON_TITLES[i] || `Module ${i + 1}`}`,
-  }));
-}
-
-function formatCedi(value: number | null | undefined) {
+function formatCedi(value: number | null | undefined, decimals = 2) {
   const n = Number(value ?? 0);
-  return `GH₵ ${n.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `GH₵ ${n.toLocaleString("en-GH", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
 
 function text(value: unknown, fallback = "") {
@@ -80,8 +81,83 @@ const STATUS_STYLES: Record<string, { color: string; background: string }> = {
   Pending: { color: "#b45309", background: "#fef3c7" },
 };
 
+function CircleProgress({ percent, size = 64 }: { percent: number; size?: number }) {
+  const stroke = 7;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(Math.max(percent, 0), 100) / 100) * circumference;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="url(#sb-ring)"
+          strokeWidth={stroke}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.6s ease" }}
+        />
+        <defs>
+          <linearGradient id="sb-ring" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#2563eb" />
+            <stop offset="100%" stopColor="#7c3aed" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "13px",
+          fontWeight: 800,
+          color: "#111827",
+        }}
+      >
+        {percent}%
+      </div>
+    </div>
+  );
+}
+
+function TrendChart({ points }: { points: number[] }) {
+  const width = 320;
+  const height = 130;
+  const pad = 10;
+  const max = Math.max(...points, 1);
+  const stepX = points.length > 1 ? (width - pad * 2) / (points.length - 1) : 0;
+  const coords = points.map((p, i) => ({
+    x: pad + i * stepX,
+    y: height - pad - (p / max) * (height - pad * 2),
+  }));
+  const line = coords.map((c) => `${c.x},${c.y}`).join(" ");
+  const area = `${pad},${height - pad} ${line} ${pad + (points.length - 1) * stepX},${height - pad}`;
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto" }}>
+      <defs>
+        <linearGradient id="sb-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill="url(#sb-area)" />
+      <polyline points={line} fill="none" stroke="#16a34a" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+      {coords.map((c, i) => (
+        <circle key={i} cx={c.x} cy={c.y} r="3.5" fill="#fff" stroke="#16a34a" strokeWidth="2" />
+      ))}
+    </svg>
+  );
+}
+
 export default function SkillBridgeHub() {
-  const [view, setView] = useState<View>("Learn");
+  const [view, setView] = useState<View>("Dashboard");
   const [userTier, setUserTier] = useState("Beginner");
   const [bio, setBio] = useState("");
   const [country, setCountry] = useState("GH");
@@ -89,8 +165,10 @@ export default function SkillBridgeHub() {
   const [msg, setMsg] = useState("");
   const [signedIn, setSignedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState("Alex Johnson");
+  const [search, setSearch] = useState("");
 
-  const [wallet, setWallet] = useState<Wallet>({ available_balance: 0, pending_balance: 0 });
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [challenges, setChallenges] = useState<Row[]>([]);
   const [ledger, setLedger] = useState<Row[]>([]);
   const [doneChallenges, setDoneChallenges] = useState<Record<string, boolean>>({});
@@ -121,6 +199,13 @@ export default function SkillBridgeHub() {
       if (!user) return;
       setSignedIn(true);
       setUserId(user.id);
+
+      const metaName = (user.user_metadata as Record<string, unknown> | undefined)?.full_name;
+      if (typeof metaName === "string" && metaName.trim()) {
+        setDisplayName(metaName.trim());
+      } else if (user.email) {
+        setDisplayName(user.email.split("@")[0]);
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -218,7 +303,6 @@ export default function SkillBridgeHub() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    // Redirect to whichever origin we are running on (local or live).
     window.location.assign(`${getAppOrigin()}/`);
   };
 
@@ -330,98 +414,296 @@ export default function SkillBridgeHub() {
     boxSizing: "border-box",
   };
 
-  const renderLearn = () => (
-    <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "flex-start" }}>
-      {/* Panel A: Learning Catalog */}
-      <div style={{ ...card("linear-gradient(135deg, #60a5fa, #a855f7)"), flex: "1 1 460px", maxWidth: "560px" }}>
-        <div style={cardInner}>
-          <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 4px 0" }}>
-            Free Learning Catalog
-          </h2>
-          <p style={{ fontSize: "13px", color: "#4b5563", margin: "0 0 18px 0" }}>
-            Account Status: <strong style={{ color: userTier === "Premium" ? "#2563eb" : "#16a34a" }}>{userTier}</strong>
-          </p>
+  const sectionTitle: React.CSSProperties = {
+    fontSize: "17px",
+    fontWeight: 800,
+    color: "#111827",
+    margin: "0 0 14px 0",
+  };
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {CATALOG.map((course) => {
-              const isActive = activeCourseId === course.id;
-              const checklist = isActive ? buildChecklist(course) : [];
-              const done = checklist.filter((l) => completed[l.key]).length;
-              const pct = checklist.length ? Math.round((done / checklist.length) * 100) : 0;
+  const primaryButton: React.CSSProperties = {
+    background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
+    color: "#fff",
+    padding: "10px 18px",
+    border: "none",
+    borderRadius: "10px",
+    fontWeight: 700,
+    fontSize: "13px",
+    cursor: "pointer",
+  };
 
-              return (
-                <div
-                  key={course.id}
-                  style={{
-                    padding: "14px",
-                    borderRadius: "12px",
-                    background: isActive ? "#f5f6ff" : "#f9fafb",
-                    border: isActive ? "1px solid #a5b4fc" : "1px solid #e5e7eb",
-                  }}
-                >
-                  <div onClick={() => setActiveCourseId(isActive ? null : course.id)} style={{ cursor: "pointer" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "11px", fontWeight: 700, background: "#dbeafe", color: "#2563eb", padding: "4px 8px", borderRadius: "20px" }}>
-                        {course.cat}
-                      </span>
-                      <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: 700 }}>{course.lvl}</span>
-                    </div>
-                    <h4 style={{ margin: "8px 0 4px 0", fontSize: "15px", fontWeight: 700, color: "#1f2937" }}>{course.title}</h4>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#6b7280" }}>
-                      {course.lessons} Lessons • {course.time} • <span style={{ color: "#16a34a", fontWeight: 600 }}>100% Free</span>
-                    </p>
-                  </div>
+  // ---------- Derived dashboard metrics ----------
+  const walletTotal = wallet ? wallet.available_balance + wallet.pending_balance : SAMPLE_WALLET_TOTAL;
+  const paidFromLedger = ledger.filter((row) => normalizeStatus(row.status) === "Paid").length;
+  const paidTasksCompleted = signedIn && ledger.length > 0 ? paidFromLedger : SAMPLE_PAID_TASKS_COMPLETED;
+  const trendPoints =
+    signedIn && ledger.length >= 2
+      ? ledger.slice(-7).map((row) => Number(row.amount ?? 0))
+      : SAMPLE_TREND;
+  const activeChallenges = challenges.filter((row) => row.is_active !== false);
+  const nextChallenge = activeChallenges.find((row, i) => !doneChallenges[text(row.id, String(i))]) || null;
+  const featuredTasks =
+    paidTasks.length > 0
+      ? paidTasks.slice(0, 3).map((row, i) => ({
+          id: text(row.id, String(i)),
+          title: text(row.title ?? row.name, `Task ${i + 1}`),
+          payout: Number(row.reward_amount ?? row.payout ?? row.amount ?? 0),
+          tag: text(row.skill_track ?? row.category, "General"),
+        }))
+      : SAMPLE_FEATURED_TASKS;
 
-                  {isActive && (
-                    <>
-                      <div style={{ marginTop: "14px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 700, color: "#475569", marginBottom: "4px" }}>
-                          <span>Progress</span>
-                          <span>{pct}%</span>
-                        </div>
-                        <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden" }}>
-                          <div
-                            style={{
-                              height: "100%",
-                              width: `${pct}%`,
-                              background: "linear-gradient(90deg, #2563eb, #7c3aed)",
-                              borderRadius: "999px",
-                              transition: "width 0.4s ease",
-                            }}
-                          />
-                        </div>
-                      </div>
+  const featuredCourse = CATALOG[0];
+  const featuredChecklist = buildChecklist(featuredCourse);
+  const featuredDone = featuredChecklist.filter((l) => completed[l.key]).length;
+  const featuredPct = featuredChecklist.length
+    ? Math.round((featuredDone / featuredChecklist.length) * 100)
+    : 0;
 
-                      <ul style={{ listStyle: "none", padding: 0, margin: "14px 0 0 0", display: "flex", flexDirection: "column", gap: "8px" }}>
-                        {checklist.map((lesson) => (
-                          <li key={lesson.key} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
-                            <input
-                              type="checkbox"
-                              checked={Boolean(completed[lesson.key])}
-                              onChange={() => toggleLesson(lesson.key)}
-                              style={{ width: "16px", height: "16px", cursor: "pointer" }}
-                            />
-                            <span
-                              style={{
-                                color: completed[lesson.key] ? "#94a3b8" : "#334155",
-                                textDecoration: completed[lesson.key] ? "line-through" : "none",
-                              }}
-                            >
-                              {lesson.label}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+  const goToTask = (taskId: string) => {
+    setView("Paid Tasks");
+    setActiveTaskId(taskId);
+  };
+
+  // ---------- Views ----------
+  const renderDashboard = () => (
+    <>
+      {/* Summary cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "18px" }}>
+        <div style={card("linear-gradient(135deg, #60a5fa, #a855f7)")}>
+          <div style={{ ...cardInner, padding: "18px", display: "flex", alignItems: "center", gap: "14px" }}>
+            <CircleProgress percent={SAMPLE_LEARNING_PROGRESS} />
+            <div>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
+                Learning Progress
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: 800, color: "#111827" }}>
+                {SAMPLE_LEARNING_PROGRESS}% complete
+              </div>
+              <button
+                onClick={() => setView("Learn")}
+                style={{ background: "none", border: "none", padding: 0, color: "#2563eb", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
+              >
+                View courses →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style={card("linear-gradient(135deg, #a855f7, #2563eb)")}>
+          <div style={{ ...cardInner, padding: "18px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Paid Tasks</div>
+            <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", margin: "6px 0 2px 0" }}>
+              {paidTasksCompleted}
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280", marginLeft: "6px" }}>completed</span>
+            </div>
+            <button
+              onClick={() => setView("Paid Tasks")}
+              style={{ background: "none", border: "none", padding: 0, color: "#2563eb", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
+            >
+              Track tasks →
+            </button>
+          </div>
+        </div>
+
+        <div style={card("linear-gradient(135deg, #22c55e, #0ea5e9)")}>
+          <div style={{ ...cardInner, padding: "18px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
+              Wallet Total Balance
+            </div>
+            <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", margin: "6px 0 2px 0" }}>
+              {formatCedi(walletTotal, 0)}
+            </div>
+            <button
+              onClick={() => setView("Earnings")}
+              style={{ background: "none", border: "none", padding: 0, color: "#2563eb", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
+            >
+              View earnings →
+            </button>
+          </div>
+        </div>
+
+        <div style={card("linear-gradient(135deg, #f59e0b, #ef4444)")}>
+          <div style={{ ...cardInner, padding: "18px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
+              Verified Tasks
+            </div>
+            <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", margin: "6px 0 6px 0" }}>
+              {SAMPLE_VERIFIED_TASKS}
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280", marginLeft: "6px" }}>items</span>
+            </div>
+            <span
+              style={{ fontSize: "11px", fontWeight: 700, background: "#dcfce7", color: "#166534", padding: "3px 10px", borderRadius: "999px" }}
+            >
+              ✓ Verified
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Panel B: Profile */}
+      {/* Central workspace */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "18px" }}>
+        <div style={card("linear-gradient(135deg, #60a5fa, #a855f7)")}>
+          <div style={cardInner}>
+            <h3 style={sectionTitle}>Continue Learning</h3>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#2563eb", background: "#dbeafe", display: "inline-block", padding: "3px 10px", borderRadius: "999px" }}>
+              {featuredCourse.cat}
+            </div>
+            <div style={{ fontSize: "16px", fontWeight: 700, color: "#1f2937", margin: "10px 0 4px 0" }}>
+              {featuredCourse.title}
+            </div>
+            <div style={{ fontSize: "12px", color: "#6b7280", marginBottom: "14px" }}>
+              {featuredCourse.lessons} lessons • {featuredCourse.time}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 700, color: "#475569", marginBottom: "4px" }}>
+              <span>Progress</span>
+              <span>{featuredPct}%</span>
+            </div>
+            <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden", marginBottom: "16px" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${featuredPct}%`,
+                  background: "linear-gradient(90deg, #2563eb, #7c3aed)",
+                  borderRadius: "999px",
+                  transition: "width 0.4s ease",
+                }}
+              />
+            </div>
+            <button
+              onClick={() => {
+                setActiveCourseId(featuredCourse.id);
+                setView("Learn");
+              }}
+              style={primaryButton}
+            >
+              Continue Course
+            </button>
+          </div>
+        </div>
+
+        <div style={card("linear-gradient(135deg, #f59e0b, #ef4444)")}>
+          <div style={cardInner}>
+            <h3 style={sectionTitle}>Next Action</h3>
+            {nextChallenge ? (
+              <>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(doneChallenges[text(nextChallenge.id)])}
+                    onChange={() => toggleChallenge(text(nextChallenge.id))}
+                    style={{ width: "16px", height: "16px", marginTop: "3px", cursor: "pointer" }}
+                  />
+                  <div>
+                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#1f2937" }}>
+                      {text(nextChallenge.title ?? nextChallenge.name, "Practice challenge")}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "6px" }}>
+                      {text(nextChallenge.skill_track ?? nextChallenge.track ?? nextChallenge.category, "General")} •{" "}
+                      {text(nextChallenge.difficulty ?? nextChallenge.difficulty_level, "Beginner")} •{" "}
+                      {text(nextChallenge.estimated_minutes ?? nextChallenge.est_minutes ?? nextChallenge.duration_minutes, "—")} min
+                    </div>
+                  </div>
+                </label>
+              </>
+            ) : (
+              <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+                {signedIn
+                  ? "You're all caught up. New practice challenges will appear here."
+                  : "Log in to see your next practice challenge."}
+              </p>
+            )}
+            <button onClick={() => setView("Practice")} style={{ ...primaryButton, marginTop: "18px" }}>
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <div style={card("linear-gradient(135deg, #22c55e, #0ea5e9)")}>
+          <div style={cardInner}>
+            <h3 style={sectionTitle}>Your Earnings Trend</h3>
+            <TrendChart points={trendPoints} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginTop: "8px" }}>
+              <span>Last {trendPoints.length} payouts</span>
+              <span style={{ color: "#166534", fontWeight: 700 }}>
+                {formatCedi(trendPoints.reduce((a, b) => a + b, 0), 0)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured paid tasks */}
+      <div style={card("linear-gradient(135deg, #a855f7, #2563eb)")}>
+        <div style={cardInner}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+            <h3 style={{ ...sectionTitle, margin: 0 }}>Available Featured Paid Tasks</h3>
+            <button
+              onClick={() => setView("Paid Tasks")}
+              style={{ background: "none", border: "none", color: "#2563eb", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+            >
+              View all →
+            </button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "14px" }}>
+            {featuredTasks.map((task) => (
+              <div
+                key={task.id}
+                style={{ padding: "16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "14px", display: "flex", flexDirection: "column", gap: "10px" }}
+              >
+                <span
+                  style={{ alignSelf: "flex-start", fontSize: "11px", fontWeight: 700, background: "#dbeafe", color: "#1d4ed8", padding: "3px 10px", borderRadius: "999px" }}
+                >
+                  {task.tag}
+                </span>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937", lineHeight: 1.4 }}>{task.title}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 800, color: "#166534" }}>{formatCedi(task.payout, 0)}</span>
+                  <button onClick={() => goToTask(task.id)} style={{ ...primaryButton, padding: "8px 14px" }}>
+                    View Task
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Portfolio */}
+      <div style={card("linear-gradient(135deg, #34d399, #2563eb)")}>
+        <div style={cardInner}>
+          <h3 style={sectionTitle}>Your Portfolio</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
+            {PORTFOLIO_ITEMS.map((item) => (
+              <a
+                key={item.id}
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                style={{ display: "flex", alignItems: "center", gap: "14px", padding: "16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "14px", textDecoration: "none" }}
+              >
+                <div style={{ fontSize: "28px" }}>{item.icon}</div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937" }}>{item.title}</div>
+                  <div style={{ fontSize: "12px", color: "#6b7280" }}>{item.note}</div>
+                </div>
+                <span style={{ marginLeft: "auto", color: "#2563eb", fontWeight: 700, fontSize: "13px" }}>View →</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderLearn = () => (
+    <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "flex-start" }}>
+      <Courses
+        userTier={userTier}
+        completed={completed}
+        toggleLesson={toggleLesson}
+        activeCourseId={activeCourseId}
+        setActiveCourseId={setActiveCourseId}
+      />
+
       <div style={{ ...card("linear-gradient(135deg, #34d399, #2563eb)"), flex: "1 1 360px", maxWidth: "440px" }}>
         <div style={cardInner}>
           <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 16px 0" }}>
@@ -457,17 +739,7 @@ export default function SkillBridgeHub() {
               <button
                 onClick={saveProfile}
                 disabled={isSaving}
-                style={{
-                  width: "100%",
-                  background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
-                  color: "#fff",
-                  padding: "12px",
-                  border: "none",
-                  borderRadius: "10px",
-                  fontWeight: 700,
-                  cursor: isSaving ? "default" : "pointer",
-                  opacity: isSaving ? 0.7 : 1,
-                }}
+                style={{ ...primaryButton, width: "100%", padding: "12px", fontSize: "14px", opacity: isSaving ? 0.7 : 1 }}
               >
                 {isSaving ? "Saving..." : "Save Identity Parameters"}
               </button>
@@ -480,7 +752,6 @@ export default function SkillBridgeHub() {
   );
 
   const renderPractice = () => {
-    const activeChallenges = challenges.filter((row) => row.is_active !== false);
     const doneCount = activeChallenges.filter((row, i) => doneChallenges[text(row.id, String(i))]).length;
     const pct = activeChallenges.length ? Math.round((doneCount / activeChallenges.length) * 100) : 0;
 
@@ -615,7 +886,6 @@ export default function SkillBridgeHub() {
 
     return (
       <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "flex-start" }}>
-        {/* Task list */}
         <div style={{ ...card("linear-gradient(135deg, #a855f7, #2563eb)"), flex: "1 1 340px", maxWidth: "420px" }}>
           <div style={cardInner}>
             <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 16px 0" }}>Paid Tasks</h2>
@@ -662,7 +932,6 @@ export default function SkillBridgeHub() {
           </div>
         </div>
 
-        {/* Task workspace */}
         <div style={{ ...card("linear-gradient(135deg, #34d399, #2563eb)"), flex: "2 1 460px", maxWidth: "640px" }}>
           <div style={cardInner}>
             {!activeTask ? (
@@ -678,11 +947,26 @@ export default function SkillBridgeHub() {
                   {text(activeTask.title ?? activeTask.name, "Task Workspace")}
                 </h2>
                 <p style={{ fontSize: "13px", color: "#4b5563", margin: "0 0 16px 0" }}>
-                  Reward: <strong style={{ color: "#166534" }}>{formatCedi(Number(activeTask.reward_amount ?? activeTask.payout ?? activeTask.amount ?? 0))}</strong>
+                  Reward:{" "}
+                  <strong style={{ color: "#166534" }}>
+                    {formatCedi(Number(activeTask.reward_amount ?? activeTask.payout ?? activeTask.amount ?? 0))}
+                  </strong>
                 </p>
 
                 <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "6px" }}>TASK BRIEF</div>
-                <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "14px", fontSize: "14px", color: "#334155", lineHeight: 1.6, marginBottom: "18px", whiteSpace: "pre-wrap" }}>
+                <div
+                  style={{
+                    background: "#f9fafb",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "10px",
+                    padding: "14px",
+                    fontSize: "14px",
+                    color: "#334155",
+                    lineHeight: 1.6,
+                    marginBottom: "18px",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
                   {text(activeTask.brief ?? activeTask.description, "No brief has been provided for this task.")}
                 </div>
 
@@ -719,17 +1003,7 @@ export default function SkillBridgeHub() {
                 <button
                   onClick={() => submitDeliverable(activeTask)}
                   disabled={submitting}
-                  style={{
-                    width: "100%",
-                    background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
-                    color: "#fff",
-                    padding: "12px",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontWeight: 700,
-                    cursor: submitting ? "default" : "pointer",
-                    opacity: submitting ? 0.7 : 1,
-                  }}
+                  style={{ ...primaryButton, width: "100%", padding: "12px", fontSize: "14px", opacity: submitting ? 0.7 : 1 }}
                 >
                   {submitting ? "Submitting..." : "Submit Proof of Work"}
                 </button>
@@ -821,16 +1095,7 @@ export default function SkillBridgeHub() {
           <button
             onClick={sendMessage}
             disabled={sending || !signedIn}
-            style={{
-              background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
-              color: "#fff",
-              padding: "12px 20px",
-              border: "none",
-              borderRadius: "10px",
-              fontWeight: 700,
-              cursor: sending ? "default" : "pointer",
-              opacity: sending || !signedIn ? 0.7 : 1,
-            }}
+            style={{ ...primaryButton, padding: "12px 20px", fontSize: "14px", opacity: sending || !signedIn ? 0.7 : 1 }}
           >
             {sending ? "Sending..." : "Send Message"}
           </button>
@@ -850,6 +1115,7 @@ export default function SkillBridgeHub() {
   );
 
   const isBuiltView =
+    view === "Dashboard" ||
     view === "Learn" ||
     view === "Practice" ||
     view === "Earnings" ||
@@ -857,10 +1123,31 @@ export default function SkillBridgeHub() {
     view === "Messages" ||
     view === "Mentors";
 
+  const unreadCount = messages.filter((m) => text(m.sender_role).toLowerCase() !== "student").length;
+  const initials = displayName
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "system-ui, sans-serif", background: "#f1f5f9" }}>
-      <aside style={{ width: "240px", background: "#0f172a", color: "#e2e8f0", padding: "28px 18px", display: "flex", flexDirection: "column", gap: "6px", flexShrink: 0 }}>
-        <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff", marginBottom: "28px", paddingLeft: "10px" }}>SkillBridge</div>
+      <aside
+        style={{
+          width: "240px",
+          background: "#0f172a",
+          color: "#e2e8f0",
+          padding: "28px 18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff", marginBottom: "28px", paddingLeft: "10px" }}>
+          SkillBridge
+        </div>
         {SIDEBAR_LINKS.map((link) => {
           const isActive = link === view;
           return (
@@ -886,40 +1173,98 @@ export default function SkillBridgeHub() {
         {signedIn && (
           <button
             onClick={handleSignOut}
-            style={{ marginTop: "auto", textAlign: "left", padding: "10px 14px", borderRadius: "8px", border: "1px solid #334155", background: "transparent", color: "#94a3b8", fontSize: "14px", cursor: "pointer" }}
+            style={{
+              marginTop: "auto",
+              textAlign: "left",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              border: "1px solid #334155",
+              background: "transparent",
+              color: "#94a3b8",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
           >
             Sign out
           </button>
         )}
       </aside>
 
-      <main style={{ flex: 1, padding: "32px", display: "flex", flexDirection: "column", gap: "24px", minWidth: 0 }}>
-        <div style={{ background: "#fff", borderRadius: "16px", padding: "18px 24px", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
-          <div style={{ display: "flex", gap: "32px", flexWrap: "wrap" }}>
-            <div>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Available Balance</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "#111827" }}>{formatCedi(wallet.available_balance)}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Pending</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "#b45309" }}>{formatCedi(wallet.pending_balance)}</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span
-              style={{
-                width: "10px",
-                height: "10px",
-                borderRadius: "999px",
-                background: "#22c55e",
-                display: "inline-block",
-                animation: "sb-pulse 1.6s infinite",
-              }}
+      <main style={{ flex: 1, padding: "28px 32px", display: "flex", flexDirection: "column", gap: "22px", minWidth: 0 }}>
+        {/* Global top header */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "16px",
+            padding: "14px 22px",
+            border: "1px solid #e5e7eb",
+            display: "flex",
+            alignItems: "center",
+            gap: "18px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: "1 1 280px", position: "relative", minWidth: 0 }}>
+            <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "14px" }}>
+              🔍
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search courses, tasks, mentors..."
+              style={{ width: "100%", padding: "11px 14px 11px 40px", border: "1px solid #e2e8f0", borderRadius: "12px", background: "#f8fafc", fontSize: "14px", boxSizing: "border-box" }}
             />
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "#166534" }}>MTN Mobile Money Connected</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span
+              style={{ width: "9px", height: "9px", borderRadius: "999px", background: "#22c55e", display: "inline-block", animation: "sb-pulse 1.6s infinite" }}
+            />
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#166534" }}>MTN Mobile Money Connected</span>
+          </div>
+
+          <button
+            aria-label="Notifications"
+            style={{ position: "relative", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", width: "42px", height: "42px", cursor: "pointer", fontSize: "18px" }}
+          >
+            🔔
+            <span
+              style={{ position: "absolute", top: "-4px", right: "-4px", background: "#ef4444", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "999px", minWidth: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              3
+            </span>
+          </button>
+
+          <button
+            aria-label="Messages"
+            onClick={() => setView("Messages")}
+            style={{ position: "relative", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", width: "42px", height: "42px", cursor: "pointer", fontSize: "18px" }}
+          >
+            💬
+            {unreadCount > 0 && (
+              <span
+                style={{ position: "absolute", top: "-4px", right: "-4px", background: "#2563eb", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "999px", minWidth: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div
+              style={{ width: "42px", height: "42px", borderRadius: "999px", background: "linear-gradient(135deg, #2563eb, #7c3aed)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px" }}
+            >
+              {initials || "AJ"}
+            </div>
+            <div style={{ lineHeight: 1.25 }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>{displayName}</div>
+              <div style={{ fontSize: "12px", color: "#6b7280" }}>Learner</div>
+            </div>
           </div>
         </div>
 
+        {view === "Dashboard" && renderDashboard()}
         {view === "Learn" && renderLearn()}
         {view === "Practice" && renderPractice()}
         {view === "Earnings" && renderEarnings()}
