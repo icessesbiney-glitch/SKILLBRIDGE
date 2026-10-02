@@ -46,6 +46,9 @@ const CATALOG: CatalogCourse[] = [
 
 const LESSON_TITLES = ["Introduction", "Core Fundamentals", "Practical Deliverable Assignment"];
 
+// Resolves the current site origin at runtime (localhost in dev, the live domain on Vercel).
+const getAppOrigin = () => (typeof window !== "undefined" ? window.location.origin : "");
+
 function buildChecklist(course: CatalogCourse) {
   const total = Math.min(course.lessons, 12);
   return Array.from({ length: total }, (_, i) => ({
@@ -64,6 +67,19 @@ function text(value: unknown, fallback = "") {
   return String(value);
 }
 
+function normalizeStatus(value: unknown): "Paid" | "Reviewing" | "Pending" {
+  const s = text(value).toLowerCase();
+  if (s === "paid" || s === "completed" || s === "success") return "Paid";
+  if (s === "reviewing" || s === "in_review" || s === "review") return "Reviewing";
+  return "Pending";
+}
+
+const STATUS_STYLES: Record<string, { color: string; background: string }> = {
+  Paid: { color: "#166534", background: "#dcfce7" },
+  Reviewing: { color: "#1d4ed8", background: "#dbeafe" },
+  Pending: { color: "#b45309", background: "#fef3c7" },
+};
+
 export default function SkillBridgeHub() {
   const [view, setView] = useState<View>("Learn");
   const [userTier, setUserTier] = useState("Beginner");
@@ -76,6 +92,7 @@ export default function SkillBridgeHub() {
   const [wallet, setWallet] = useState<Wallet>({ available_balance: 0, pending_balance: 0 });
   const [challenges, setChallenges] = useState<Row[]>([]);
   const [ledger, setLedger] = useState<Row[]>([]);
+  const [doneChallenges, setDoneChallenges] = useState<Record<string, boolean>>({});
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
@@ -141,8 +158,17 @@ export default function SkillBridgeHub() {
     setIsSaving(false);
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    // Redirect to whichever origin we are running on (local or live).
+    window.location.assign(`${getAppOrigin()}/`);
+  };
+
   const toggleLesson = (key: string) =>
     setCompleted((current) => ({ ...current, [key]: !current[key] }));
+
+  const toggleChallenge = (key: string) =>
+    setDoneChallenges((current) => ({ ...current, [key]: !current[key] }));
 
   const card = (gradient: string): React.CSSProperties => ({
     borderRadius: "18px",
@@ -187,10 +213,7 @@ export default function SkillBridgeHub() {
                     border: isActive ? "1px solid #a5b4fc" : "1px solid #e5e7eb",
                   }}
                 >
-                  <div
-                    onClick={() => setActiveCourseId(isActive ? null : course.id)}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <div onClick={() => setActiveCourseId(isActive ? null : course.id)} style={{ cursor: "pointer" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: "11px", fontWeight: 700, background: "#dbeafe", color: "#2563eb", padding: "4px 8px", borderRadius: "20px" }}>
                         {course.cat}
@@ -310,34 +333,91 @@ export default function SkillBridgeHub() {
     </div>
   );
 
-  const renderPractice = () => (
-    <div style={card("linear-gradient(135deg, #f59e0b, #ef4444)")}>
-      <div style={cardInner}>
-        <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 16px 0" }}>Practice Challenges</h2>
-        {challenges.length === 0 ? (
-          <p style={{ fontSize: "14px", color: "#6b7280" }}>No practice challenges available yet.</p>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {challenges.map((row, i) => (
-              <div key={text(row.id, String(i))} style={{ padding: "14px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "12px" }}>
-                <strong style={{ fontSize: "14px", color: "#1f2937" }}>
-                  {text(row.title ?? row.name, `Challenge ${i + 1}`)}
-                </strong>
-                {row.description !== undefined && row.description !== null && (
-                  <p style={{ margin: "6px 0 0 0", fontSize: "13px", color: "#4b5563" }}>{text(row.description)}</p>
-                )}
-                {(row.difficulty_level !== undefined || row.difficulty !== undefined) && (
-                  <p style={{ margin: "6px 0 0 0", fontSize: "12px", color: "#6b7280" }}>
-                    Difficulty: {text(row.difficulty_level ?? row.difficulty)}
-                  </p>
-                )}
-              </div>
-            ))}
+  const renderPractice = () => {
+    const activeChallenges = challenges.filter((row) => row.is_active !== false);
+    const doneCount = activeChallenges.filter((row, i) => doneChallenges[text(row.id, String(i))]).length;
+    const pct = activeChallenges.length ? Math.round((doneCount / activeChallenges.length) * 100) : 0;
+
+    return (
+      <div style={card("linear-gradient(135deg, #f59e0b, #ef4444)")}>
+        <div style={cardInner}>
+          <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 4px 0" }}>Practice Challenges</h2>
+          <p style={{ fontSize: "13px", color: "#4b5563", margin: "0 0 14px 0" }}>
+            {doneCount} of {activeChallenges.length} completed ({pct}%)
+          </p>
+          <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden", marginBottom: "18px" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${pct}%`,
+                background: "linear-gradient(90deg, #f59e0b, #ef4444)",
+                borderRadius: "999px",
+                transition: "width 0.4s ease",
+              }}
+            />
           </div>
-        )}
+
+          {!signedIn ? (
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>Please log in to view practice challenges.</p>
+          ) : activeChallenges.length === 0 ? (
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>No practice challenges available yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {activeChallenges.map((row, i) => {
+                const key = text(row.id, String(i));
+                const isDone = Boolean(doneChallenges[key]);
+                return (
+                  <label
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      padding: "14px",
+                      background: isDone ? "#f0fdf4" : "#f9fafb",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isDone}
+                      onChange={() => toggleChallenge(key)}
+                      style={{ width: "16px", height: "16px", marginTop: "2px", cursor: "pointer" }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: isDone ? "#94a3b8" : "#1f2937",
+                          textDecoration: isDone ? "line-through" : "none",
+                        }}
+                      >
+                        {text(row.title ?? row.name, `Challenge ${i + 1}`)}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px", fontSize: "12px" }}>
+                        <span style={{ background: "#dbeafe", color: "#1d4ed8", padding: "2px 8px", borderRadius: "999px", fontWeight: 700 }}>
+                          {text(row.skill_track ?? row.track ?? row.category, "General")}
+                        </span>
+                        <span style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "999px", fontWeight: 700 }}>
+                          {text(row.difficulty ?? row.difficulty_level, "Beginner")}
+                        </span>
+                        <span style={{ color: "#6b7280", padding: "2px 0" }}>
+                          {text(row.estimated_minutes ?? row.est_minutes ?? row.duration_minutes, "—")} min
+                        </span>
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderEarnings = () => (
     <div style={card("linear-gradient(135deg, #22c55e, #0ea5e9)")}>
@@ -349,25 +429,35 @@ export default function SkillBridgeHub() {
           <p style={{ fontSize: "14px", color: "#6b7280" }}>No earnings recorded yet.</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {ledger.map((row, i) => (
-              <div
-                key={text(row.id, String(i))}
-                style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "12px 14px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px" }}
-              >
-                <div>
-                  <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937" }}>
-                    {text(row.description ?? row.title ?? row.source, "Earning")}
+            {ledger.map((row, i) => {
+              const status = normalizeStatus(row.status);
+              const style = STATUS_STYLES[status];
+              const reference = text(row.reference_code ?? row.reference ?? row.ref_code ?? row.id, "—");
+              return (
+                <div
+                  key={text(row.id, String(i))}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", padding: "12px 14px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", flexWrap: "wrap" }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937" }}>
+                      {text(row.description ?? row.title ?? row.source, "Payout")}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+                      Ref: {reference}
+                      {row.created_at ? ` • ${new Date(text(row.created_at)).toLocaleDateString()}` : ""}
+                    </div>
                   </div>
-                  <div style={{ fontSize: "12px", color: "#6b7280" }}>
-                    {text(row.status, "recorded")}
-                    {row.created_at ? ` • ${new Date(text(row.created_at)).toLocaleDateString()}` : ""}
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", color: style.color, background: style.background }}>
+                      {status}
+                    </span>
+                    <span style={{ fontSize: "14px", fontWeight: 800, color: "#166534" }}>
+                      {formatCedi(Number(row.amount ?? 0))}
+                    </span>
                   </div>
                 </div>
-                <div style={{ fontSize: "14px", fontWeight: 800, color: "#166534" }}>
-                  {formatCedi(Number(row.amount ?? 0))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -409,6 +499,14 @@ export default function SkillBridgeHub() {
             </button>
           );
         })}
+        {signedIn && (
+          <button
+            onClick={handleSignOut}
+            style={{ marginTop: "auto", textAlign: "left", padding: "10px 14px", borderRadius: "8px", border: "1px solid #334155", background: "transparent", color: "#94a3b8", fontSize: "14px", cursor: "pointer" }}
+          >
+            Sign out
+          </button>
+        )}
       </aside>
 
       <main style={{ flex: 1, padding: "32px", display: "flex", flexDirection: "column", gap: "24px", minWidth: 0 }}>
