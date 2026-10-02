@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -88,6 +88,7 @@ export default function SkillBridgeHub() {
   const [isSaving, setIsSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [signedIn, setSignedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [wallet, setWallet] = useState<Wallet>({ available_balance: 0, pending_balance: 0 });
   const [challenges, setChallenges] = useState<Row[]>([]);
@@ -97,12 +98,29 @@ export default function SkillBridgeHub() {
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
+  // Paid Tasks workspace state
+  const [paidTasks, setPaidTasks] = useState<Row[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState("");
+  const [deliverable, setDeliverable] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [taskMsg, setTaskMsg] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Mentor messaging state
+  const [messages, setMessages] = useState<Row[]>([]);
+  const [draftMessage, setDraftMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [chatMsg, setChatMsg] = useState("");
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     async function loadAll() {
       const { data: authData } = await supabase.auth.getUser();
       const user = authData?.user;
       if (!user) return;
       setSignedIn(true);
+      setUserId(user.id);
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -138,10 +156,50 @@ export default function SkillBridgeHub() {
         .eq("user_id", user.id)
         .limit(100);
       if (ledgerRows) setLedger(ledgerRows as Row[]);
+
+      const { data: taskRows } = await supabase.from("paid_tasks").select("*").limit(50);
+      if (taskRows) setPaidTasks(taskRows as Row[]);
+
+      const { data: messageRows } = await supabase
+        .from("mentor_messages")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (messageRows) setMessages(messageRows as Row[]);
     }
 
     loadAll();
   }, []);
+
+  // Real-time subscription for this user's mentor conversation
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`mentor-messages-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "mentor_messages", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          const incoming = payload.new as Row;
+          setMessages((current) =>
+            current.some((m) => text(m.id) === text(incoming.id)) ? current : [...current, incoming]
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (view === "Messages" || view === "Mentors") {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, view]);
 
   const saveProfile = async () => {
     setIsSaving(true);
@@ -169,6 +227,94 @@ export default function SkillBridgeHub() {
 
   const toggleChallenge = (key: string) =>
     setDoneChallenges((current) => ({ ...current, [key]: !current[key] }));
+
+  const selectTask = (taskId: string | null) => {
+    setActiveTaskId(taskId);
+    setResponseText("");
+    setDeliverable(null);
+    setTaskMsg("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const submitDeliverable = async (task: Row) => {
+    setTaskMsg("");
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
+    if (!user) {
+      setTaskMsg("Please log in to submit your work.");
+      return;
+    }
+    if (!responseText.trim() && !deliverable) {
+      setTaskMsg("Add a written response or upload a deliverable file before submitting.");
+      return;
+    }
+
+    setSubmitting(true);
+    let filePath: string | null = null;
+
+    if (deliverable) {
+      const safeName = deliverable.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${user.id}/${text(task.id)}/${Date.now()}-${safeName}`;
+      const { error: uploadError } = await supabase.storage.from("deliverables").upload(path, deliverable);
+      if (uploadError) {
+        setTaskMsg("File upload failed. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      filePath = path;
+    }
+
+    const { error } = await supabase.from("task_submissions").insert({
+      task_id: task.id,
+      user_id: user.id,
+      response_text: responseText.trim() || null,
+      file_path: filePath,
+      status: "Reviewing",
+    });
+
+    if (error) {
+      setTaskMsg("Could not submit your work. Please try again.");
+    } else {
+      setTaskMsg("Submitted! Your work is now under review.");
+      setResponseText("");
+      setDeliverable(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    setSubmitting(false);
+  };
+
+  const sendMessage = async () => {
+    const body = draftMessage.trim();
+    if (!body) return;
+    setChatMsg("");
+
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
+    if (!user) {
+      setChatMsg("Please log in to send messages.");
+      return;
+    }
+
+    setSending(true);
+    const { data, error } = await supabase
+      .from("mentor_messages")
+      .insert({ user_id: user.id, sender_role: "student", body })
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      setChatMsg("Message could not be sent. Please try again.");
+    } else {
+      setDraftMessage("");
+      if (data) {
+        const inserted = data as Row;
+        setMessages((current) =>
+          current.some((m) => text(m.id) === text(inserted.id)) ? current : [...current, inserted]
+        );
+      }
+    }
+    setSending(false);
+  };
 
   const card = (gradient: string): React.CSSProperties => ({
     borderRadius: "18px",
@@ -464,6 +610,236 @@ export default function SkillBridgeHub() {
     </div>
   );
 
+  const renderPaidTasks = () => {
+    const activeTask = paidTasks.find((row, i) => text(row.id, String(i)) === activeTaskId) || null;
+
+    return (
+      <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "flex-start" }}>
+        {/* Task list */}
+        <div style={{ ...card("linear-gradient(135deg, #a855f7, #2563eb)"), flex: "1 1 340px", maxWidth: "420px" }}>
+          <div style={cardInner}>
+            <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 16px 0" }}>Paid Tasks</h2>
+            {!signedIn ? (
+              <p style={{ fontSize: "14px", color: "#6b7280" }}>Please log in to view paid tasks.</p>
+            ) : paidTasks.length === 0 ? (
+              <p style={{ fontSize: "14px", color: "#6b7280" }}>No paid tasks available right now.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {paidTasks.map((row, i) => {
+                  const key = text(row.id, String(i));
+                  const isActive = key === activeTaskId;
+                  return (
+                    <div
+                      key={key}
+                      onClick={() => selectTask(isActive ? null : key)}
+                      style={{
+                        padding: "14px",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        background: isActive ? "#f5f3ff" : "#f9fafb",
+                        border: isActive ? "1px solid #a78bfa" : "1px solid #e5e7eb",
+                      }}
+                    >
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937" }}>
+                        {text(row.title ?? row.name, `Task ${i + 1}`)}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px", fontSize: "12px", alignItems: "center" }}>
+                        <span style={{ background: "#dcfce7", color: "#166534", padding: "2px 8px", borderRadius: "999px", fontWeight: 700 }}>
+                          {formatCedi(Number(row.reward_amount ?? row.payout ?? row.amount ?? 0))}
+                        </span>
+                        <span style={{ background: "#dbeafe", color: "#1d4ed8", padding: "2px 8px", borderRadius: "999px", fontWeight: 700 }}>
+                          {text(row.skill_track ?? row.category, "General")}
+                        </span>
+                        {row.deadline ? (
+                          <span style={{ color: "#6b7280" }}>Due {new Date(text(row.deadline)).toLocaleDateString()}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Task workspace */}
+        <div style={{ ...card("linear-gradient(135deg, #34d399, #2563eb)"), flex: "2 1 460px", maxWidth: "640px" }}>
+          <div style={cardInner}>
+            {!activeTask ? (
+              <>
+                <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 8px 0" }}>Task Workspace</h2>
+                <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+                  Select a paid task from the list to view its brief and submit your work.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 4px 0" }}>
+                  {text(activeTask.title ?? activeTask.name, "Task Workspace")}
+                </h2>
+                <p style={{ fontSize: "13px", color: "#4b5563", margin: "0 0 16px 0" }}>
+                  Reward: <strong style={{ color: "#166534" }}>{formatCedi(Number(activeTask.reward_amount ?? activeTask.payout ?? activeTask.amount ?? 0))}</strong>
+                </p>
+
+                <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "6px" }}>TASK BRIEF</div>
+                <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "14px", fontSize: "14px", color: "#334155", lineHeight: 1.6, marginBottom: "18px", whiteSpace: "pre-wrap" }}>
+                  {text(activeTask.brief ?? activeTask.description, "No brief has been provided for this task.")}
+                </div>
+
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", display: "block", marginBottom: "6px" }}>
+                  YOUR RESPONSE
+                </label>
+                <textarea
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  rows={6}
+                  placeholder="Describe your approach, share links, or paste your answer here..."
+                  style={{ width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "8px", boxSizing: "border-box", marginBottom: "14px", resize: "vertical", fontSize: "14px" }}
+                />
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={(e) => setDeliverable(e.target.files?.[0] ?? null)}
+                  style={{ display: "none" }}
+                />
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "18px" }}>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ background: "#fff", border: "1px dashed #2563eb", color: "#2563eb", padding: "10px 16px", borderRadius: "10px", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}
+                  >
+                    [+ Upload Deliverable File]
+                  </button>
+                  <span style={{ fontSize: "13px", color: deliverable ? "#334155" : "#94a3b8", wordBreak: "break-all" }}>
+                    {deliverable ? deliverable.name : "No file attached"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => submitDeliverable(activeTask)}
+                  disabled={submitting}
+                  style={{
+                    width: "100%",
+                    background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
+                    color: "#fff",
+                    padding: "12px",
+                    border: "none",
+                    borderRadius: "10px",
+                    fontWeight: 700,
+                    cursor: submitting ? "default" : "pointer",
+                    opacity: submitting ? 0.7 : 1,
+                  }}
+                >
+                  {submitting ? "Submitting..." : "Submit Proof of Work"}
+                </button>
+                {taskMsg && <p style={{ marginTop: "12px", fontSize: "13px", fontWeight: 600, color: "#374151" }}>{taskMsg}</p>}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMessages = () => (
+    <div style={card("linear-gradient(135deg, #38bdf8, #6366f1)")}>
+      <div style={cardInner}>
+        <h2 style={{ fontSize: "19px", fontWeight: 800, color: "#111827", margin: "0 0 4px 0" }}>Mentor Messages</h2>
+        <p style={{ fontSize: "13px", color: "#4b5563", margin: "0 0 16px 0" }}>
+          Live conversation with your reviewer and mentor.
+        </p>
+
+        <div
+          style={{
+            height: "380px",
+            overflowY: "auto",
+            background: "#f8fafc",
+            border: "1px solid #e5e7eb",
+            borderRadius: "12px",
+            padding: "16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          {!signedIn ? (
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>Please log in to view your messages.</p>
+          ) : messages.length === 0 ? (
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>
+              No messages yet. Reviewer feedback will appear here, for example: "Please correct the logo placement and resubmit."
+            </p>
+          ) : (
+            messages.map((row, i) => {
+              const mine = text(row.sender_role).toLowerCase() === "student";
+              return (
+                <div key={text(row.id, String(i))} style={{ display: "flex", justifyContent: mine ? "flex-end" : "flex-start" }}>
+                  <div
+                    style={{
+                      maxWidth: "75%",
+                      padding: "10px 14px",
+                      borderRadius: mine ? "14px 14px 2px 14px" : "14px 14px 14px 2px",
+                      background: mine ? "linear-gradient(90deg, #2563eb, #1d4ed8)" : "#fff",
+                      color: mine ? "#fff" : "#1f2937",
+                      border: mine ? "none" : "1px solid #e5e7eb",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {!mine && (
+                      <div style={{ fontSize: "11px", fontWeight: 700, color: "#6366f1", marginBottom: "4px" }}>
+                        {text(row.sender_name, "Reviewer")}
+                      </div>
+                    )}
+                    <div>{text(row.body ?? row.message)}</div>
+                    {row.created_at ? (
+                      <div style={{ fontSize: "10px", opacity: 0.7, marginTop: "4px", textAlign: "right" }}>
+                        {new Date(text(row.created_at)).toLocaleString()}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
+          <input
+            type="text"
+            value={draftMessage}
+            onChange={(e) => setDraftMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") sendMessage();
+            }}
+            placeholder="Type your message to your mentor..."
+            disabled={!signedIn}
+            style={{ flex: 1, padding: "12px", border: "1px solid #d1d5db", borderRadius: "10px", fontSize: "14px", minWidth: 0 }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={sending || !signedIn}
+            style={{
+              background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
+              color: "#fff",
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "10px",
+              fontWeight: 700,
+              cursor: sending ? "default" : "pointer",
+              opacity: sending || !signedIn ? 0.7 : 1,
+            }}
+          >
+            {sending ? "Sending..." : "Send Message"}
+          </button>
+        </div>
+        {chatMsg && <p style={{ marginTop: "10px", fontSize: "13px", fontWeight: 600, color: "#b91c1c" }}>{chatMsg}</p>}
+      </div>
+    </div>
+  );
+
   const renderPlaceholder = (name: string) => (
     <div style={card("linear-gradient(135deg, #94a3b8, #64748b)")}>
       <div style={cardInner}>
@@ -472,6 +848,14 @@ export default function SkillBridgeHub() {
       </div>
     </div>
   );
+
+  const isBuiltView =
+    view === "Learn" ||
+    view === "Practice" ||
+    view === "Earnings" ||
+    view === "Paid Tasks" ||
+    view === "Messages" ||
+    view === "Mentors";
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "system-ui, sans-serif", background: "#f1f5f9" }}>
@@ -539,7 +923,9 @@ export default function SkillBridgeHub() {
         {view === "Learn" && renderLearn()}
         {view === "Practice" && renderPractice()}
         {view === "Earnings" && renderEarnings()}
-        {view !== "Learn" && view !== "Practice" && view !== "Earnings" && renderPlaceholder(view)}
+        {view === "Paid Tasks" && renderPaidTasks()}
+        {(view === "Messages" || view === "Mentors") && renderMessages()}
+        {!isBuiltView && renderPlaceholder(view)}
       </main>
 
       <style>{`
