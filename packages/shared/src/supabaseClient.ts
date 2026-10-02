@@ -1,7 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Hardcoded fallback coordinates unblock the Next.js compiler from throwing structural URL validation crashes during builds
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lhpdxsnsepvlhwkwsvel.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    "Missing Supabase configuration: set NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY (web) or EXPO_PUBLIC_SUPABASE_URL/EXPO_PUBLIC_SUPABASE_ANON_KEY (mobile)."
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

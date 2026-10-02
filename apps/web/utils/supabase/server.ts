@@ -6,13 +6,15 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
-  // Defensive fallbacks to insulate the Next.js prerender layer from crashing in CI containers
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
-  const clientKey = supabaseKey || "placeholder-anon-key";
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      "Missing Supabase configuration: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set."
+    );
+  }
 
   return createServerClient(
-    clientUrl,
-    clientKey,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
