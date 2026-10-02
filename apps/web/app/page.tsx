@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient("https://supabase.co", "sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE");
+const supabase = createClient(
+  "https://aolfuonsuaeoitumuvqc.supabase.co",
+  "sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE"
+);
 
 export default function SkillBridgeHub() {
   const [userTier, setUserTier] = useState("Beginner");
