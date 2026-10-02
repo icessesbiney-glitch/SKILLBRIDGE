@@ -2,12 +2,12 @@
   "name": "skillbridge-monorepo",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/web"
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "build:web": "npm run build --workspace=@skillbridge/web"
   },
   "dependencies": {},
   "devDependencies": {
