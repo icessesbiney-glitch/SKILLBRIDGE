@@ -68,6 +68,13 @@ function text(value: unknown, fallback = "") {
   return String(value);
 }
 
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "GU";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 function normalizeStatus(value: unknown): "Paid" | "Reviewing" | "Pending" {
   const s = text(value).toLowerCase();
   if (s === "paid" || s === "completed" || s === "success") return "Paid";
@@ -163,9 +170,11 @@ export default function SkillBridgeHub() {
   const [country, setCountry] = useState("GH");
   const [isSaving, setIsSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  const [authReady, setAuthReady] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState("Alex Johnson");
+  // Name resolved from profiles.full_name, then auth metadata, then email prefix.
+  const [fullName, setFullName] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
@@ -192,69 +201,104 @@ export default function SkillBridgeHub() {
   const [chatMsg, setChatMsg] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    async function loadAll() {
-      const { data: authData } = await supabase.auth.getUser();
-      const user = authData?.user;
-      if (!user) return;
-      setSignedIn(true);
-      setUserId(user.id);
+  // Loads everything scoped to a verified user.id
+  const loadForUser = async (user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }) => {
+    setSignedIn(true);
+    setUserId(user.id);
 
-      const metaName = (user.user_metadata as Record<string, unknown> | undefined)?.full_name;
-      if (typeof metaName === "string" && metaName.trim()) {
-        setDisplayName(metaName.trim());
-      } else if (user.email) {
-        setDisplayName(user.email.split("@")[0]);
-      }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, account_tier, bio, country")
+      .eq("id", user.id)
+      .maybeSingle();
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("account_tier, bio, country")
-        .eq("id", user.id)
-        .maybeSingle();
+    const profileName = typeof profile?.full_name === "string" ? profile.full_name.trim() : "";
+    const metaFull = user.user_metadata?.full_name;
+    const metaName = typeof metaFull === "string" ? metaFull.trim() : "";
+    const emailName = user.email ? user.email.split("@")[0] : "";
+    setFullName(profileName || metaName || emailName || null);
 
-      if (profile) {
-        if (profile.account_tier) setUserTier(profile.account_tier);
-        if (profile.bio) setBio(profile.bio);
-        if (profile.country) setCountry(profile.country);
-      }
-
-      const { data: walletRow } = await supabase
-        .from("wallet_balances")
-        .select("available_balance, pending_balance")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (walletRow) {
-        setWallet({
-          available_balance: Number(walletRow.available_balance ?? 0),
-          pending_balance: Number(walletRow.pending_balance ?? 0),
-        });
-      }
-
-      const { data: challengeRows } = await supabase.from("practice_challenges").select("*").limit(50);
-      if (challengeRows) setChallenges(challengeRows as Row[]);
-
-      const { data: ledgerRows } = await supabase
-        .from("earnings_ledger")
-        .select("*")
-        .eq("user_id", user.id)
-        .limit(100);
-      if (ledgerRows) setLedger(ledgerRows as Row[]);
-
-      const { data: taskRows } = await supabase.from("paid_tasks").select("*").limit(50);
-      if (taskRows) setPaidTasks(taskRows as Row[]);
-
-      const { data: messageRows } = await supabase
-        .from("mentor_messages")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true })
-        .limit(200);
-      if (messageRows) setMessages(messageRows as Row[]);
+    if (profile) {
+      if (profile.account_tier) setUserTier(profile.account_tier);
+      if (profile.bio) setBio(profile.bio);
+      if (profile.country) setCountry(profile.country);
     }
 
-    loadAll();
+    const { data: walletRow } = await supabase
+      .from("wallet_balances")
+      .select("available_balance, pending_balance")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (walletRow) {
+      setWallet({
+        available_balance: Number(walletRow.available_balance ?? 0),
+        pending_balance: Number(walletRow.pending_balance ?? 0),
+      });
+    }
+
+    const { data: challengeRows } = await supabase.from("practice_challenges").select("*").limit(50);
+    if (challengeRows) setChallenges(challengeRows as Row[]);
+
+    const { data: ledgerRows } = await supabase
+      .from("earnings_ledger")
+      .select("*")
+      .eq("user_id", user.id)
+      .limit(100);
+    if (ledgerRows) setLedger(ledgerRows as Row[]);
+
+    const { data: taskRows } = await supabase.from("paid_tasks").select("*").limit(50);
+    if (taskRows) setPaidTasks(taskRows as Row[]);
+
+    const { data: messageRows } = await supabase
+      .from("mentor_messages")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (messageRows) setMessages(messageRows as Row[]);
+  };
+
+  const clearUserState = () => {
+    setSignedIn(false);
+    setUserId(null);
+    setFullName(null);
+    setWallet(null);
+    setLedger([]);
+    setMessages([]);
+    setPaidTasks([]);
+    setChallenges([]);
+  };
+
+  useEffect(() => {
+    async function init() {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData?.user;
+      if (user) {
+        await loadForUser(user as { id: string; email?: string | null; user_metadata?: Record<string, unknown> });
+      }
+      setAuthReady(true);
+    }
+
+    init();
+
+    // Keep the header and identity box in sync with login / logout events
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        clearUserState();
+      } else if (event === "SIGNED_IN") {
+        supabase.auth.getUser().then(({ data }) => {
+          if (data?.user) {
+            loadForUser(data.user as { id: string; email?: string | null; user_metadata?: Record<string, unknown> });
+          }
+        });
+      }
+    });
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Real-time subscription for this user's mentor conversation
@@ -431,6 +475,11 @@ export default function SkillBridgeHub() {
     fontSize: "13px",
     cursor: "pointer",
   };
+
+  // ---------- Derived header identity ----------
+  const headerName = signedIn ? fullName || "Learner" : "Guest User";
+  const headerRole = signedIn ? "Learner" : "Not signed in";
+  const initials = getInitials(headerName);
 
   // ---------- Derived dashboard metrics ----------
   const walletTotal = wallet ? wallet.available_balance + wallet.pending_balance : SAMPLE_WALLET_TOTAL;
@@ -710,10 +759,19 @@ export default function SkillBridgeHub() {
             Secure Professional Identity
           </h2>
 
-          {!signedIn ? (
+          {!authReady ? (
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>Loading your profile...</p>
+          ) : !signedIn ? (
             <p style={{ fontSize: "14px", color: "#6b7280" }}>Please log in to manage your profile.</p>
           ) : (
             <>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "6px" }}>FULL NAME</div>
+              <div
+                style={{ padding: "10px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "#f8fafc", marginBottom: "14px", fontSize: "14px", color: "#1f2937" }}
+              >
+                {fullName || "Not set"}
+              </div>
+
               <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", display: "block", marginBottom: "6px" }}>
                 COUNTRY LOCATION CODE
               </label>
@@ -1124,12 +1182,6 @@ export default function SkillBridgeHub() {
     view === "Mentors";
 
   const unreadCount = messages.filter((m) => text(m.sender_role).toLowerCase() !== "student").length;
-  const initials = displayName
-    .split(" ")
-    .map((part) => part.charAt(0))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "system-ui, sans-serif", background: "#f1f5f9" }}>
@@ -1253,13 +1305,24 @@ export default function SkillBridgeHub() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div
-              style={{ width: "42px", height: "42px", borderRadius: "999px", background: "linear-gradient(135deg, #2563eb, #7c3aed)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px" }}
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "999px",
+                background: signedIn ? "linear-gradient(135deg, #2563eb, #7c3aed)" : "#94a3b8",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: "14px",
+              }}
             >
-              {initials || "AJ"}
+              {initials}
             </div>
             <div style={{ lineHeight: 1.25 }}>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>{displayName}</div>
-              <div style={{ fontSize: "12px", color: "#6b7280" }}>Learner</div>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>{headerName}</div>
+              <div style={{ fontSize: "12px", color: "#6b7280" }}>{headerRole}</div>
             </div>
           </div>
         </div>
