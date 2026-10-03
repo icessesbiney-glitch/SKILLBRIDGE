@@ -1,17 +1,18 @@
 {
   "name": "skillbridge-monorepo",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
-  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.0.0"
-  },
-  "packageManager": "npm@10.8.2"
+    "typescript": "^5.0.0"
+  }
 }

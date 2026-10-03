@@ -1,26 +1,25 @@
 {
   "name": "skillbridge-mobile",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "ts:check": "tsc"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
-    "expo": "~51.0.0",
-    "expo-location": "^57.0.20",
-    "expo-status-bar": "~1.12.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.74.1",
-    "react-native-maps": "^1.29.11",
-    "react-native-web": "~0.19.10"
+    "expo": "~57.0.26",
+    "expo-status-bar": "~1.11.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.74.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
-  },
-  "private": true
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.45",
+    "typescript": "^5.3.3"
+  }
 }
