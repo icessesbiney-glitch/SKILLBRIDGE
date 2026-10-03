@@ -1,7 +1,10 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://aolfuonsuaeoitumuvqc.supabase.co';
+const supabaseAnonKey = 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE';
+const clientSupabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function TasksPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -10,7 +13,7 @@ export default function TasksPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    supabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
+    clientSupabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
       if (data) setSubmissions(data);
     });
   }, []);
@@ -20,14 +23,14 @@ export default function TasksPage() {
     if (!file) return setMsg('Please select a file');
     setMsg('Uploading asset file...');
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await clientSupabase.auth.getUser();
       if (!user) throw new Error('Unauthenticated user instance');
       const path = `${user.id}/${Date.now()}_${file.name}`;
       
-      const { error: uploadErr } = await supabase.storage.from('task-deliverables').upload(path, file);
+      const { error: uploadErr } = await clientSupabase.storage.from('task-deliverables').upload(path, file);
       if (uploadErr) throw uploadErr;
 
-      await supabase.from('task_submissions').insert({
+      await clientSupabase.from('task_submissions').insert({
         task_id: '00000000-0000-0000-0000-000000000000',
         user_id: user.id,
         notes_text: notes,
@@ -44,20 +47,9 @@ export default function TasksPage() {
   return (
     <div className="p-8 max-w-xl mx-auto space-y-4">
       <h2 className="text-xl font-bold">SkillBridge Task Submission Portal</h2>
-      <input 
-        type="file" 
-        onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} 
-        className="border p-2 w-full" 
-      />
-      <textarea 
-        value={notes} 
-        onChange={(e) => setNotes(e.target.value)} 
-        placeholder="Add transaction task notes..." 
-        className="border p-2 w-full" 
-      />
-      <button onClick={handleUpload} className="bg-blue-600 text-white p-2 w-full">
-        Upload File Deliverable
-      </button>
+      <input type="file" onChange={e => setFile(e.target.files ? e.target.files : null)} className="border p-2 w-full" />
+      <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add transaction task notes..." className="border p-2 w-full" />
+      <button onClick={handleUpload} className="bg-blue-600 text-white p-2 w-full">Upload File Deliverable</button>
       <p className="text-sm font-semibold">{msg}</p>
     </div>
   );

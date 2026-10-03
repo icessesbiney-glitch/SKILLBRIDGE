@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getAdminSupabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
     const { userId, amount, channel } = await request.json();
-    const adminClient = getAdminSupabase();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://aolfuonsuaeoitumuvqc.supabase.co';
+    const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE', { auth: { persistSession: false } });
 
     const { data: wallet } = await adminClient
       .from('platform_wallets')
