@@ -70,3 +70,4 @@ build-output.txt
 .env
 .vercel
 .env*
+supabase/.temp/
