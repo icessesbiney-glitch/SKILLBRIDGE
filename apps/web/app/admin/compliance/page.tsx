@@ -8,7 +8,6 @@ export default function AdminComplianceDashboard() {
   const [alert, setAlert] = useState({ type: '', message: '' });
 
   useEffect(() => {
-    // Simulated live administration fetch loop payload
     setProfiles([
       { id: '1', legal_name: 'Joshua Biney', phone_number: '0241234567', role_tier: 'vendor_micro', verification: 'pending', national_id_hash: '8f7a9c...e3b2' },
       { id: '2', legal_name: 'Accra Logistics Hub', phone_number: '0559876543', role_tier: 'driver_rider', verification: 'pending', national_id_hash: '4d1e2f...a9b0' }
@@ -18,8 +17,6 @@ export default function AdminComplianceDashboard() {
 
   const updateProfileStatus = async (id: string, nextStatus: 'verified' | 'suspended') => {
     setAlert({ type: 'info', message: 'Updating compliance records inside data layer...' });
-    
-    // Optimistically update administrative layout UI state records
     setProfiles(prev => prev.map(p => p.id === id ? { ...p, verification: nextStatus } : p));
     setAlert({ type: 'success', message: `Profile registration state successfully updated to ${nextStatus}!` });
   };
@@ -69,8 +66,8 @@ export default function AdminComplianceDashboard() {
                   <td className="p-4 text-right space-x-2">
                     {profile.verification === 'pending' && (
                       <>
-                        <button onClick={() => updateProfileStatus(profile.id, 'verified')} className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-md transition">Approve</button>
-                        <button onClick={() => updateProfileStatus(profile.id, 'suspended')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition">Suspend</button>
+                        <button onClick={() => updateProfileStatus(profile.id, 'verified')} className="px-3 py-1 bg-emerald-600 text-white text-xs font-medium rounded-md">Approve</button>
+                        <button onClick={() => updateProfileStatus(profile.id, 'suspended')} className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded-md">Suspend</button>
                       </>
                     )}
                   </td>
