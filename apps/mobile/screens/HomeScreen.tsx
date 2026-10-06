@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, SafeAreaView } from 'react-format-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, SafeAreaView } from 'react-native';
 import { View as RNView, Text as RNText, StyleSheet as RNStyleSheet, RefreshControl as RNRefreshControl } from 'react-native';
 import { supabase } from '@skillbridge/shared';
 
@@ -147,7 +147,7 @@ export default function HomeScreen() {
 
       <FlatList
         data={todos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: any) => item.id}
         contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
           <RNView style={[styles.todoItem, item.completed && styles.todoItemCompleted]}>

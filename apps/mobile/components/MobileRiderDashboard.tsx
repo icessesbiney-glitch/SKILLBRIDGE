@@ -52,11 +52,11 @@ export default function MobileRiderDashboard() {
 
         <View style={styles.balanceContainer}>
           <Text style={styles.balanceLabel}>Available Balance (GHS)</Text>
-          <Text style={styles.balanceValue}>¢{balance}</Text>
+          <Text style={styles.balanceValue}>ï¿½{balance}</Text>
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Withdrawal Value (¢)</Text>
+          <Text style={styles.label}>Withdrawal Value (ï¿½)</Text>
           <TextInput
             style={styles.input}
             value={amount}
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#fff", borderRadius: 16, padding: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   header: { fontSize: 22, fontWeight: "bold", color: "#111", textAlign: "center" },
   subheader: { fontSize: 12, color: "#666", textAlign: "center", marginBottom: 20 },
-  balanceContainer: { backgroundColor: "#f0f4ff", borderRadius: 12, padding: 16, alignItems: "center", marginBottom: 20, borderWith: 1, borderColor: "#d0e0ff" },
+  balanceContainer: { backgroundColor: "#f0f4ff", borderRadius: 12, padding: 16, alignItems: "center", marginBottom: 20, borderWidth: 1, borderColor: "#d0e0ff" },
   balanceLabel: { fontSize: 11, fontWeight: "600", color: "#5570e0", textTransform: "uppercase" },
   balanceValue: { fontSize: 28, fontWeight: "bold", color: "#1d3edb", marginTop: 4 },
   inputGroup: { marginBottom: 20 },
