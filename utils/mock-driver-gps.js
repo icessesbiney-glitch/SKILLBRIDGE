@@ -1,6 +1,6 @@
 const { createClient } = require("@supabase/supabase-js");
 
-const SUPABASE_URL = "https://supabase.co";
+const SUPABASE_URL = "https://lspdxssepvlswkwswvel.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGR4c3NlcHZsc3drd3N3dmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTUxOTIsImV4cCI6MjETA4OTUxOTJ9.example_signature";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
