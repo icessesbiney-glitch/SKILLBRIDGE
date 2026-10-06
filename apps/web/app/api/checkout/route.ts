@@ -1,54 +1,118 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { amount, currency, email, provider, userId, metadata } = await request.json();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: "Server database configuration parameters are missing." },
+        { status: 500 }
+      );
+    }
+
+    if (!paystackSecretKey) {
+      return NextResponse.json(
+        { error: "Paystack secret verification key is not configured." },
+        { status: 500 }
+      );
+    }
+
+    const body = await req.json();
+    const { amount, currency, email, userId, metadata } = body;
 
     if (!amount || !email || !userId) {
-      return NextResponse.json({ error: 'Missing required checkout fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required checkout parameters: amount, email, and userId are mandatory." },
+        { status: 400 }
+      );
     }
 
-    if (provider === 'paystack') {
-      const response = await fetch('https://paystack.co', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          amount: Math.round(amount * 100),
-          currency,
-          metadata: { ...metadata, userId, provider: 'paystack' },
-        }),
-      });
-      const data = await response.json();
-      if (!data.status) throw new Error(data.message);
-      return NextResponse.json({ checkoutUrl: data.data.authorization_url, reference: data.data.reference });
-    } 
-    
-    if (provider === 'dodo') {
-      const response = await fetch('https://dodopayments.com', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.DODO_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100),
-          currency,
-          customer: { email },
-          metadata: { ...metadata, userId, provider: 'dodo' },
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Dodo transaction initialization failed');
-      return NextResponse.json({ checkoutUrl: data.checkout_url, paymentId: data.id });
+    const txAmount = Number(amount);
+    if (!Number.isFinite(txAmount) || txAmount <= 0) {
+      return NextResponse.json(
+        { error: "Invalid currency processing amount allocation specified." },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ error: 'Unsupported gateway provider selection' }, { status: 400 });
+    const amountInPesewas = Math.round(txAmount * 100);
+    const reference = `SB-CHKT-${crypto.randomUUID()}`;
+    const targetCurrency = currency || "GHS";
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+    const callbackUrl = `${siteUrl}/payment/callback`;
+
+    // Initialize elevated Supabase admin database connection
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // Step 1: Dispatch transaction parameters initialization straight to Paystack API
+    const paystackResponse = await fetch("https://paystack.co", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${paystackSecretKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        amount: String(amountInPesewas),
+        currency: targetCurrency,
+        reference,
+        callback_url: callbackUrl,
+        metadata: {
+          ...metadata,
+          user_id: userId,
+          platform: "skillbridge",
+        },
+      }),
+    });
+
+    const paystackData = await paystackResponse.json();
+
+    if (!paystackResponse.ok || !paystackData.status) {
+      return NextResponse.json(
+        { error: paystackData.message || "Paystack transaction engine failure during initialization phase." },
+        { status: 400 }
+      );
+    }
+
+    // Step 2: Log initialized transaction intent into the local database
+    const { error: dbError } = await supabase
+      .from("paystack_transactions")
+      .insert({
+        user_id: userId,
+        email,
+        reference,
+        paystack_transaction_id: paystackData.data?.id ?? null,
+        amount: txAmount,
+        currency: targetCurrency,
+        status: "initialized",
+        metadata: {
+          ...metadata,
+          user_id: userId,
+          platform: "skillbridge_checkout",
+        },
+      });
+
+    if (dbError) {
+      console.error("Failed to commit initial checkout record log to database ledger:", dbError);
+    }
+
+    return NextResponse.json({
+      success: true,
+      checkoutUrl: paystackData.data.authorization_url,
+      reference: reference,
+    });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Internal Server processing Error' }, { status: 500 });
+    console.error("Checkout transaction handler runtime crash:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server exception while processing checkout initialization." },
+      { status: 500 }
+    );
   }
 }
