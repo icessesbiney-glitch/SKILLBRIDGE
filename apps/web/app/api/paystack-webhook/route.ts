@@ -1,40 +1,51 @@
-import { NextResponse } from 'next/server';
-import crypto from 'crypto';
+import { NextResponse } from "next/server";
+import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
-/**
- * Live Production Paystack Webhook Handler
- * Target Endpoint: https://vercel.app
- */
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+);
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const paystackSignature = req.headers.get('x-paystack-signature');
-    const secretKey = process.env.PAYSTACK_LIVE_SECRET_KEY;
+    const signature = req.headers.get("x-paystack-signature");
+    const secretKey = process.env.PAYSTACK_LIVE_SECRET_KEY || "";
 
-    if (!paystackSignature || !secretKey) {
-      return NextResponse.json({ error: 'Missing security configuration parameters' }, { status: 401 });
+    if (!signature || !secretKey) {
+      return NextResponse.json({ error: "Missing configuration" }, { status: 401 });
     }
 
-    // Cryptographic signature validation against payload forgery
     const computedHash = crypto
-      .createHmac('sha512', secretKey)
+      .createHmac("sha512", secretKey)
       .update(rawBody)
-      .digest('hex');
+      .digest("hex");
 
-    if (computedHash !== paystackSignature) {
-      return NextResponse.json({ error: 'Cryptographic signature mismatch' }, { status: 401 });
+    if (computedHash !== signature) {
+      return NextResponse.json({ error: "Signature mismatch" }, { status: 401 });
     }
 
     const event = JSON.parse(rawBody);
-
-    if (event.event === 'charge.success') {
+    if (event.event === "charge.success") {
       const { reference, amount, customer } = event.data;
-      console.log(`[PAYSTACK LIVE] Verified payment signature: ${reference} | Amount: ${amount / 100} GHS`);
+      
+      console.log(`[PAYSTACK LIVE] Ingesting validated transaction: ${reference}`);
+
+      // Invoke the atomic stored procedure to safely increment user wallet balance sheets
+      const { data, error } = await supabase.rpc("increment_wallet_balance", {
+        target_user_email: customer.email,
+        amount_cents_to_add: amount,
+        transaction_reference_id: reference
+      });
+
+      if (error) {
+        console.error("[LEDGER UPDATE ERROR]", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
     }
 
-    return NextResponse.json({ status: 'success', message: 'Webhook handshake processed' }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Handshake verified" }, { status: 200 });
   } catch (error: any) {
-    console.error('[PAYSTACK ERROR]', error);
-    return NextResponse.json({ error: 'Internal pipeline processing breakdown' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
