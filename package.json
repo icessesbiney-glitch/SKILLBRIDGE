@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npx next dev apps/web",
+    "dev": "npm run dev --workspace=apps/web",
     "build": "turbo run build --filter=@skillbridge/web",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
