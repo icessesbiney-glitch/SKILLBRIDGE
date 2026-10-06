@@ -2,7 +2,7 @@
   "name": "skillbridge",
   "version": "1.0.0",
   "description": "SkillBridge Global Marketplace Hub Desktop Wrapper Client",
-  "main": "main.js",
+  "main": "dist/main.js",
   "author": {
     "name": "Joshua Biney",
     "email": "icessesbiney@gmail.com"
@@ -26,7 +26,12 @@
         "deb"
       ],
       "category": "Utility"
-    }
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ]
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
