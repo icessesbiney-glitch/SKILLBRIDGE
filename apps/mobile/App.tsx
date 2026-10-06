@@ -1,14 +1,244 @@
-SmporSSReacS,S{SuSeSSaSe,SuSeESSecSS}SSromS"reacS";
-SmporSS{SSaSeAreaVSew,SSSyleSSeeS,STexS,SVSew,SToucSableOpacSSy,SSSyleSSeeS,SSSaSuSBar,SAcSSvSSyISdScaSorS}SSromS"reacS-SaSSve";
-SmporSSMapVSew,S{SMarkerS}SSromS"reacS-SaSSve-mapS";
-SmporSS*SaSSLocaSSoSSSromS"expo-locaSSoS";
-SmporSS{ScreaSeClSeSSS}SSromS"@SupabaSe/SupabaSe-jS";
+import React, { useState, useEffect } from "react";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  StatusBar,
+  ActivityIndicator,
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
+import { createClient } from "@supabase/supabase-js";
 
-coSSSSSupabaSeS=ScreaSeClSeSS("SSSpS://lSpdxSSSepvlSwkwSvel.SupabaSe.co",S"SbWÜX›\ÚX›WÙŒŒTÛÌŞ’ÜŒ[Ø^QÕ^WŞ[ÍÔÛÈŠNS‚™^ÜY˜][[˜İ[Ûˆ\
+// Initialize Supabase configuration securely
+const SUPABASE_URL = "https://supabase.co";
+// Replace this placeholder string with your secure client/anon public key variable matching your .env structure
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGR4c3NlcHZsc3drd3N3dmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTUxOTIsImV4cCI6MjETA4OTUxOTJ9.example_signature";
 
-HSˆÛÛœİÜİ]\ËÙ]İ]\×HH\ÙTİ]J“Û›[™HŠNSˆÛÛœİØ˜[[˜ÙWHH\ÙTİ]JŒ
-NSˆÛÛœİØÛÛÜ™ËÙ]ÛÛÜ™×HH\ÙTİ]J[
-NS‚ˆ\ÙQY™™Xİ
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
 
-HOŠ°¢ÄS&R7V"ÒçVÆÃ°¢7–æ2SVæ7F–öâ7F'EG&6¶–ær‚’°¢ÆWB²7FGW2ÒÒv—BÆö6F–öâç&WVW7DS÷&Vw&÷VæEW&Ö—76–öç47–æ2‚“°¢–b‡7FGW2ÓÒ&w&çFVB"’&WGW&ã°¢ÆWBÆö2Òv—BÆö6F–öâævWD7W'&VçE÷6—F–öä7–æ2‚“°¢6WD6ö÷&G2†Æö2æ6ö÷&G2“°S¢7V"Òv—BÆö6F–öâçvF6…÷6—F–öä7–æ2€¢²67W&7“¢Æö6F–öâä67W&7’ä†–v‚SF–ÖT–çFW'SÃ¢SSF—7Fæ6T–çFW'SÃ¢RÒÀ¢7–æ2†æWSÆö2’Óâ°¢6WD6ö÷&G2†æWSÆö2æ6ö÷&G2“°¢v—B7W&6RæS&öÒ‚'&öS–ÆW2"’çWFFR‡°¢ÆF—GVFS¢æWSÆö2æ6ö÷&G2æÆF—GVFRÀ¢Æöæv—GVFS¢æWSÆö2æ6ö÷&G2æÆöæv—GVFP¢Ò’æW‚&VÖ–S"S&7W7FöÖW$6¶–ÆÆ'&–FvRæ6ÇV""“°¢Ğ¢“°¢Ğ¢7F'EG&6¶–ær‚“°¢&WGW&â‚’Óâ²–b‡7V"’7V"ç&VÖ÷SR‚“²Ó°¢ÒSµÒ“°S¢6öç7B6†ævU7FGW2Ò7–æ2†Ò’Óâ°¢6WE7FGW2†Ò“°¢v—B7W&6RæS&öÒ‚'&öS–ÆW2"’çWFFR‡²7W'&VçE÷7FGW3¢ÒÒ’æW‚&VÖ–S"S&7W7FöÖW$6¶–ÆÆ'&–FvRæ6ÇV""“°¢Ó°S¢&WGW&â€¢Å6ST&VS–Wr7G–ÆS×·2çv–çÓà¢Å7FGW4&"&%7G–ÆSÒ&F&²Ö6öçFVçB"óà¢ÅS–Wr7G–ÆS×·2æ&÷‡Óà¢ÅFW‡B7G–ÆS×·2çGÓå6¶–ÆÄ'&–FvR&–FW"æöFSSõFW‡Cà¢ÅFW‡B7G–ÆS×·2ç7V'Óä‡—W&Æö6Su
+export default function App() {
+  const [location, setLocation] = useState<Coordinate | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isTracking, setIsTracking] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [dummyDriverId] = useState<string>("driver-accra-001"); // Link to auth.uid() or profile id later
+
+  useEffect(() => {
+    (async () => {
+      // Step 1: Request system position authorization permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied.");
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Extract initial starting point fix
+      try {
+        const initialLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setLocation({
+          latitude: initialLocation.coords.latitude,
+          longitude: initialLocation.coords.longitude,
+        });
+      } catch (err) {
+        console.error("Error retrieving baseline location coordinates:", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  } [] );
+
+  useEffect(() => {
+    let positionSubscription: Location.LocationSubscription | null = null;
+
+    // Step 3: Continuously stream coordinate shifting values into State and Supabase
+    async function startLocationTracking() {
+      if (!isTracking) return;
+
+      positionSubscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000, // Update coordinates every 5 seconds
+          distanceInterval: 5, // Update coordinate thresholds every 5 meters
+        },
+        async (newLocation) => {
+          const coords: Coordinate = {
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+          };
+          
+          setLocation(coords);
+
+          // Stream real-time GPS locations into your Supabase database tier
+          const { error } = await supabase
+            .from("driver_locations")
+            .upsert({
+              driver_id: dummyDriverId,
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'driver_id' });
+
+          if (error) {
+            console.error("Supabase live coordinate streaming failure:", error.message);
+          }
+        }
+      );
+    }
+
+    if (isTracking) {
+      startLocationTracking();
+    }
+
+    return () => {
+      if (positionSubscription) {
+        positionSubscription.remove();
+      }
+    };
+  }, [isTracking]);
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#0052FF" />
+        <Text style={styles.loadingText}>Initializing GPS Navigation Systems...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
+      {location ? (
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.0121,
+          }}
+          showsUserLocation={true}
+        >
+          <Marker
+            coordinate={location}
+            title="Active Service Driver"
+            description="Live path synchronization active"
+          />
+        </MapView>
+      ) : (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{errorMsg || "Unable to acquire active GPS signaling maps."}</Text>
+        </View>
+      )}
+
+      {/* Driver Control Navigation Dashboard Overlay */}
+      <View style={styles.dashboardCard}>
+        <Text style={styles.titleText}>SkillBridge Mobility Framework</Text>
+        {location && (
+          <Text style={styles.coordText}>
+            Lat: {location.latitude.toFixed(5)} | Long: {location.longitude.toFixed(5)}
+          </Text>
+        )}
+        <TouchableOpacity
+          style={[styles.button, isTracking ? styles.buttonStop : styles.buttonStart]}
+          onPress={() => setIsTracking(!isTracking)}
+        >
+          <Text style={styles.buttonText}>
+            {isTracking ? "DISCONNECT TRACKING" : "INITIALIZE LIVE LOGGING"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F4F7FC",
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  map: {
+    flex: 1,
+    width: "100%",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#64748B",
+    fontWeight: "500",
+  },
+  errorText: {
+    fontSize: 14,
+    color: "#EF4444",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  dashboardCard: {
+    position: "absolute",
+    bottom: 24,
+    left: 16,
+    right: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1E293B",
+    marginBottom: 4,
+  },
+  coordText: {
+    fontSize: 12,
+    fontFamily: "monospace",
+    color: "#64748B",
+    marginBottom: 16,
+  },
+  button: {
+    width: "100%",
+    height: 48,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonStart: {
+    backgroundColor: "#0052FF",
+  },
+  buttonStop: {
+    backgroundColor: "#EF4444",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+});
