@@ -1,0 +1,94 @@
+
+> @skillbridge/web@1.0.0 build
+> next build
+
+  [1m[38;2;173;127;168m▲ Next.js 14.2.3[39m[22m
+  - Environments: .env.local
+
+ [37m[1m [22m[39m Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (267kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ [32m[1m✓[22m[39m Compiled successfully
+ [37m[1m [22m[39m Skipping validation of types
+ [37m[1m [22m[39m Skipping linting
+[1m[33mIt looks like you're trying to use TypeScript but do not have the required package(s) installed.[39m[22m
+Installing dependencies
+
+[1mIf you are not trying to use TypeScript, please remove the [36mtsconfig.json[39m file from your package root (and any TypeScript files in your pages directory).[22m
+
+
+Installing devDependencies (pnpm):
+- [36mtypescript[39m
+- [36m@types/react[39m
+
+[43m[30m WARN [39m[49m Moving next that was installed by a different package manager to "node_modules/.ignored"
+[33m[39m
+[33m   ╭─────────────────────────────────────────╮[39m
+   [33m│[39m                                         [33m│[39m
+   [33m│[39m   Update available! [31m10.32.1[39m → [32m12.9.1[39m.   [33m│[39m
+   [33m│[39m   [35mChangelog:[39m https://pnpm.io/v/12.9.1   [33m│[39m
+   [33m│[39m    To update, run: [35mpnpm add -g pnpm[39m     [33m│[39m
+   [33m│[39m                                         [33m│[39m
+[33m   ╰─────────────────────────────────────────╯[39m
+[33m[39m
+Progress: resolved [96m1[39m, reused [96m0[39m, downloaded [96m0[39m, added [96m0[39m
+Progress: resolved [96m9[39m, reused [96m0[39m, downloaded [96m5[39m, added [96m0[39m
+Progress: resolved [96m20[39m, reused [96m0[39m, downloaded [96m8[39m, added [96m0[39m
+Progress: resolved [96m39[39m, reused [96m0[39m, downloaded [96m18[39m, added [96m0[39m
+Progress: resolved [96m43[39m, reused [96m0[39m, downloaded [96m18[39m, added [96m0[39m
+Progress: resolved [96m44[39m, reused [96m0[39m, downloaded [96m18[39m, added [96m0[39m
+Progress: resolved [96m58[39m, reused [96m0[39m, downloaded [96m40[39m, added [96m0[39m
+Progress: resolved [96m70[39m, reused [96m0[39m, downloaded [96m56[39m, added [96m0[39m
+Progress: resolved [96m85[39m, reused [96m0[39m, downloaded [96m66[39m, added [96m0[39m
+Progress: resolved [96m116[39m, reused [96m0[39m, downloaded [96m91[39m, added [96m0[39m
+Progress: resolved [96m137[39m, reused [96m0[39m, downloaded [96m106[39m, added [96m0[39m
+Progress: resolved [96m138[39m, reused [96m0[39m, downloaded [96m106[39m, added [96m0[39m
+Progress: resolved [96m201[39m, reused [96m0[39m, downloaded [96m114[39m, added [96m0[39m
+Progress: resolved [96m202[39m, reused [96m0[39m, downloaded [96m147[39m, added [96m0[39m
+Progress: resolved [96m303[39m, reused [96m0[39m, downloaded [96m245[39m, added [96m0[39m
+Progress: resolved [96m374[39m, reused [96m0[39m, downloaded [96m336[39m, added [96m0[39m
+Packages: [32m+340[39m
+[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m[32m+[39m
+Progress: resolved [96m374[39m, reused [96m0[39m, downloaded [96m344[39m, added [96m23[39m
+Progress: resolved [96m374[39m, reused [96m0[39m, downloaded [96m345[39m, added [96m169[39m
+Progress: resolved [96m374[39m, reused [96m0[39m, downloaded [96m345[39m, added [96m320[39m
+Progress: resolved [96m374[39m, reused [96m0[39m, downloaded [96m345[39m, added [96m340[39m, done
+[43m[30m WARN [39m[49m Issues with peer dependencies found
+[0m.[0m
+├─┬ eslint-plugin-import [90m2.32.0[39m
+│ └── [93m✕ unmet peer[39m eslint@"^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8 || ^9": found 10.12.0
+└─┬ eslint-config-next [90m16.4.0[39m
+  ├─┬ eslint-plugin-import [90m2.32.0[39m
+  │ └── [93m✕ unmet peer[39m eslint@"^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8 || ^9": found 10.12.0
+  ├─┬ eslint-plugin-jsx-a11y [90m6.10.2[39m
+  │ └── [93m✕ unmet peer[39m eslint@"^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9": found 10.12.0
+  └─┬ eslint-plugin-react [90m7.37.5[39m
+    └── [93m✕ unmet peer[39m eslint@"^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7": found 10.12.0
+
+[96mdependencies:[39m
+[32m+[39m @supabase/ssr [90m0.12.7[39m
+[32m+[39m @supabase/supabase-js [90m2.117.2[39m
+[32m+[39m next [90m14.2.35[39m [90m(16.4.0 is available)[39m
+[32m+[39m react [90m18.3.1[39m [90m(19.3.0 is available)[39m
+[32m+[39m react-dom [90m18.3.1[39m [90m(19.3.0 is available)[39m
+
+[96mdevDependencies:[39m
+[32m+[39m @types/node [90m20.19.43[39m [90m(26.6.4 is available)[39m
+[32m+[39m @types/react [90m18.3.31[39m [90m(19.3.0 is available)[39m
+[32m+[39m @typescript-eslint/eslint-plugin [90m8.71.1[39m
+[32m+[39m @typescript-eslint/parser [90m8.71.1[39m
+[32m+[39m eslint [90m10.12.0[39m
+[32m+[39m eslint-config-next [90m16.4.0[39m
+[32m+[39m typescript [90m5.9.3[39m [90m(7.0.2 is available)[39m
+
+[33m╭ Warning ─────────────────────────────────────────────────────────────────────╮[39m
+[33m│[39m                                                                              [33m│[39m
+[33m│[39m   Ignored build scripts: unrs-resolver@1.12.2.                               [33m│[39m
+[33m│[39m   Run "pnpm approve-builds" to pick which dependencies should be allowed     [33m│[39m
+[33m│[39m   to run scripts.                                                            [33m│[39m
+[33m│[39m                                                                              [33m│[39m
+[33m╰──────────────────────────────────────────────────────────────────────────────╯[39m
+Done in 21.8s using pnpm v10.32.1
+
+[?25l [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data     [32m[1m✓[22m[39m Collecting page data 
+[?25l [37m[1m [22m[39m Generating static pages (0/18)  [36m[    ][39m[2K[1G [37m[1m [22m[39m Generating static pages (0/18)  [36m[=   ][39m[2K[1G [37m[1m [22m[39m Generating static pages (2/18)  [36m[==  ][39m[2K[1G [37m[1m [22m[39m Generating static pages (4/18)  [36m[=== ][39m[2K
