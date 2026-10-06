@@ -4,7 +4,7 @@ echo "💰 SKILLBRIDGE MARKETPLACE - PLATFORM REVENUE & PROVAL BALANCES"
 echo "=============================================================================="
 echo ""
 
-# Query total accumulated platform commission cuts from the database container
+# Query total accumulated platform metrics securely out of your container instance
 TOTAL_REVENUE_CENTS=$(docker exec -i supabase_db_SKILLBRIDGE psql -U postgres -d postgres -t -c "
   SELECT COALESCE(SUM(commission_earned_cents), 0) FROM public.platform_revenue_ledger;
 " | tr -d '[:space:]')
@@ -13,14 +13,14 @@ TOTAL_GROSS_CENTS=$(docker exec -i supabase_db_SKILLBRIDGE psql -U postgres -d p
   SELECT COALESCE(SUM(gross_amount_cents), 0) FROM public.platform_revenue_ledger;
 " | tr -d '[:space:]')
 
-# Convert cents metrics to GHS currencies cleanly
-REVENUE_GHS=$(echo "scale=2; $TOTAL_REVENUE_CENTS / 100" | bc)
-GROSS_GHS=$(echo "scale=2; $TOTAL_GROSS_CENTS / 100" | bc)
+# Compute currency transformations cleanly using standard built-in awk matrix
+REVENUE_GHS=$(awk "BEGIN {print $TOTAL_REVENUE_CENTS / 100}")
+GROSS_GHS=$(awk "BEGIN {print $TOTAL_GROSS_CENTS / 100}")
 
 echo "📊 FINANCIAL METRICS OVERVIEW:"
 echo "------------------------------------------------------------------------------"
-echo "🛒 Total Gross Marketplace Volume (GMV):   $GROSS_GHS GHS"
-echo "🚀 Total Accumulated Platform Net Profit:  $REVENUE_GHS GHS"
+printf "🛒 Total Gross Marketplace Volume (GMV):   %%.2f GHS\n" "$GROSS_GHS"
+printf "🚀 Total Accumulated Platform Net Profit:  %%.2f GHS\n" "$REVENUE_GHS"
 echo "------------------------------------------------------------------------------"
 echo ""
 echo "📝 ITEMIZED REVENUE TRANSACTION JOURNAL HISTORY:"
