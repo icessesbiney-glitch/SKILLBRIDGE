@@ -9,11 +9,11 @@ const supabase = createClient(
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get("x-paystack-signature");
+    const signature = request.headers.get("x-paystack-signature") || req.headers.get("x-paystack-signature");
     const secretKey = process.env.PAYSTACK_LIVE_SECRET_KEY || "";
 
     if (!signature || !secretKey) {
-      return NextResponse.json({ error: "Missing configuration" }, { status: 401 });
+      return NextResponse.json({ error: "Missing configurations" }, { status: 401 });
     }
 
     const computedHash = crypto
@@ -22,16 +22,14 @@ export async function POST(req: Request) {
       .digest("hex");
 
     if (computedHash !== signature) {
-      return NextResponse.json({ error: "Signature mismatch" }, { status: 401 });
+      return NextResponse.json({ error: "Signature validation break" }, { status: 401 });
     }
 
     const event = JSON.parse(rawBody);
     if (event.event === "charge.success") {
       const { reference, amount, customer } = event.data;
-      
-      console.log(`[PAYSTACK LIVE] Ingesting validated transaction: ${reference}`);
+      console.log(`[PAYSTACK] Ingesting payment tracking criteria: ${reference}`);
 
-      // Invoke the atomic stored procedure to safely increment user wallet balance sheets
       const { data, error } = await supabase.rpc("increment_wallet_balance", {
         target_user_email: customer.email,
         amount_cents_to_add: amount,
@@ -39,7 +37,7 @@ export async function POST(req: Request) {
       });
 
       if (error) {
-        console.error("[LEDGER UPDATE ERROR]", error);
+        console.error("[DATABASE RPC LEDGER EXCEPTION]", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
