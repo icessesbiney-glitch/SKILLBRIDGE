@@ -64,5 +64,9 @@
       "category": "Productivity"
     },
     "electronVersion": "27.0.0"
+  },
+  "author": {
+    "name": "Joshua Biney",
+    "email": "icessesbiney@gmail.com"
   }
 }
