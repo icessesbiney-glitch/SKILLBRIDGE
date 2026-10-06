@@ -36,9 +36,6 @@ export async function POST(req: NextRequest) {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    // ==========================================
-    // CASE 1: Inbound Deposit Succeeded
-    // ==========================================
     if (body.event === "charge.success") {
       const payment = body.data;
       const reference = payment.reference;
@@ -63,7 +60,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true, info: "Duplicate notification ignored." });
       }
 
-      // Update the transaction log status
       const { error: txUpdateError } = await supabase
         .from("paystack_transactions")
         .update({
@@ -79,7 +75,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Database lock failed on logging transaction status." }, { status: 500 });
       }
 
-      // ATOMIC WALLET UPDATE: Increment the client balance
       const { data: currentWallet, error: fetchWalletErr } = await supabase
         .from("platform_wallets")
         .select("available_balance, total_earnings")
@@ -103,14 +98,10 @@ export async function POST(req: NextRequest) {
       console.log(`[DEPOSIT CONFIRMED] Wallet Credited: User ${txRecord.user_id} + GHS ${amount}`);
     }
 
-    // ==========================================
-    // CASE 2: Outbound Transfer/Withdrawal Failed
-    // ==========================================
     if (body.event === "transfer.failed" || body.event === "transfer.reversed") {
       const transfer = body.data;
       const originalReason = transfer.reason || "";
       
-      // Extract User ID string pattern matching from transfer payload
       const userIdMatch = originalReason.match(/User ID:\s*([a-f0-9-]{36})/i);
       const userId = userIdMatch ? userIdMatch[1] : null;
       const refundAmount = Number(transfer.amount || 0) / 100;
