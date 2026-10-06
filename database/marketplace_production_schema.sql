@@ -50,3 +50,25 @@ CREATE POLICY "Vendors can update their own store metrics." ON public.vendors FO
 CREATE POLICY "Admins can view all system real-time GPS tracking coordinates." ON public.logistics_agents FOR ALL USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role_tier = 'admin_central')
 );
+
+-- =========================================================================
+-- AUTOMATED MARKETPLACE WALLET STATE INITIALIZATION SYSTEM
+-- =========================================================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_profile_wallet_provision()
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+    VALUES (NEW.id, 0, 'GHS')
+    ON CONFLICT (profile_id) DO NOTHING;
+    RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trigger_on_profile_signup_provision_wallet
+    AFTER INSERT ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_new_profile_wallet_provision();
