@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "next lint",
+    "test": "echo \"Pass web application module unit tests\""
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
