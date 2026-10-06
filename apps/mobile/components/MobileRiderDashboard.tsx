@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
-import { createClient } from "@supabase/supabase-js";
+
 
 // Initialize your secure cross-platform client bindings inside the native smartphone layer
-const supabase = createClient(
-  "https://supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
-);
+import { supabase } from '@skillbridge/shared';
 
 export default function MobileRiderDashboard() {
   const [email, setEmail] = useState("test@acme.com");
@@ -26,7 +23,7 @@ export default function MobileRiderDashboard() {
     try {
       // Electron and Expo native bridge calls insert directly into your verified withdrawal requests data grid
       const { error } = await supabase
-        .from("withdrawal_requests")
+        .from("platform_wallets")
         .insert([{ email: email, amount: parseFloat(amount), status: "pending" }]);
 
       if (error) {
