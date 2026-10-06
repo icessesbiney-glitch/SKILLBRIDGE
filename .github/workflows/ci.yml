@@ -29,3 +29,6 @@ jobs:
 
       - name: Run Turborepo Validation Pipeline
         run: npx turbo run build lint test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_build_unblocker
