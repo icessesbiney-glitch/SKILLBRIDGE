@@ -1,5 +1,5 @@
 {
-  "name": "@skillbridge/desktop",
+  "name": "skillbridge",
   "version": "1.0.0",
   "private": true,
   "main": "dist/main.js",
@@ -61,17 +61,10 @@
         "AppImage",
         "deb"
       ],
-      "category": "Productivity"
+      "category": "Utility"
     },
     "electronVersion": "27.0.0",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "icessesbiney-glitch",
-        "repo": "SKILLBRIDGE",
-        "publishAutoUpdate": false
-      }
-    ]
+    "publish": null
   },
   "author": {
     "name": "Joshua Biney",
@@ -81,5 +74,5 @@
     "type": "git",
     "url": "git+https://github.com"
   },
-  "description": "SkillBridge Global Marketplace Desktop Client"
+  "description": "SkillBridge Global Marketplace Hub Desktop Wrapper Client"
 }
