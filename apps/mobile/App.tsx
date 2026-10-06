@@ -1,55 +1,30 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  StatusBar,
-  ActivityIndicator,
-} from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, StatusBar, ActivityIndicator } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://lspdxssepvlswkwswvel.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGR4c3NlcHZsc3drd3N3dmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTUxOTIsImV4cCI6MjETA4OTUxOTJ9.example_signature";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
-
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
+const supabase = createClient("https://lspdxssepvlswkwswvel.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGR4c3NlcHZsc3drd3N3dmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTUxOTIsImV4cCI6MjETA4OTUxOTJ9.example_signature");
 
 export default function App() {
-  const [location, setLocation] = useState<Coordinate | null>(null);
+  const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [driverId] = useState<string>("driver-accra-001");
 
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied.");
+        setErrorMsg("Location access denied.");
         setLoading(false);
         return;
       }
       try {
-        const initialLocation = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        setLocation({
-          latitude: initialLocation.coords.latitude,
-          longitude: initialLocation.coords.longitude,
-          ...
-        });
-      } catch (err) {
-        console.error("Error retrieving baseline coordinates:", err);
+        const current = await Location.getCurrentPositionAsync({});
+        setLocation({ latitude: current.coords.latitude, longitude: current.coords.longitude });
+      } catch {
+        setErrorMsg("Signal acquisition timed out.");
       } finally {
         setLoading(false);
       }
@@ -57,78 +32,32 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let positionSubscription: any = null;
-
-    async function startLocationTracking() {
-      if (!isTracking) return;
-      positionSubscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 5,
-        },
-        async (newLocation) => {
-          const coords: Coordinate = {
-            latitude: newLocation.coords.latitude,
-            longitude: newLocation.coords.longitude,
-          };
-          setLocation(coords);
-
-          await supabase.from("driver_locations").upsert({
-            driver_id: driverId,
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            updated_at: new Date().toISOString(),
-          });
-        }
-      );
-    }
-
+    let sub: any = null;
     if (isTracking) {
-      startLocationTracking();
+      Location.watchPositionAsync({ accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 5 }, 
+        async (loc) => {
+          const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+          setLocation(coords);
+          await supabase.from("driver_locations").upsert({ driver_id: "driver-accra-001", ...coords, updated_at: new Date().toISOString() });
+        }
+      ).then(s => sub = s);
     }
-    return () => {
-      if (positionSubscription) positionSubscription.remove();
-    };
+    return () => { if (sub) sub.remove(); };
   }, [isTracking]);
 
-  if (loading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#0052FF" />
-        <Text style={styles.loadingText}>Initializing GPS Navigation Systems...</Text>
-      </View>
-    );
-  }
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#0052FF" /></View>;
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       {location ? (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
-          showsUserLocation={true}
-        >
-          <Marker coordinate={location} title="Active Driver" description="Live synchronization active" />
+        <MapView style={styles.map} initialRegion={{ ...location, latitudeDelta: 0.015, longitudeDelta: 0.012 }}>
+          <Marker coordinate={location} title="Active Courier" />
         </MapView>
-      ) : (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{errorMsg || "Unable to acquire GPS signaling maps."}</Text>
-        </View>
-      )}
-      <View style={styles.dashboardCard}>
-        <Text style={styles.titleText}>SkillBridge Mobility Hub</Text>
-        <TouchableOpacity
-          style={[styles.button, isTracking ? styles.buttonStop : styles.buttonStart]}
-          onPress={() => setIsTracking(!isTracking)}
-        >
-          <Text style={styles.buttonText}>{isTracking ? "DISCONNECT TRACKING" : "INITIALIZE LIVE LOGGING"}</Text>
+      ) : <Text>{errorMsg}</Text>}
+      <View style={styles.card}>
+        <TouchableOpacity style={styles.btn} onPress={() => setIsTracking(!isTracking)}>
+          <Text style={styles.btnTxt}>{isTracking ? "STOP LIVE TRACKING" : "START LIVE LOGGING"}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -136,15 +65,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F7FC" },
-  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
-  map: { flex: 1, width: "100%" },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#64748B", fontWeight: "500" },
-  errorText: { fontSize: 14, color: "#EF4444", textAlign: "center", fontWeight: "500" },
-  dashboardCard: { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#FFFFFF", borderRadius: 16, padding: 20 },
-  titleText: { fontSize: 16, fontWeight: "700", color: "#1E293B", marginBottom: 12 },
-  button: { width: "100%", height: 48, borderRadius: 10, justifyContent: "center", alignItems: "center" },
-  buttonStart: { backgroundColor: "#0052FF" },
-  buttonStop: { backgroundColor: "#EF4444" },
-  buttonText: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
+  container: { flex: 1 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  map: { flex: 1 },
+  card: { position: "absolute", bottom: 20, left: 20, right: 20, backgroundColor: "#FFF", padding: 15, borderRadius: 10 },
+  btn: { backgroundColor: "#0052FF", padding: 12, borderRadius: 8, alignItems: "center" },
+  btnTxt: { color: "#FFF", fontWeight: "600" }
 });
