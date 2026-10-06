@@ -22,14 +22,17 @@ export default function WalletBalanceDisplay() {
     streamWalletMetrics();
   }, []);
 
-  if (loading) return <div className="text-sm text-gray-400 animate-pulse">Loading wallet...</div>;
+  if (loading) return <div className="text-sm text-gray-400 animate-pulse">Loading wallet balance...</div>;
+
   return (
     <div className="p-6 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-lg text-white max-w-sm">
       <p className="text-xs uppercase tracking-wider text-emerald-100 font-semibold mb-1">Available Balance</p>
-      <h3 className="text-3xl font-extrabold">{balance !== null ? `${balance.toFixed(2)} GHS` : "0.00 GHS"}</h3>
+      <h3 className="text-3xl font-extrabold tracking-tight">
+        {balance !== null ? `${balance.toFixed(2)} GHS` : "0.00 GHS"}
+      </h3>
       <div className="mt-4 pt-3 border-t border-emerald-500/30 flex justify-between text-xs text-emerald-100">
-        <span>Currency: GHS</span>
-        <span className="font-medium">● Live Ledger</span>
+        <span>Currency: GHS (₵)</span>
+        <span className="font-medium">● Live Production Ledger</span>
       </div>
     </div>
   );
