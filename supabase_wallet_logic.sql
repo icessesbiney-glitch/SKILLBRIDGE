@@ -36,25 +36,24 @@ AS $$
 DECLARE
     current_wallet_id UUID;
     available_cents BIGINT;
-    response_payload JSONB;
 BEGIN
-    -- Enforce row locking to safeguard against simultaneous runtime races
+    -- Enforce immediate row locking to secure against parallel runtime races
     SELECT id, balance_cents INTO current_wallet_id, available_cents
     FROM public.platform_wallets
     WHERE profile_id = target_profile_id
     FOR UPDATE;
 
     IF current_wallet_id IS NULL THEN
-        RAISE EXCEPTION 'Platform user does not possess an active wallet account state.';
+        RETURN jsonb_build_object('success', false, 'error', 'Platform user wallet not initialized.');
     END IF;
 
-    -- Enforce platform-wide checkout limits (e.g., minimum 50 GHS / 5000 Cents threshold)
+    -- Enforce local limits (50 GHS minimum withdrawal)
     IF requested_amount_cents < 5000 THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Withdrawal requests must meet the baseline 50 GHS minimum threshold.');
+        RETURN jsonb_build_object('success', false, 'error', 'Withdrawal requests must meet the 50 GHS baseline threshold.');
     END IF;
 
     IF available_cents < requested_amount_cents THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Insufficient funds available inside wallet balance.');
+        RETURN jsonb_build_object('success', false, 'error', 'Insufficient funds available inside account balance.');
     END IF;
 
     -- Deduct transaction values atomically
@@ -63,7 +62,7 @@ BEGIN
         updated_at = TIMEZONE('utc'::text, NOW())
     WHERE id = current_wallet_id;
 
-    -- Log transaction path tracking inside table
+    -- Log transaction path details inside tracking table
     INSERT INTO public.ledger_entries (wallet_id, amount_cents, entry_type, reference_id)
     VALUES (current_wallet_id, -requested_amount_cents, 'withdrawal', payment_reference);
 
