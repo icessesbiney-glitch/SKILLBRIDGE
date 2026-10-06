@@ -6,21 +6,33 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+export async function OPTIONS() {
+  return NextResponse.json({}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { fullName, phoneNumber, ghanaCardPin, roleTier } = body;
 
     if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
-      return NextResponse.json({ error: 'Incomplete compliance onboarding payload attributes.' }, { status: 400 });
+      return NextResponse.json({ error: 'Incomplete compliance attributes.' }, { status: 400 });
     }
 
     const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
-    console.log(`[COMPLIANCE] Secure identification validation hash created for: ${fullName}`);
+    console.log(`[COMPLIANCE] Hashed record for: ${fullName}`);
 
     if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_supabase')) {
-      console.warn('[SANDBOX MODE] Missing keys. Falling back to mock response.');
-      return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, { status: 200 });
+      return NextResponse.json({ success: true, message: 'Sandbox bypass success.' }, {
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' }
+      });
     }
 
     const { error: dbError } = await supabase
@@ -34,12 +46,14 @@ export async function POST(req: Request) {
       }]);
 
     if (dbError) {
-      return NextResponse.json({ error: 'Database record insertion rejected.', details: dbError.message }, { status: 500 });
+      return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Onboarding records securely processed.' }, { status: 200 });
+    return NextResponse.json({ success: true, message: 'Processed successfully.' }, {
+      status: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
   } catch (error: any) {
-    console.error('[MIGRATION EXCEPTION]', error);
-    return NextResponse.json({ error: 'Internal serverless processing exception.' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
