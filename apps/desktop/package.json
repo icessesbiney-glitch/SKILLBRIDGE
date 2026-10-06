@@ -1,71 +1,8 @@
 {
   "name": "skillbridge",
   "version": "1.0.0",
-  "private": true,
-  "main": "dist/main.js",
-  "homepage": "./",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:3000 && npm run dev:main\"",
-    "dev:main": "electron .",
-    "dev:renderer": "cd ../web && npm run dev",
-    "build": "npm run build:main",
-    "build:main": "tsc",
-    "type-check": "tsc --noEmit",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run dist -- --mac",
-    "dist:win": "npm run dist -- --win",
-    "dist:linux": "npm run dist -- --linux",
-    "lint": "echo \"Pass desktop wrapper linting checks\"",
-    "test": "echo \"Pass desktop wrapper unit tests\""
-  },
-  "dependencies": {
-    "electron-is-dev": "^2.0.0",
-    "electron-squirrel-startup": "1.0.1"
-  },
-  "devDependencies": {
-    "@types/node": "^20.5.0",
-    "concurrently": "^8.2.2",
-    "electron": "27.0.0",
-    "electron-builder": "^24.13.3",
-    "typescript": "5.6.3",
-    "wait-on": "^7.0.1"
-  },
-  "build": {
-    "appId": "com.skillbridge.app",
-    "productName": "SkillBridge",
-    "directories": {
-      "buildResources": "assets"
-    },
-    "files": [
-      "dist/**/*",
-      "renderer/**/*",
-      "node_modules/**/*",
-      "assets/icon.png"
-    ],
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "category": "public.app-category.productivity"
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "certificateFile": null
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Utility"
-    },
-    "electronVersion": "27.0.0",
-    "publish": []
-  },
+  "description": "SkillBridge Global Marketplace Hub Desktop Wrapper Client",
+  "main": "main.js",
   "author": {
     "name": "Joshua Biney",
     "email": "icessesbiney@gmail.com"
@@ -74,5 +11,18 @@
     "type": "git",
     "url": "git+https://github.com"
   },
-  "description": "SkillBridge Global Marketplace Hub Desktop Wrapper Client"
+  "scripts": {
+    "build:main": "tsc",
+    "build": "npm run build:main",
+    "dist": "npm run build && electron-builder --linux",
+    "dist:linux": "npm run dist -- --linux"
+  },
+  "build": {
+    "electronVersion": "27.0.0",
+    "publish": [],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    }
+  }
 }
