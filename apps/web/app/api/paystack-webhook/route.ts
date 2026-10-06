@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const signature = request.headers.get("x-paystack-signature") || req.headers.get("x-paystack-signature");
+    const signature = req.headers.get("x-paystack-signature");
     const secretKey = process.env.PAYSTACK_LIVE_SECRET_KEY || "";
 
     if (!signature || !secretKey) {
