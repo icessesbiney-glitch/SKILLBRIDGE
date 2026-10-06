@@ -21,7 +21,10 @@
     "electronVersion": "27.0.0",
     "publish": [],
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Utility"
     }
   }
