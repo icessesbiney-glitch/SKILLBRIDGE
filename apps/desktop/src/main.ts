@@ -8,7 +8,7 @@ let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   const packagedRendererUrl = `file://${path.join(__dirname, '../renderer/index.html')}`;
-  const productionUrl = process.env.SKILLBRIDGE_DESKTOP_WEB_URL || process.env.NEXT_PUBLIC_URL || packagedRendererUrl;
+  const productionUrl = "https://vercel.app";
 
   mainWindow = new BrowserWindow({
     width: 1200,
