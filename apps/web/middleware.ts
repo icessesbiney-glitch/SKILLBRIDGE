@@ -1,63 +1,43 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from './utils/supabase/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  let response = NextResponse.next({
+    request: { headers: request.headers },
+  });
 
-  // 1. Bypass check instantly if accessing public assets, auth endpoints, or api tracks
-  if (
-    pathname.startsWith('/auth') || 
-    pathname.startsWith('/_next') || 
-    pathname.startsWith('/api') || 
-    pathname.static || 
-    pathname === '/favicon.ico'
-  ) {
-    return NextResponse.next();
-  }
-
-  // 2. Enforce strict matching strategy for protected layouts
-  const protectedPrefixes = ['/dashboard', '/team', '/roadmap'];
-  const isProtected = protectedPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll(); },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
+      },
+    }
   );
 
-  if (!isProtected) {
-    return NextResponse.next();
-  }
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // 3. Fallback routing path configuration
-  const loginUrl = new URL('/auth', request.url);
-  loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
-
-  // 4. Verify baseline environment settings safely
-  const isConfigured = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-
-  if (!isConfigured) {
-    console.warn('SkillBridge Infrastructure Alert: Supabase environment variables missing inside cluster.');
-    return NextResponse.redirect(loginUrl);
-  }
-
-  try {
-    // 5. Secure session updating with validation wrapper logic
-    const sessionResult = await updateSession(request);
-    
-    if (!sessionResult || !sessionResult.user) {
-      return NextResponse.redirect(loginUrl);
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/auth', request.url));
     }
 
-    return sessionResult.response || NextResponse.next();
-  } catch (error) {
-    console.error('SkillBridge Middleware Runtime Catch:', error);
-    return NextResponse.redirect(loginUrl);
+    const userRole = user.user_metadata?.role_tier;
+    if (userRole !== 'admin_central') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
+
+  return response;
 }
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/team/:path*',
-    '/roadmap/:path*'
-  ],
+  matcher: ['/admin/:path*', '/dashboard/:path*'],
 };
