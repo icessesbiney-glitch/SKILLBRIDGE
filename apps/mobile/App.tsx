@@ -7,10 +7,10 @@ import { createClient } from "@supabase/supabase-js";
 const supabase = createClient("https://lspdxssepvlswkwswvel.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcGR4c3NlcHZsc3drd3N3dmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4OTUxOTIsImV4cCI6MjETA4OTUxOTJ9.example_signature");
 
 export default function App() {
-  const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isTracking, setIsTracking] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -32,16 +32,24 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let sub: any = null;
-    if (isTracking) {
-      Location.watchPositionAsync({ accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 5 }, 
-        async (loc) => {
-          const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
-          setLocation(coords);
-          await supabase.from("driver_locations").upsert({ driver_id: "driver-accra-001", ...coords, updated_at: new Date().toISOString() });
-        }
-      ).then(s => sub = s);
+    let sub = null;
+    async function startTracking() {
+      if (isTracking) {
+        sub = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 5 },
+          async (loc) => {
+            const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+            setLocation(coords);
+            await supabase.from("driver_locations").upsert({
+              driver_id: "driver-accra-001",
+              ...coords,
+              updated_at: new Date().toISOString()
+            });
+          }
+        );
+      }
     }
+    startTracking();
     return () => { if (sub) sub.remove(); };
   }, [isTracking]);
 
@@ -54,7 +62,7 @@ export default function App() {
         <MapView style={styles.map} initialRegion={{ ...location, latitudeDelta: 0.015, longitudeDelta: 0.012 }}>
           <Marker coordinate={location} title="Active Courier" />
         </MapView>
-      ) : <Text>{errorMsg}</Text>}
+      ) : <View style={styles.center}><Text>{errorMsg || "Acquiring GPS fix..."}</Text></View>}
       <View style={styles.card}>
         <TouchableOpacity style={styles.btn} onPress={() => setIsTracking(!isTracking)}>
           <Text style={styles.btnTxt}>{isTracking ? "STOP LIVE TRACKING" : "START LIVE LOGGING"}</Text>

@@ -1,55 +1,102 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://supabase.co";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
-}
-
-export async function GET() {
-  try {
-    const { data, error } = await supabase.from("wallets").select("amount").single();
-    const currentAmount = data?.amount ?? 400.00;
-    return NextResponse.json({ data: { amount: currentAmount } }, { headers: corsHeaders });
-  } catch (err) {
-    return NextResponse.json({ data: { amount: 400.00 } }, { headers: corsHeaders });
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
-    const { amount } = await req.json();
-    const subAmount = parseFloat(amount || "0");
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
 
-    if (subAmount <= 0) {
-      return NextResponse.json({ error: "Invalid transaction amount" }, { status: 400, headers: corsHeaders });
+    if (!supabaseUrl || !supabaseServiceKey || !paystackSecretKey) {
+      return NextResponse.json({ error: "Server configurations are incomplete." }, { status: 500 });
     }
 
-    // Pull down current live ledger settings sequence
-    const { data: wallet } = await supabase.from("wallets").select("id, amount").single();
-    const existingBalance = wallet?.amount ?? 400.00;
-    const nextBalance = Math.max(0, existingBalance - subAmount);
+    const body = await req.json();
+    const { amount, bankCode, accountNumber, accountName, userId } = body;
 
-    if (wallet?.id) {
-      await supabase.from("wallets").update({ amount: nextBalance }).eq("id", wallet.id);
+    if (!amount || !bankCode || !accountNumber || !accountName || !userId) {
+      return NextResponse.json({ error: "Missing required cashout payload elements." }, { status: 400 });
     }
 
-    // Injects a permanent ledger log transaction trace tracking parameter block record row row line
-    await supabase.from("transactions").insert([
-      { title: "Mobile Wallet Cashout Request", amount: subAmount, type: "withdrawal", status: "success" }
-    ]);
+    const cashoutAmount = Number(amount);
+    if (!Number.isFinite(cashoutAmount) || cashoutAmount <= 0) {
+      return NextResponse.json({ error: "Invalid withdrawal computation limit." }, { status: 400 });
+    }
 
-    return NextResponse.json({ success: true, balance: nextBalance }, { headers: corsHeaders });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const { data: wallet, error: walletError } = await adminClient
+      .from("platform_wallets")
+      .select("available_balance")
+      .eq("user_id", userId)
+      .single();
+
+    if (walletError || !wallet) {
+      return NextResponse.json({ error: "Wallet lookup matching target missed." }, { status: 404 });
+    }
+
+    if (wallet.available_balance < cashoutAmount) {
+      return NextResponse.json({ error: "Insufficient available wallet balance." }, { status: 400 });
+    }
+
+    // Step 1: Create Paystack recipient token assignment
+    const recipientRes = await fetch("https://paystack.co", {
+      method: "POST",
+      headers: {
+        Authorization: \`Bearer \${paystackSecretKey}\`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "ghip",
+        name: accountName,
+        account_number: accountNumber,
+        bank_code: bankCode,
+        currency: "GHS",
+      }),
+    });
+
+    const recipientData = await recipientRes.json();
+    if (!recipientRes.ok || !recipientData.status) {
+      return NextResponse.json({ error: recipientData.message || "Recipient parsing failed." }, { status: 400 });
+    }
+
+    // Step 2: Dispatch immediate balance payout to Paystack Core
+    const transferRes = await fetch("https://paystack.co", {
+      method: "POST",
+      headers: {
+        Authorization: \`Bearer \${paystackSecretKey}\`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        source: "balance",
+        amount: String(Math.round(cashoutAmount * 100)),
+        recipient: recipientData.data.recipient_code,
+        reason: \`SkillBridge Mobile Cashout for User: \${userId}\`,
+        currency: "GHS",
+      }),
+    });
+
+    const transferData = await transferRes.json();
+    if (!transferRes.ok || !transferData.status) {
+      return NextResponse.json({ error: transferData.message || "Paystack transfer processing rejected." }, { status: 400 });
+    }
+
+    // Step 3: Atomic local wallet deduction
+    const nextBalance = wallet.available_balance - cashoutAmount;
+    await adminClient
+      .from("platform_wallets")
+      .update({ available_balance: nextBalance })
+      .eq("user_id", userId);
+
+    return NextResponse.json({
+      success: true,
+      message: "Cashout disbursement tracked successfully.",
+      remainingBalance: nextBalance,
+      transferCode: transferData.data.transfer_code
+    });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal payment handler runtime crash." }, { status: 500 });
   }
 }
