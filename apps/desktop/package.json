@@ -80,5 +80,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com"
-  }
+  },
+  "description": "SkillBridge Global Marketplace Desktop Client"
 }
