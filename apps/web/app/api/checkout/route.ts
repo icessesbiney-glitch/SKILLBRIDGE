@@ -46,12 +46,10 @@ export async function POST(req: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
     const callbackUrl = `${siteUrl}/payment/callback`;
 
-    // Initialize elevated Supabase admin database connection
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    // Step 1: Dispatch transaction parameters initialization straight to Paystack API
     const paystackResponse = await fetch("https://paystack.co", {
       method: "POST",
       headers: {
@@ -81,7 +79,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 2: Log initialized transaction intent into the local database
     const { error: dbError } = await supabase
       .from("paystack_transactions")
       .insert({
