@@ -118,11 +118,24 @@ export default function AuthScreen() {
 
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
         });
         if (error) throw error;
+
+        // Automatically initialize an active balance ledger row for new users inside your platform wallet schemas
+        if (signUpData?.user) {
+          const { error: walletError } = await supabase
+            .from("platform_wallets")
+            .upsert({
+              user_id: signUpData.user.id,
+              available_balance: 0.00,
+              updated_at: new Date().toISOString()
+            });
+          if (walletError) console.error("Wallet provision warning:", walletError.message);
+        }
+
         setSuccessMessage('Account created! Check your email to confirm registration.');
         setEmail('');
         setPassword('');
