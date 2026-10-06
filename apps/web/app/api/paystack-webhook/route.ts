@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
     const signature = req.headers.get("x-paystack-signature");
-    const secretKey = process.env.PAYSTACK_LIVE_SECRET_KEY || "";
+    const secretKey = process.env.PAYSTACK_SECRET_KEY || "";
 
     if (!signature || !secretKey) {
       return NextResponse.json({ error: "Missing configurations" }, { status: 401 });
