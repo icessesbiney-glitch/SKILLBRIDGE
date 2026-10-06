@@ -41,11 +41,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Insufficient available wallet balance." }, { status: 400 });
     }
 
-    // Step 1: Create Paystack recipient token assignment
     const recipientRes = await fetch("https://paystack.co", {
       method: "POST",
       headers: {
-        Authorization: \`Bearer \${paystackSecretKey}\`,
+        Authorization: "Bearer " + paystackSecretKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -62,18 +61,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: recipientData.message || "Recipient parsing failed." }, { status: 400 });
     }
 
-    // Step 2: Dispatch immediate balance payout to Paystack Core
     const transferRes = await fetch("https://paystack.co", {
       method: "POST",
       headers: {
-        Authorization: \`Bearer \${paystackSecretKey}\`,
+        Authorization: "Bearer " + paystackSecretKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         source: "balance",
         amount: String(Math.round(cashoutAmount * 100)),
         recipient: recipientData.data.recipient_code,
-        reason: \`SkillBridge Mobile Cashout for User: \${userId}\`,
+        reason: "SkillBridge Mobile Cashout for User: " + userId,
         currency: "GHS",
       }),
     });
@@ -83,7 +81,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: transferData.message || "Paystack transfer processing rejected." }, { status: 400 });
     }
 
-    // Step 3: Atomic local wallet deduction
     const nextBalance = wallet.available_balance - cashoutAmount;
     await adminClient
       .from("platform_wallets")
