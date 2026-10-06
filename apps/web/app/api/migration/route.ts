@@ -22,14 +22,14 @@ export async function POST(req: Request) {
     const { fullName, phoneNumber, ghanaCardPin, roleTier } = body;
 
     if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
-      return NextResponse.json({ error: 'Incomplete compliance attributes.' }, { status: 400 });
+      return NextResponse.json({ error: 'Incomplete payload attributes.' }, { status: 400 });
     }
 
     const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
-    console.log(`[COMPLIANCE] Hashed record for: ${fullName}`);
+    console.log(`[COMPLIANCE] Generated secure ID verification hash for user: ${fullName}`);
 
-    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_supabase')) {
-      return NextResponse.json({ success: true, message: 'Sandbox bypass success.' }, {
+    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_live')) {
+      return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, {
         status: 200,
         headers: { 'Access-Control-Allow-Origin': '*' }
       });

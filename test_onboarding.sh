@@ -16,7 +16,7 @@ INNER_EOF
 )
 
 # Trigger an absolute curl request straight to your Next.js local serverless engine
-curl -X POST http://localhost:3001/api/migration \
+curl -X POST http://localhost:3003/api/migration \
   -H "Content-Type: application/json" \
   -d "$MOCK_PAYLOAD" \
   -w "\n=== HANDSHAKE HTTP RESPONSE CODE: %{http_code} ===\n"
