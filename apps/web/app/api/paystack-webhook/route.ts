@@ -6,159 +6,137 @@ export async function POST(req: NextRequest) {
   try {
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!secretKey) {
-      return NextResponse.json(
-        { error: "Paystack secret key is not configured." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Paystack secret key is not configured." }, { status: 500 });
     }
 
     if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json(
-        { error: "Supabase environment variables are not configured." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Supabase configuration is incomplete." }, { status: 500 });
     }
 
     const signature = req.headers.get("x-paystack-signature");
-
     if (!signature) {
-      return NextResponse.json(
-        { error: "Missing Paystack signature." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Missing verification headers." }, { status: 401 });
     }
 
     const rawBody = await req.text();
+    const expectedSignature = crypto.createHmac("sha512", secretKey).update(rawBody).digest("hex");
 
-    const expectedSignature = crypto
-      .createHmac("sha512", secretKey)
-      .update(rawBody)
-      .digest("hex");
-
-    const signaturesMatch =
-      signature.length === expectedSignature.length &&
-      crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature)
-      );
+    const signaturesMatch = signature.length === expectedSignature.length && 
+      crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 
     if (!signaturesMatch) {
-      return NextResponse.json(
-        { error: "Invalid Paystack signature." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Signature verification failed." }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);
-
     const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
+      auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    // ==========================================
+    // CASE 1: Inbound Deposit Succeeded
+    // ==========================================
     if (body.event === "charge.success") {
       const payment = body.data;
-
       const reference = payment.reference;
       const amount = Number(payment.amount || 0) / 100;
-      const currency = payment.currency || "GHS";
-      const email = payment.customer?.email || null;
 
       if (!reference) {
-        return NextResponse.json(
-          { error: "Missing Paystack transaction reference." },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Missing reference tracker parameter." }, { status: 400 });
       }
 
-      const { data: existingPayment, error: lookupError } =
-        await supabase
-          .from("paystack_transactions")
-          .select("id, user_id, status")
-          .eq("reference", reference)
-          .maybeSingle();
+      const { data: txRecord, error: lookError } = await supabase
+        .from("paystack_transactions")
+        .select("id, user_id, status")
+        .eq("reference", reference)
+        .maybeSingle();
 
-      if (lookupError) {
-        console.error("Paystack payment lookup error:", lookupError);
-
-        return NextResponse.json(
-          { error: "Unable to locate payment record." },
-          { status: 500 }
-        );
+      if (lookError || !txRecord) {
+        console.error("Payment target matching missed:", lookError || "Not found");
+        return NextResponse.json({ error: "Payment lookup target unresolvable." }, { status: 200 });
       }
 
-      if (!existingPayment) {
-        console.error(
-          "Received Paystack payment for unknown reference:",
-          reference
-        );
-
-        return NextResponse.json(
-          { error: "Unknown payment reference." },
-          { status: 400 }
-        );
+      if (txRecord.status === "success") {
+        return NextResponse.json({ received: true, info: "Duplicate notification ignored." });
       }
 
-      if (existingPayment.status === "success") {
-        return NextResponse.json(
-          { received: true, duplicate: true },
-          { status: 200 }
-        );
-      }
-
-      const { error: updateError } = await supabase
+      // Update the transaction log status
+      const { error: txUpdateError } = await supabase
         .from("paystack_transactions")
         .update({
           status: "success",
           paystack_transaction_id: payment.id ?? null,
-          amount,
-          currency,
-          email,
           paid_at: payment.paid_at || new Date().toISOString(),
-          metadata: payment.metadata || {},
           updated_at: new Date().toISOString(),
         })
-        .eq("id", existingPayment.id);
+        .eq("id", txRecord.id);
 
-      if (updateError) {
-        console.error(
-          "Paystack payment update error:",
-          updateError
-        );
-
-        return NextResponse.json(
-          { error: "Unable to update payment record." },
-          { status: 500 }
-        );
+      if (txUpdateError) {
+        console.error("Transaction status update failed:", txUpdateError);
+        return NextResponse.json({ error: "Database lock failed on logging transaction status." }, { status: 500 });
       }
 
-      console.log(
-        `Paystack payment confirmed: ${reference} / GHS ${amount}`
-      );
+      // ATOMIC WALLET UPDATE: Increment the client balance
+      const { data: currentWallet, error: fetchWalletErr } = await supabase
+        .from("platform_wallets")
+        .select("available_balance, total_earnings")
+        .eq("user_id", txRecord.user_id)
+        .maybeSingle();
+
+      if (!fetchWalletErr && currentWallet) {
+        const nextBalance = Number(currentWallet.available_balance || 0) + amount;
+        const nextEarnings = Number(currentWallet.total_earnings || 0) + amount;
+
+        await supabase
+          .from("platform_wallets")
+          .update({
+            available_balance: nextBalance,
+            total_earnings: nextEarnings,
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", txRecord.user_id);
+      }
+      
+      console.log(`[DEPOSIT CONFIRMED] Wallet Credited: User ${txRecord.user_id} + GHS ${amount}`);
     }
 
-    return NextResponse.json(
-      { received: true },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Paystack webhook error:", error);
+    // ==========================================
+    // CASE 2: Outbound Transfer/Withdrawal Failed
+    // ==========================================
+    if (body.event === "transfer.failed" || body.event === "transfer.reversed") {
+      const transfer = body.data;
+      const originalReason = transfer.reason || "";
+      
+      // Extract User ID string pattern matching from transfer payload
+      const userIdMatch = originalReason.match(/User ID:\s*([a-f0-9-]{36})/i);
+      const userId = userIdMatch ? userIdMatch[1] : null;
+      const refundAmount = Number(transfer.amount || 0) / 100;
 
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Webhook processing failed.",
-      },
-      { status: 400 }
-    );
+      if (userId) {
+        const { data: wallet, error: walletFetchErr } = await supabase
+          .from("platform_wallets")
+          .select("available_balance")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (!walletFetchErr && wallet) {
+          const restoredBalance = Number(wallet.available_balance || 0) + refundAmount;
+          await supabase
+            .from("platform_wallets")
+            .update({ available_balance: restoredBalance })
+            .eq("user_id", userId);
+          
+          console.warn(`[WITHDRAWAL REVERSED] Transfer failed via Paystack. Refunded GHS ${refundAmount} to User ${userId}`);
+        }
+      }
+    }
+
+    return NextResponse.json({ received: true }, { status: 200 });
+  } catch (error) {
+    console.error("Webhook endpoint runtime crash:", error);
+    return NextResponse.json({ error: "Internal crash processing asynchronous paystack ledger hooks." }, { status: 500 });
   }
 }
