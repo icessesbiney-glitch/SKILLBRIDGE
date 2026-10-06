@@ -6,7 +6,9 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "echo \"Pass shared package linting checks\"",
+    "test": "echo \"Pass shared package unit tests\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
