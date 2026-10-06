@@ -298,7 +298,7 @@ export default function SkillBridgeHub() {
     return () => {
       listener?.subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // patched inline rule hooks
   }, []);
 
   // Real-time subscription for this user's mentor conversation
