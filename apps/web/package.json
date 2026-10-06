@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "type-check": "tsc --noEmit",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=0",
     "test": "echo \"Pass web application module unit tests\""
   },
   "dependencies": {
