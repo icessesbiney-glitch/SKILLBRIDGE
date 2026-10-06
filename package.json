@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
-    "build": "turbo run build --filter=@skillbridge/web...",
+    "build": "turbo run build --filter=@skillbridge/web",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build:web": "npm run build --workspace=apps/web"
