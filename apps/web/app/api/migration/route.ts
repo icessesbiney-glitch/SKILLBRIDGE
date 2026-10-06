@@ -16,11 +16,10 @@ export async function POST(req: Request) {
     }
 
     const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
-    console.log(`[COMPLIANCE] Generated secure identification validation hash for: ${fullName}`);
+    console.log(`[COMPLIANCE] Secure identification validation hash created for: ${fullName}`);
 
-    // If keys are unconfigured or database is waking up, use a local data fallback to allow local form execution
-    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_live')) {
-      console.warn('[SUPABASE WARNING] Missing or unconfigured environment variables. Using sandbox response.');
+    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_supabase')) {
+      console.warn('[SANDBOX MODE] Missing keys. Falling back to mock response.');
       return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, { status: 200 });
     }
 
@@ -35,13 +34,12 @@ export async function POST(req: Request) {
       }]);
 
     if (dbError) {
-      console.error('[SUPABASE DB ERROR]', dbError);
       return NextResponse.json({ error: 'Database record insertion rejected.', details: dbError.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Onboarding records securely processed.' }, { status: 200 });
   } catch (error: any) {
-    console.error('[MIGRATION ENDPOINT ERROR]', error);
+    console.error('[MIGRATION EXCEPTION]', error);
     return NextResponse.json({ error: 'Internal serverless processing exception.' }, { status: 500 });
   }
 }
