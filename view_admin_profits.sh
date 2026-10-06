@@ -14,13 +14,13 @@ TOTAL_GROSS_CENTS=$(docker exec -i supabase_db_SKILLBRIDGE psql -U postgres -d p
 " | tr -d '[:space:]')
 
 # Compute currency transformations cleanly using standard built-in awk matrix
-REVENUE_GHS=$(awk "BEGIN {print $TOTAL_REVENUE_CENTS / 100}")
-GROSS_GHS=$(awk "BEGIN {print $TOTAL_GROSS_CENTS / 100}")
+REVENUE_GHS=$(awk "BEGIN {printf \"%.2f\", $TOTAL_REVENUE_CENTS / 100}")
+GROSS_GHS=$(awk "BEGIN {printf \"%.2f\", $TOTAL_GROSS_CENTS / 100}")
 
 echo "📊 FINANCIAL METRICS OVERVIEW:"
 echo "------------------------------------------------------------------------------"
-printf "🛒 Total Gross Marketplace Volume (GMV):   %%.2f GHS\n" "$GROSS_GHS"
-printf "🚀 Total Accumulated Platform Net Profit:  %%.2f GHS\n" "$REVENUE_GHS"
+echo "🛒 Total Gross Marketplace Volume (GMV):   $GROSS_GHS GHS"
+echo "🚀 Total Accumulated Platform Net Profit:  $REVENUE_GHS GHS"
 echo "------------------------------------------------------------------------------"
 echo ""
 echo "📝 ITEMIZED REVENUE TRANSACTION JOURNAL HISTORY:"
