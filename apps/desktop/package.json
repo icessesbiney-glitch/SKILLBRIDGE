@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com"
+    "url": "git+https://github.com/icessesbiney-glitch/SKILLBRIDGE.git"
   },
   "scripts": {
     "build:main": "tsc",
