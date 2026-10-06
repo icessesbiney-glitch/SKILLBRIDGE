@@ -1,30 +1,187 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   try {
-    const { amount, email } = await req.json();
-    const dodoKey = process.env.DODO_PAYMENTS_API_KEY || "live_sk_placeholder";
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
 
-    const res = await fetch("https://dodopayments.com", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + dodoKey,
-        "Content-Type": "application/json",
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: "Supabase environment variables are not configured." },
+        { status: 500 }
+      );
+    }
+
+    if (!paystackSecretKey) {
+      return NextResponse.json(
+        { error: "Paystack secret key is not configured." },
+        { status: 500 }
+      );
+    }
+
+    const authorization = req.headers.get("authorization");
+
+    if (!authorization?.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
       },
-      body: JSON.stringify({
-        amount: Math.round(parseFloat(amount) * 100),
-        currency: "GHS",
-        customer: { email },
-        billing_rdr: "https://vercel.app"
-      }),
+      global: {
+        headers: {
+          Authorization: authorization,
+        },
+      },
     });
 
-    const data = await res.json();
-    if (res.ok && data.payment_url) {
-      return NextResponse.json({ authorization_url: data.payment_url });
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Invalid or expired authentication session." },
+        { status: 401 }
+      );
     }
-    return NextResponse.json({ error: data.message || "Dodo Initialization Failed" }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+
+    const body = await req.json();
+
+    const amount = Number(body.amount);
+    const email =
+      typeof body.email === "string" && body.email.trim()
+        ? body.email.trim()
+        : user.email;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "A valid email address is required." },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return NextResponse.json(
+        { error: "Invalid transaction amount." },
+        { status: 400 }
+      );
+    }
+
+    const amountInPesewas = Math.round(amount * 100);
+
+    if (amountInPesewas < 100) {
+      return NextResponse.json(
+        { error: "The minimum payment amount is GHS 1.00." },
+        { status: 400 }
+      );
+    }
+
+    const reference = `SB-${crypto.randomUUID()}`;
+
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+
+    const callbackUrl = `${siteUrl}/payment/callback`;
+
+    const paystackResponse = await fetch(
+      "https://api.paystack.co/transaction/initialize",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${paystackSecretKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          amount: String(amountInPesewas),
+          currency: "GHS",
+          reference,
+          callback_url: callbackUrl,
+          metadata: {
+            user_id: user.id,
+            email,
+            platform: "skillbridge",
+          },
+        }),
+      }
+    );
+
+    const paystackData = await paystackResponse.json();
+
+    if (!paystackResponse.ok || !paystackData.status) {
+      return NextResponse.json(
+        {
+          error:
+            paystackData.message ||
+            "Paystack transaction initialization failed.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const { data: paymentRecord, error: paymentRecordError } =
+      await supabase
+        .from("paystack_transactions")
+        .insert({
+          user_id: user.id,
+          email,
+          reference,
+          paystack_transaction_id: paystackData.data?.id ?? null,
+          amount,
+          currency: "GHS",
+          status: "initialized",
+          metadata: {
+            user_id: user.id,
+            platform: "skillbridge",
+          },
+        })
+        .select("id, reference, amount, currency, status")
+        .single();
+
+    if (paymentRecordError) {
+      console.error(
+        "Paystack transaction record error:",
+        paymentRecordError
+      );
+
+      return NextResponse.json(
+        {
+          error: "Payment was initialized but could not be recorded.",
+          reference,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      authorization_url: paystackData.data.authorization_url,
+      access_code: paystackData.data.access_code,
+      reference: paystackData.data.reference,
+      payment: paymentRecord,
+    });
+  } catch (error) {
+    console.error("Paystack initialization error:", error);
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to initialize Paystack payment.",
+      },
+      { status: 500 }
+    );
   }
 }
