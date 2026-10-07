@@ -1,0 +1,49 @@
+
+> @skillbridge/web@1.0.0 build
+> next build
+
+  [1m[38;2;173;127;168m▲ Next.js 14.2.3[39m[22m
+  - Environments: .env.local
+
+ [37m[1m [22m[39m Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (267kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ [32m[1m✓[22m[39m Compiled successfully
+ [37m[1m [22m[39m Skipping validation of types
+ [37m[1m [22m[39m Skipping linting
+[?25l [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m...[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data     [32m[1m✓[22m[39m Collecting page data 
+[?25l [37m[1m [22m[39m Generating static pages (0/20)  [36m[    ][39m[2K[1G [37m[1m [22m[39m Generating static pages (1/20)  [36m[=   ][39m[2K[1G [37m[1m [22m[39m Generating static pages (9/20)  [36m[==  ][39m[2K[1G [37m[1m [22m[39m Generating static pages (11/20)  [36m[=== ][39m[2K[1G [37m[1m [22m[39m Generating static pages (14/20)  [36m[ ===][39m[2K[1G [37m[1m [22m[39m Generating static pages (18/20)  [36m[  ==][39m[2K[1G[?25h [32m[1m✓[22m[39m Generating static pages (20/20)
+[?25l [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[?25l [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting build traces     [32m[1m✓[22m[39m Collecting build traces 
+[2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization     [32m[1m✓[22m[39m Finalizing page optimization 
+
+[4mRoute (app)[24m                              [4mSize[24m     [4mFirst Load JS[24m
+┌ ○ /                                    1.25 kB        [37m[1m88.3 kB[22m[39m
+├ ○ /_not-found                          872 B          [37m[1m87.9 kB[22m[39m
+├ ƒ /admin/academy-records               140 B          [37m[1m87.2 kB[22m[39m
+├ ○ /admin/compliance                    1.62 kB         [37m[1m153 kB[22m[39m
+├ ƒ /api/cashout                         0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/checkout                        0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/migration                       0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/paystack-init                   0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/paystack-webhook                0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/rider/telemetry                 0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/webhook                         0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/webhooks/dodo                   0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/withdraw                        0 B                [37m[1m0 B[22m[39m
+├ ○ /auth                                4.22 kB         [37m[1m163 kB[22m[39m
+├ ○ /dashboard                           1.6 kB          [37m[1m163 kB[22m[39m
+├ ○ /roadmap                             140 B          [37m[1m87.2 kB[22m[39m
+├ ○ /tasks                               1.05 kB         [37m[1m153 kB[22m[39m
+└ ○ /team                                184 B           [37m[1m161 kB[22m[39m
++ First Load JS shared by all            [37m[1m87 kB[22m[39m
+  ├ chunks/23-cdf892f9103dc873.js        31.5 kB
+  ├ chunks/fd9d1056-14e083ac9b0544be.js  53.6 kB
+  └ other shared chunks (total)          1.95 kB
+
+
+ƒ Middleware                             [37m[1m87.5 kB[22m[39m
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[?25h⠙[1G[0K
