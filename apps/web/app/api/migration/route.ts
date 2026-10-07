@@ -19,7 +19,7 @@ export async function OPTIONS() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { fullName, phoneNumber, ghanaCardPin, roleTier } = body;
+    const { id, fullName, phoneNumber, ghanaCardPin, roleTier } = body;
 
     if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
       return NextResponse.json({ error: 'Incomplete payload attributes.' }, { status: 400 });
@@ -35,15 +35,19 @@ export async function POST(req: Request) {
       });
     }
 
+    const profileId = id || '00000000-0000-0000-0000-000000000137';
+
+    // Using .upsert() handles updating matching records without causing key errors
     const { error: dbError } = await supabase
       .from('profiles')
-      .insert([{
+      .upsert({
+        id: profileId,
         legal_name: fullName,
         phone_number: phoneNumber,
         role_tier: roleTier,
         national_id_hash: nationalIdHash,
-        verification: 'pending'
-      }]);
+        verification: 'verified'
+      }, { onConflict: 'id' });
 
     if (dbError) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });

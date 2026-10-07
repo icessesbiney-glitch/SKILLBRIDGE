@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { riderId, latitude, longitude, bearing, speedKmh, currentStatus } = body;
+    const { riderId, latitude, longitude, bearing, speedKmh } = body;
 
     // 1. Structural Parameter Integrity Verification
     if (!riderId || latitude === undefined || longitude === undefined) {
@@ -19,31 +19,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Log real-time GPS coordinate point trace into historical telemetry table
+    // Convert speed to m/s for your schema definition layout (km/h divided by 3.6)
+    const speedMs = speedKmh ? parseFloat((speedKmh / 3.6).toFixed(2)) : 0.00;
+
+    // 2. Log real-time GPS coordinate point trace directly into admin_gps_tracking table
     const { error: trackingError } = await supabase
-      .from("delivery_location_tracking")
+      .from("admin_gps_tracking")
       .insert({
         rider_id: riderId,
-        latitude,
-        longitude,
+        live_latitude: latitude,
+        live_longitude: longitude,
         bearing: bearing || 0.00,
-        speed_kmh: speedKmh || 0.00,
-        recorded_at: new Date().toISOString()
+        speed: speedMs,
+        is_active_delivery: true,
+        last_ping_time: new Date().toISOString()
       });
 
     if (trackingError) {
       return NextResponse.json({ error: trackingError.message }, { status: 400 });
-    }
-
-    // 3. Update the rider's master profile availability state row dynamically
-    if (currentStatus) {
-      await supabase
-        .from("rider_profiles")
-        .update({
-          current_status: currentStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", riderId);
     }
 
     return NextResponse.json({
