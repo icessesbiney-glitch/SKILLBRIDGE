@@ -11,7 +11,10 @@ export async function POST(req: Request) {
     const { dispatchId, riderId, nextStatus } = body;
 
     if (!dispatchId || !riderId || !nextStatus) {
-      return NextResponse.json({ error: 'Missing required dispatch operation attributes.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required dispatch operation attributes.' },
+        { status: 400 }
+      );
     }
 
     const { data, error: updateError } = await supabase
@@ -29,7 +32,10 @@ export async function POST(req: Request) {
     }
 
     if (!data || data.length === 0) {
-      return NextResponse.json({ error: 'No matching active dispatch record found for this transaction context.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'No matching active dispatch record found for this transaction context.' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({
@@ -37,26 +43,7 @@ export async function POST(req: Request) {
       message: 'Delivery transport status transition processed atomically.',
       updatedRecord: data
     }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-      .eq('assigned_rider_id', riderId)
-      .select();
 
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
-    }
-
-    if (!data || data.length === 0) {
-      return NextResponse.json({ error: 'No matching active dispatch record found for this transaction context.' }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Delivery transport status transition processed atomically.',
-      updatedRecord: data
-    }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
