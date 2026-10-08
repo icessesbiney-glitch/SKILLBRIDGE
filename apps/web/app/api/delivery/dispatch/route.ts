@@ -41,3 +41,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+      .eq('assigned_rider_id', riderId)
+      .select();
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'No matching active dispatch record found for this transaction context.' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Delivery transport status transition processed atomically.',
+      updatedRecord: data
+    }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
