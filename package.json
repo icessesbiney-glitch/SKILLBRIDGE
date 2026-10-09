@@ -1,9 +1,8 @@
 {
   "name": "skillbridge",
   "private": true,
-  "packageManager": "pnpm@9.12.2",
   "workspaces": [
-    "apps/web"
+    "apps/*"
   ],
   "dependencies": {},
   "devDependencies": {

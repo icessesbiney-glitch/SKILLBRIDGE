@@ -1,5 +1,11 @@
 ﻿import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(req: Request) {
   try {
@@ -12,15 +18,22 @@ export async function POST(req: Request) {
       .update(bodyText)
       .digest("hex");
     
-    console.log("=== PAYSTACK WEBHOOK HANDSHAKE DIAGNOSTICS ===");
-    console.log("Incoming Payload Header Signature:", incomingSignature);
-    console.log("Computed Runtime Shell Signature:", computedSignature);
-    
     if (incomingSignature !== computedSignature) {
       return new NextResponse("Cryptographic Signature Mismatch", { status: 401 });
     }
     
-    return NextResponse.json({ success: true, reference: "WITHDRAW_TXN_VERIFIED" });
+    const payload = JSON.parse(bodyText);
+    
+    if (payload.event === "charge.success") {
+      const transactionReference = payload.data.reference;
+      
+      await supabase
+        .from("transactions")
+        .update({ status: "completed", updated_at: new Date().toISOString() })
+        .eq("reference", transactionReference);
+    }
+    
+    return NextResponse.json({ success: true, reference: payload.data?.reference });
   } catch (error: any) {
     return new NextResponse(error.message, { status: 500 });
   }
