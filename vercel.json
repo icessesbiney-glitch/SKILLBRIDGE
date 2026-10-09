@@ -1,1 +1,0 @@
-{"framework": null, "installCommand": "pnpm install", "buildCommand": "pnpm turbo run build --filter=@skillbridge/web", "outputDirectory": "apps/web/.next"}
