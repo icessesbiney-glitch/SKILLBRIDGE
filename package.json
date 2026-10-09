@@ -1,4 +1,4 @@
-{
+﻿{
     "name":  "skillbridge-monorepo",
     "version":  "1.0.0",
     "private":  true,
@@ -17,5 +17,5 @@
                             "turbo":  "^2.11.7",
                             "typescript":  "^5.0.0"
                         },
-    "packageManager": "pnpm@9.12.2+node26.7.0"
+    "packageManager":  "pnpm@9.12.2+node26.7.0"
 }
