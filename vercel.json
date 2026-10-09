@@ -1,1 +1,1 @@
-{"buildCommand": "npx turbo run build --filter=@skillbridge/web"}
+{"buildCommand": "npx turbo run build --filter=@skillbridge/web", "installCommand": "npm install", "outputDirectory": "apps/web/.next"}
