@@ -1,21 +1,21 @@
-{
-  "name": "skillbridge-monorepo",
-  "version": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "dev": "cd apps/web && npx next dev",
-    "build": "turbo run build --filter=@skillbridge/web",
-    "type-check": "npm run type-check --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "build:web": "npm run build --workspace=apps/web"
-  },
-  "devDependencies": {
-    "turbo": "^2.11.7",
-    "typescript": "^5.0.0"
-  },
-  "packageManager": "npm@10.8.2"
+﻿{
+    "name":  "skillbridge-monorepo",
+    "version":  "1.0.0",
+    "private":  true,
+    "workspaces":  [
+                       "apps/*",
+                       "packages/*"
+                   ],
+    "scripts":  {
+                    "dev":  "cd apps/web \u0026\u0026 npx next dev",
+                    "build":  "turbo run build --filter=@skillbridge/web",
+                    "type-check":  "npm run type-check --workspaces --if-present",
+                    "lint":  "npm run lint --workspaces --if-present",
+                    "build:web":  "npm run build --workspace=apps/web"
+                },
+    "devDependencies":  {
+                            "turbo":  "^2.11.7",
+                            "typescript":  "^5.0.0"
+                        },
+    "packageManager":  "pnpm@9.12.2"
 }
