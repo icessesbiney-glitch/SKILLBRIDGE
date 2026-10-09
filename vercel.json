@@ -1,1 +1,1 @@
-﻿{"rootDirectory": null, "buildCommand": "npx turbo run build --filter=@skillbridge/web"}
+{"rootDirectory": null, "buildCommand": "npx turbo run build --filter=@skillbridge/web"}
