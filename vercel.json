@@ -1,5 +1,1 @@
-{
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install --legacy-peer-deps"
-}
+﻿{"rootDirectory": null, "buildCommand": "npx turbo run build --filter=@skillbridge/web"}
