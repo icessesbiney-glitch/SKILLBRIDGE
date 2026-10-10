@@ -1,18 +1,21 @@
-{
+﻿{
   "name": "skillbridge",
   "private": true,
+  "version": "1.0.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "next dev apps/web",
-    "build": "next build apps/web"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
   },
   "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "pg": "^8.23.1"
+    "node": ">=26.0.0"
   }
 }
