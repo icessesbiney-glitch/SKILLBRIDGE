@@ -2,16 +2,11 @@
   "name": "skillbridge",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "clean": "turbo clean"
-  },
-  "devDependencies": {
-    "turbo": "^2.0.0"
+    "build": "npm run build --prefix apps/web",
+    "dev": "npm run dev --prefix apps/web",
+    "clean": "git clean -xdf -e .env*"
   },
   "engines": {
     "node": ">=18"
-  },
-  "packageManager": "npm@10.0.0"
+  }
 }
