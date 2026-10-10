@@ -4,10 +4,19 @@ import { NextResponse } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+interface TelemetryPayload {
+  userId: string;
+  profileType: 'driver' | 'rider';
+  latitude: number;
+  longitude: number;
+  status?: string;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-    const { userId, profileType, latitude, longitude, status } = await request.json();
+    const body: TelemetryPayload = await request.json();
+    const { userId, profileType, latitude, longitude, status } = body;
 
     if (!userId || !profileType || !latitude || !longitude) {
       return NextResponse.json({ error: 'Missing telemetry matrices fields' }, { status: 400 });
