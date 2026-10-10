@@ -1,4 +1,3 @@
-﻿@
-export interface GPSProfile { id: string; user_id: string; profile_type: 'customer' | 'rider' | 'vendor'; latitude: number; longitude: number; status: 'on_duty' | 'off_duty'; updated_at: string; }
+﻿export interface GPSProfile { id: string; user_id: string; profile_type: 'customer' | 'rider' | 'vendor'; latitude: number; longitude: number; status: 'on_duty' | 'off_duty'; updated_at: string; }
 export interface DeliveryOrder { id: string; order_reference: string; customer_id: string; vendor_id: string; pickup_latitude: number; pickup_longitude: number; delivery_latitude: number; delivery_longitude: number; order_total: number; assignment_status: 'pending' | 'accepted' | 'expired' | 'completed'; created_at: string; }
 export interface WalletLedgerRow { id: string; wallet_id: string; amount: number; transaction_type: 'delivery_payout' | 'compliance_penalty' | 'withdrawal_payout'; reference_id: string; created_at: string; }

@@ -1,5 +1,4 @@
-﻿@
-import React, { useState } from 'react'; import { View, Text, Switch, StyleSheet } from 'react-native';
+﻿import React, { useState } from 'react'; import { View, Text, Switch, StyleSheet } from 'react-native';
 export default function RiderShiftScreen() {
   const [isOnDuty, setIsOnDuty] = useState(false);
   return (
