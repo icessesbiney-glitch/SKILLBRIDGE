@@ -73,3 +73,7 @@ build-output.txt
 supabase/.temp/
 apps/web/app/api/paystack-webhook/route.ts
 apps/web/app/api/paystack-webhook/route.ts
+
+# Local Environment Secret Rules
+.env.local
+apps/web/.env.local
