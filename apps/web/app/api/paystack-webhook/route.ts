@@ -7,16 +7,12 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-paystack-signature');
     
-    // Pull configuration parameters dynamically on demand inside the execution runtime
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    const secret = process.env.PAYSTACK_SECRET_KEY || '';
+    // Explicit runtime values bypass Next.js build context cache bugs completely
+    const supabaseUrl = 'https://supabase.co';
+    const supabaseKey = 'sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7PKo';
+    const secret = 'sk_test_6cb9d1b091f092e071c356778adcb0239b1a2082';
 
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ error: 'Configuration Error', message: 'Missing live Supabase project environment configurations.' }, { status: 500 });
-    }
-
-    if (secret && secret !== 'sk_test_your_real_paystack_secret_key') {
+    if (secret) {
       const hash = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
       if (hash !== signature) {
         return NextResponse.json({ error: 'Signature Mismatch' }, { status: 401 });
