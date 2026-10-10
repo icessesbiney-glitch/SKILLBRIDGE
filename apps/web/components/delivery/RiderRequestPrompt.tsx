@@ -32,7 +32,6 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
   useEffect(() => {
     const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
-    // Subscribe to real-time order assignments targeting this specific rider
     const dispatchChannel = supabase
       .channel(`rider-dispatch-${riderProfileId}`)
       .on(
@@ -45,7 +44,6 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
         },
         async (payload: any) => {
           if (payload.new.assignment_status === 'pending') {
-            // Fetch nested order metadata fields to populate the card interface metrics
             const { data: orderData } = await supabase
               .from('delivery_orders')
               .select('order_reference, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, order_total')
@@ -59,14 +57,6 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
                 delivery_orders: orderData as any
               });
               setCountdown(30);
-              // Trigger a system alert notification tone safely inside the browser context
-              try {
-                const audio = new Audio('https://mixkit.co');
-                audio.volume = 0.5;
-                audio.play();
-              } catch (e) {
-                console.log('Audio playback delayed due to browser interaction policies');
-              }
             }
           }
         }
@@ -78,13 +68,12 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
     };
   }, [riderProfileId]);
 
-  // Handle countdown timeout tick matrices
   useEffect(() => {
     if (activeRequest && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else if (activeRequest && countdown === 0) {
-      handleResolution('expired', 'Timeout expiration matrix threshold reached');
+      handleResolution('expired');
     }
   }, [activeRequest, countdown]);
 
@@ -95,7 +84,6 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
     const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
     try {
-      // 1. Core transactional update to change the status of the dispatch row item
       const { error: updateError } = await supabase
         .from('delivery_assignments')
         .update({
@@ -107,14 +95,13 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
 
       if (updateError) throw updateError;
 
-      // 2. File a violation penalty compliance log if the rider declines or lets it time out
       if (status === 'declined' || status === 'expired') {
         await supabase.from('rider_compliance_logs').insert([
           {
             rider_profile_id: riderProfileId,
             order_id: activeRequest.order_id,
             violation_type: status === 'declined' ? 'proximity_decline' : 'timeout_expiry',
-            penalty_fee: 2.50 // Apply a standardized GHS 2.50 system penalty charge modifier
+            penalty_fee: 2.50
           }
         ]);
       }
@@ -122,7 +109,7 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
       setActiveRequest(null);
       onAssignmentResolved();
     } catch (err: any) {
-      alert(`Dispatch resolution critical block error: ${err.message}`);
+      console.error(err.message);
     } finally {
       setProcessing(false);
     }
@@ -138,7 +125,7 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
             <h3 className="text-amber-400 font-bold uppercase tracking-widest text-sm animate-pulse">Incoming Order Alert</h3>
             <p className="text-[10px] text-slate-400">Ref: {activeRequest.delivery_orders.order_reference}</p>
           </div>
-          <div className="text-xl font-bold bg-amber-950/40 text-amber-400 border border-amber-500 rounded-full w-12 h-12 flex justify-center items-center animate-bounce">
+          <div className="text-xl font-bold bg-amber-950/40 text-amber-400 border border-amber-500 rounded-full w-12 h-12 flex justify-center items-center">
             {countdown}s
           </div>
         </div>
@@ -157,16 +144,16 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
           <button
             disabled={processing}
             onClick={() => handleResolution('declined', 'Rider manually skipped request matrix')}
-            className="flex-1 py-3 bg-rose-950/40 border border-rose-500 text-rose-400 font-bold uppercase rounded-xl hover:bg-rose-900 transition-colors disabled:opacity-50"
+            className="flex-1 py-3 bg-rose-950/40 border border-rose-500 text-rose-400 font-bold uppercase rounded-xl hover:bg-rose-900 transition-colors"
           >
-            Decline Order
+            Decline
           </button>
           <button
             disabled={processing}
             onClick={() => handleResolution('accepted')}
-            className="flex-1 py-3 bg-emerald-950/40 border border-emerald-500 text-emerald-400 font-bold uppercase rounded-xl hover:bg-emerald-900 transition-colors shadow-lg shadow-emerald-950/50 disabled:opacity-50"
+            className="flex-1 py-3 bg-emerald-950/40 border border-emerald-500 text-emerald-400 font-bold uppercase rounded-xl hover:bg-emerald-900 transition-colors"
           >
-            Accept Request
+            Accept
           </button>
         </div>
       </div>
