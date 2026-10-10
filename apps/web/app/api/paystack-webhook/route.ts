@@ -3,9 +3,9 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 export async function POST(req: Request) {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://supabase.co";
-    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7PKo";
-    const secret = process.env.PAYSTACK_SECRET_KEY || "sk_test_your_real_paystack_secret_key";
+    const url = "https://aolfuonsuaeoitumuvqc.supabase.co";
+    const anon = "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7PKo";
+    const secret = "sk_test_your_real_paystack_secret_key";
     const supabase = createClient(url, anon);
     const bodyText = await req.text();
     const incomingSignature = req.headers.get("x-paystack-signature");
