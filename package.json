@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "skillbridge",
   "private": true,
   "workspaces": [
@@ -11,5 +11,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }
