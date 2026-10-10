@@ -2,20 +2,9 @@
   "name": "@skillbridge/web",
   "version": "1.0.0",
   "private": true,
-  "scripts": {`n    "dev": "next dev",,
-    "build": "next build"
-  },
-  "dependencies": {
-    "@skillbridge/shared": "file:../../packages/shared",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.117.3",
-    "next": "^14.2.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "typescript": "^5.9.3"
-  },
-  "devDependencies": {
-    "@types/react": "19.3.0"
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   }
 }
-
