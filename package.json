@@ -1,10 +1,13 @@
 ﻿{
   "name": "skillbridge",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "build": "npm run build --prefix apps/web",
-    "dev": "npm run dev --prefix apps/web",
-    "clean": "git clean -xdf -e .env*"
+    "dev": "next dev apps/web",
+    "build": "next build apps/web"
   },
   "engines": {
     "node": ">=18"

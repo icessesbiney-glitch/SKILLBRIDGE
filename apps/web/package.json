@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "@skillbridge/web",
   "version": "1.0.0",
   "private": true,
@@ -9,12 +9,13 @@
   },
   "dependencies": {
     "next": "^14.2.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "@types/react": "^19.3.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.0.0",
+    "@types/react": "^18.2.0",
+    "@types/node": "^20.0.0"
   }
 }
