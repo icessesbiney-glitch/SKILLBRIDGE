@@ -6,7 +6,7 @@ $sh = $h.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($p))
 $sig = [System.BitConverter]::ToString($sh).Replace("-","").ToLower()
 $hd = @{"x-paystack-signature"=$sig}
 try {
-    $r = Invoke-RestMethod -Uri "http://127.0.0" -Method Post -Body $p -ContentType "application/json" -Headers $hd
+    $r = Invoke-RestMethod -Uri "http://localhost:3000/api/paystack-webhook" -Method Post -Body $p -ContentType "application/json" -Headers $hd
     Write-Host "? SUCCESS: Handshake simulation completed natively!" -ForegroundColor Green
     $r | ConvertTo-Json
 } catch {
