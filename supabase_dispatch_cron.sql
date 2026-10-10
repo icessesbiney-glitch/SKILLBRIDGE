@@ -1,5 +1,4 @@
-﻿-- Database function to check for expired assignments and trigger a cascading re-dispatch matrix loop
-CREATE OR REPLACE FUNCTION public.check_and_process_expired_delivery_dispatches(
+﻿CREATE OR REPLACE FUNCTION public.check_and_process_expired_delivery_dispatches(
     timeout_threshold_seconds INT DEFAULT 30
 )
 RETURNS TABLE (
