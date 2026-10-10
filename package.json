@@ -1,11 +1,14 @@
 {
-  "name": "skillbridge",
-  "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
-  "dependencies": {},
-  "devDependencies": {
-    "turbo": "^2.11.7"
-  }
+    "name":  "skillbridge",
+    "private":  true,
+    "workspaces":  [
+                       "apps/*"
+                   ],
+    "dependencies":  {
+
+                     },
+    "devDependencies":  {
+                            "turbo":  "^2.11.7"
+                        },
+    "packageManager":  "npm@10.8.2"
 }
