@@ -7,8 +7,8 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-paystack-signature');
     
-    // Explicit runtime values bypass Next.js build context cache bugs completely
-    const supabaseUrl = 'https://supabase.co';
+    // Explicit project reference subdomain parameters prevent routing mismatches entirely
+    const supabaseUrl = 'https://aolfuonsuaeoitumuvqc.supabase.co';
     const supabaseKey = 'sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7PKo';
     const secret = 'sk_test_6cb9d1b091f092e071c356778adcb0239b1a2082';
 
