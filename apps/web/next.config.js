@@ -4,7 +4,11 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: true },
-  output: "standalone"
+  output: "standalone",
+  staticPagePrerenderTimeout: 10000,
+  experimental: {
+    missingSuspenseWithCSRBailout: false
+  }
 };
 
 module.exports = nextConfig;
