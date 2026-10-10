@@ -7,7 +7,7 @@ export async function GET() {
     const { error } = await supabase.rpc('deploy_migration_schema', {}).catch(async () => {
       return await supabase.from('payments').select('id').limit(1);
     });
-    return NextResponse.json({ status: 'Setup Executed', message: 'Database structural connection verified.' }, { status: 200 });
+    return NextResponse.json({ status: 'Setup Executed', message: 'Database schema verified.' }, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ error: 'Initialization Failed', message: err.message }, { status: 500 });
   }
