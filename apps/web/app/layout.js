@@ -1,5 +1,3 @@
-import "../../styles/globals.css";
-
 export const metadata = {
   title: "SkillBridge",
   description: "Market Hub Platform",
@@ -9,9 +7,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <main>
-          {children}
-        </main>
+        <main>{children}</main>
       </body>
     </html>
   );

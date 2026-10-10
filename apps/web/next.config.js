@@ -5,7 +5,6 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: true },
   output: "standalone",
-  staticPagePrerenderTimeout: 10000,
   experimental: {
     missingSuspenseWithCSRBailout: false
   }
