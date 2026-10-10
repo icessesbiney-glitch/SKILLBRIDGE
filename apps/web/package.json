@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@skillbridge/shared": "file:../../packages/shared",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "next": "^14.2.3",
     "react": "^18.3.1",
