@@ -1,20 +1,10 @@
-{
+﻿{
   "name": "@skillbridge/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "scripts": {
-    "build": "tsc",
-    "type-check": "tsc --noEmit",
-    "lint": "echo \"Pass shared package linting checks\"",
-    "test": "echo \"Pass shared package unit tests\""
-  },
+  "main": "src/supabaseClient.ts",
+  "types": "src/supabaseClient.ts",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.5.0",
-    "typescript": "^5.0.0"
   }
 }
