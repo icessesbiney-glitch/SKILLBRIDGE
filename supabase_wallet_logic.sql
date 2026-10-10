@@ -1,81 +1,35 @@
--- =========================================================================
--- SKILLBRIDGE PRODUCTION SYSTEM WALLET LEDGER ROUTINES
--- =========================================================================
-
-CREATE TABLE IF NOT EXISTS public.platform_wallets (
+﻿-- 1. Create the base rider wallet balance master table mapping
+CREATE TABLE IF NOT EXISTS public.rider_wallets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
-    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
-    currency TEXT DEFAULT 'GHS' NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    rider_profile_id UUID REFERENCES public.gps_profiles(id) ON DELETE CASCADE UNIQUE,
+    current_balance NUMERIC(10, 2) DEFAULT 0.00 NOT NULL CHECK (current_balance >= -50.00), -- Allows a controlled debt cushion margin
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS public.ledger_entries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    wallet_id UUID REFERENCES public.platform_wallets(id) ON DELETE RESTRICT NOT NULL,
-    amount_cents BIGINT NOT NULL,
-    entry_type TEXT NOT NULL CONSTRAINT check_entry_type CHECK (entry_type IN ('payout', 'withdrawal', 'commission')),
-    reference_id TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+-- 2. Create the immutable double-entry ledger transaction logs matrix
+CREATE TABLE IF NOT EXISTS public.wallet_transactions (
+    id BIGSERIAL PRIMARY KEY,
+    wallet_id UUID REFERENCES public.rider_wallets(id) ON DELETE CASCADE NOT NULL,
+    amount NUMERIC(10, 2) NOT NULL, -- Positive values indicate earnings payouts; negative values represent penalties or payouts
+    transaction_type TEXT NOT NULL CHECK (transaction_type IN ('delivery_payout', 'compliance_penalty', 'withdrawal_payout')),
+    reference_id TEXT NOT NULL, -- Maps dynamically to delivery order references or infraction logs codes
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-ALTER TABLE public.platform_wallets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ledger_entries ENABLE ROW LEVEL SECURITY;
-
-CREATE OR REPLACE FUNCTION public.execute_wallet_withdrawal(
-    target_profile_id UUID,
-    requested_amount_cents BIGINT,
-    payment_reference TEXT
-)
-RETURNS JSONB
+-- 3. Trigger function to dynamically recalculate and enforce wallet balance modifiers
+CREATE OR REPLACE FUNCTION public.process_rider_wallet_transaction()
+RETURNS TRIGGER 
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
-DECLARE
-    current_wallet_id UUID;
-    available_cents BIGINT;
-BEGIN
-    SELECT id, balance_cents INTO current_wallet_id, available_cents
-    FROM public.platform_wallets
-    WHERE profile_id = target_profile_id
-    FOR UPDATE;
+AS \[ BEGIN     -- Update or initialize the wallet balance threshold parameters directly     INSERT INTO public.rider_wallets (rider_profile_id, current_balance, updated_at)     VALUES (NEW.rider_profile_id, 0.00, NOW())     ON CONFLICT (rider_profile_id) DO NOTHING;      -- Apply financial modifier logic streams dynamically     IF NEW.violation_type IS NOT NULL THEN         UPDATE public.rider_wallets         SET current_balance = current_balance - NEW.penalty_fee,             updated_at = NOW()         WHERE rider_profile_id = NEW.rider_profile_id;                  INSERT INTO public.wallet_transactions (wallet_id, amount, transaction_type, reference_id)         SELECT id, -NEW.penalty_fee, 'compliance_penalty', 'PENALTY-' \vert{}\vert{} NEW.id::text         FROM public.rider_wallets WHERE rider_profile_id = NEW.rider_profile_id;     END IF;      RETURN NEW; END; \];
 
-    IF current_wallet_id IS NULL THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Wallet not initialized.');
-    END IF;
+-- 4. Bind the ledger hook trigger to run automatically after a penalty event hits your logs
+DROP TRIGGER IF EXISTS trg_after_compliance_penalty_deduction ON public.rider_compliance_logs;
+CREATE TRIGGER trg_after_compliance_penalty_deduction
+    AFTER INSERT ON public.rider_compliance_logs
+    FOR EACH ROW
+    EXECUTE FUNCTION public.process_rider_wallet_transaction();
 
-    IF requested_amount_cents < 5000 THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Withdrawal must meet 50 GHS minimum.');
-    END IF;
-
-    IF available_cents < requested_amount_cents THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Insufficient funds available.');
-    END IF;
-
-    UPDATE public.platform_wallets
-    SET balance_cents = balance_cents - requested_amount_cents,
-        updated_at = NOW()
-    WHERE id = current_wallet_id;
-
-    INSERT INTO public.ledger_entries (wallet_id, amount_cents, entry_type, reference_id)
-    VALUES (current_wallet_id, -requested_amount_cents, 'withdrawal', payment_reference);
-
-    RETURN jsonb_build_object(
-        'success', true,
-        'reference', payment_reference,
-        'withdrawn_cents', requested_amount_cents,
-        'remaining_balance_cents', (available_cents - requested_amount_cents)
-    );
-END;
-<<<<<<< HEAD
-$$;
-=======
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 3. Lock the wallet functions down so only the server (service role key) can call them.
--- Without this, anyone holding the public publishable key could credit or debit any wallet.
-REVOKE EXECUTE ON FUNCTION increment_wallet_balance(TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION decrement_wallet_balance(TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION increment_wallet_balance(TEXT, NUMERIC) TO service_role;
-GRANT EXECUTE ON FUNCTION decrement_wallet_balance(TEXT, NUMERIC) TO service_role;
->>>>>>> cfc2e2d86a438fc386c68b7927c07fe07b861bb0
+-- Index tables mapping profiles for lightning-fast localized accounting calculations lookup
+CREATE INDEX IF NOT EXISTS idx_rider_wallets_profile ON public.rider_wallets(rider_profile_id);
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet ON public.wallet_transactions(wallet_id);
