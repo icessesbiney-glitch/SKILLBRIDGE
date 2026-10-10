@@ -1,8 +1,8 @@
-{
+﻿{
   "name": "@skillbridge/web",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
+  "scripts": {`n    "dev": "next dev",,
     "build": "next build"
   },
   "dependencies": {
@@ -18,3 +18,4 @@
     "@types/react": "19.3.0"
   }
 }
+
