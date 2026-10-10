@@ -1,0 +1,12 @@
+﻿{
+  "projectId": "prj_skillbridge_workspace",
+  "orgId": "team_link_the_ink",
+  "settings": {
+    "framework": "nextjs",
+    "installCommand": "pnpm install",
+    "buildCommand": "npx turbo run build --filter=@skillbridge/web",
+    "outputDirectory": "apps/web/.next",
+    "rootDirectory": "apps/web",
+    "directoryListing": false
+  }
+}
