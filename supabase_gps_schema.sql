@@ -1,23 +1,25 @@
-﻿-- Create tracking lookup metadata values for system riders and delivery drivers
-CREATE TYPE vehicle_status AS ENUM ('part_time', 'personal_routine', 'active_delivery', 'offline');
+﻿-- Enable PostGIS extension for accurate location geography metrics
+CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Primary real-time GPS tracking schema matrix table
-CREATE TABLE IF NOT EXISTS public.system_trackers (
+-- 1. Create tracking profiles for system tracking
+CREATE TABLE IF NOT EXISTS public.gps_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_name TEXT NOT NULL,
-    associated_identity_card TEXT NOT NULL, -- Ghana Card Verification Linkage Record
-    current_latitude NUMERIC(10, 8) NOT NULL,
-    current_longitude NUMERIC(11, 8) NOT NULL,
-    active_status vehicle_status DEFAULT 'offline'::vehicle_status,
-    last_ping_timestamp TIMESTAMPTZ DEFAULT clock_timestamp(),
-    updated_at TIMESTAMPTZ DEFAULT clock_timestamp()
+    user_id UUID NOT NULL,
+    profile_type TEXT NOT NULL CHECK (profile_type IN ('driver', 'rider')),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Turn on row level security gating mechanisms for protection bounds
-ALTER TABLE public.system_trackers ENABLE ROW LEVEL SECURITY;
+-- 2. Create the live coordinates telemetry data matrix
+CREATE TABLE IF NOT EXISTS public.gps_telemetry (
+    id BIGSERIAL PRIMARY KEY,
+    profile_id UUID REFERENCES public.gps_profiles(id) ON DELETE CASCADE,
+    latitude NUMERIC(10, 7) NOT NULL,
+    longitude NUMERIC(10, 7) NOT NULL,
+    current_status TEXT NOT NULL DEFAULT 'on_duty' CHECK (current_status IN ('on_duty', 'off_duty', 'on_delivery', 'paused')),
+    recorded_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
-CREATE POLICY "Allow public select transactions for close location matching"
-    ON public.system_trackers FOR SELECT USING (true);
-
-CREATE POLICY "Allow authenticated internal sync overrides on tracking pings"
-    ON public.system_trackers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- Indexing for rapid hyper-local geo querying capabilities
+CREATE INDEX IF NOT EXISTS idx_gps_profiles_user ON public.gps_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_gps_telemetry_recorded_at ON public.gps_telemetry(recorded_at DESC);
