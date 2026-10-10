@@ -30,7 +30,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
   const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
   const fetchWalletMetrics = async () => {
-    // 1. Fetch live balance ledger records
     const { data: wallet } = await supabase
       .from('rider_wallets')
       .select('id, current_balance')
@@ -40,7 +39,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
     if (wallet) {
       setBalance(wallet.current_balance);
 
-      // 2. Query structural list arrays of the 5 most recent accounting items
       const { data: txs } = await supabase
         .from('wallet_transactions')
         .select('id, amount, transaction_type, reference_id, created_at')
@@ -55,7 +53,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
   useEffect(() => {
     fetchWalletMetrics();
 
-    // Subscribe to realtime transactional ledger table alerts mapping this wallet channel
     const ledgerSubscription = supabase
       .channel(`wallet-ledger-${riderProfileId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rider_wallets', filter: `rider_profile_id=eq.${riderProfileId}` }, () => fetchWalletMetrics())
@@ -78,7 +75,7 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
     }
 
     setLoading(true);
-    setStatusMessage('📡 Initializing Paystack mobile money money transfer protocols...');
+    setStatusMessage('📡 Initializing Paystack mobile money transfer protocols...');
 
     try {
       const response = await fetch('/api/rider/payout', {
@@ -113,7 +110,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
         <span className="text-[10px] text-slate-500">GHS Ledger Matrix</span>
       </div>
 
-      {/* Account balance card mapping container layout row */}
       <div className="p-4 bg-slate-950 border border-slate-850 rounded-xl text-center">
         <div className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Available Ledger Balance</div>
         <div className={`text-2xl font-bold tracking-tight ${balance < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
@@ -121,7 +117,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
         </div>
       </div>
 
-      {/* Interactive Mobile Money payment routing input field sets layout template */}
       <form onSubmit={handleWithdrawalRequest} className="space-y-3">
         <div className="text-slate-400 font-bold uppercase text-[10px]">Execute Cashout Outflow:</div>
         
@@ -170,7 +165,6 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
         </div>
       )}
 
-      {/* Transaction historical ledger feed list logs rows block container */}
       <div className="space-y-2 pt-2 border-t border-slate-800">
         <div className="text-slate-400 font-bold uppercase text-[10px] mb-2">Recent Transaction Matrix Ledger Logs:</div>
         {history.length === 0 ? (
