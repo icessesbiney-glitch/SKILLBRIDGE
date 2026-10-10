@@ -1,0 +1,37 @@
+
+> @skillbridge/web@1.0.0 build
+> next build
+
+node:internal/modules/cjs/loader:1573
+  throw err;
+  ^
+
+Error: Cannot find module 'styled-jsx/package.json'
+Require stack:
+- C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\server\require-hook.js
+- C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\bin\next
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
+    at resolve (node:internal/modules/helpers:214:31)
+    at Object.<anonymous> (C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\server\require-hook.js:38:32)
+    at Module._compile (node:internal/modules/cjs/loader:1934:14)
+    at Object..js (node:internal/modules/cjs/loader:2074:10)
+    at Module.load (node:internal/modules/cjs/loader:1656:32)
+    at Module._load (node:internal/modules/cjs/loader:1448:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\node_modules\\next\\dist\\server\\require-hook.js',
+    'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\node_modules\\next\\dist\\bin\\next'
+  ]
+}
+
+Node.js v26.7.0
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Windows\System32\SKILLBRIDGE\apps\web
+npm error workspace @skillbridge/web@1.0.0
+npm error location C:\Windows\System32\SKILLBRIDGE\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
