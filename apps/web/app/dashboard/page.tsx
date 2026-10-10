@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@skillbridge/shared";
@@ -7,6 +8,15 @@ import AuthStatusCard from "../../components/AuthStatusCard";
 import ProtectedShell from "../../components/ProtectedShell";
 import SiteChrome from "../../components/SiteChrome";
 import TaskWorkspace from "../../components/TaskWorkspace";
+=======
+import Link from 'next/link';
+import AuthStatusCard from '../../components/AuthStatusCard';
+import PaystackCheckoutButton from '../../components/PaystackCheckoutButton';
+import ProtectedShell from '../../components/ProtectedShell';
+import SiteChrome from '../../components/SiteChrome';
+import TaskWorkspace from '../../components/TaskWorkspace';
+import { deploymentSteps, platforms, teamMembers } from '../../data/siteContent';
+>>>>>>> cfc2e2d86a438fc386c68b7927c07fe07b861bb0
 
 export default function DashboardPage() {
   const [balance, setBalance] = useState<number | null>(null);
@@ -66,6 +76,7 @@ export default function DashboardPage() {
 
             <div className="sb-card-grid sb-card-grid-compact">
               <AuthStatusCard />
+<<<<<<< HEAD
               
               {/* Dynamic Live Wallet Balance Tracking Component Ledger Widget */}
               <article className="sb-card">
@@ -83,6 +94,9 @@ export default function DashboardPage() {
                 <p className="text-xs text-foreground-light">Verified directly against public platform schemas.</p>
               </article>
 
+=======
+              <PaystackCheckoutButton />
+>>>>>>> cfc2e2d86a438fc386c68b7927c07fe07b861bb0
               <article className="sb-card">
                 <span className="sb-status-pill">{readiness.length} completed repair checks</span>
                 <h3>Repository readiness</h3>

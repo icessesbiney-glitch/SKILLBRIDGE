@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "name":  "skillbridge",
     "private":  true,
     "workspaces":  [
@@ -11,4 +12,21 @@
                             "turbo":  "^2.11.7"
                         },
     "packageManager":  "npm@10.8.2"
+=======
+  "name": "skillbridge-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "build:web": "npm run build --workspace=@skillbridge/web"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "npm@10.8.2"
+>>>>>>> cfc2e2d86a438fc386c68b7927c07fe07b861bb0
 }

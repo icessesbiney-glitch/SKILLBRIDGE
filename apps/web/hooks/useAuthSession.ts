@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase } from '@skillbridge/shared'; // Aligns cleanly with your shared monorepo package layer
+import { supabase } from '../utils/supabaseClient';
 
 type AuthSessionState = {
   isConfigured: boolean;
