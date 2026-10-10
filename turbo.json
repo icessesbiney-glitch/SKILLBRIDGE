@@ -1,26 +1,14 @@
-<<<<<<< HEAD
-{"$schema": "https://turbo.build", "tasks": {"build": {"dependsOn": ["^build"], "outputs": [".next/**", "!.next/cache/**"]}}}
-=======
-{
+﻿{
   "$schema": "https://turbo.build",
-  "globalEnv": [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "PAYSTACK_SECRET_KEY",
-    "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY"
-  ],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+    },
+    "lint": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
->>>>>>> cfc2e2d86a438fc386c68b7927c07fe07b861bb0
