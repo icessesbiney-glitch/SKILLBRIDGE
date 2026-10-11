@@ -2,32 +2,40 @@
 > @skillbridge/web@1.0.0 build
 > next build
 
-node:internal/modules/cjs/loader:1573
-  throw err;
-  ^
+  ▲ Next.js 14.2.35
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · missingSuspenseWithCSRBailout
 
-Error: Cannot find module 'styled-jsx/package.json'
-Require stack:
-- C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\server\require-hook.js
-- C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\bin\next
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
-    at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
-    at resolve (node:internal/modules/helpers:214:31)
-    at Object.<anonymous> (C:\Windows\System32\SKILLBRIDGE\apps\web\node_modules\next\dist\server\require-hook.js:38:32)
-    at Module._compile (node:internal/modules/cjs/loader:1934:14)
-    at Object..js (node:internal/modules/cjs/loader:2074:10)
-    at Module.load (node:internal/modules/cjs/loader:1656:32)
-    at Module._load (node:internal/modules/cjs/loader:1448:12)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\node_modules\\next\\dist\\server\\require-hook.js',
-    'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\node_modules\\next\\dist\\bin\\next'
-  ]
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (268kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/32) ...
+   Generating static pages (8/32) 
+   Generating static pages (16/32) 
+   Generating static pages (24/32) 
+ ✓ Generating static pages (32/32)
+
+> Build error occurred
+Error: ENOENT: no such file or directory, rename 'C:\Windows\System32\SKILLBRIDGE\apps\web\.next\export\500.html' -> 'C:\Windows\System32\SKILLBRIDGE\apps\web\.next\server\pages\500.html'
+    at async Object.rename (node:internal/fs/promises:1510:10)
+    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1873:33
+    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
+    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1924:25
+    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
+    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1546:17
+    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
+    at async build (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:368:9) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'rename',
+  path: 'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\.next\\export\\500.html',
+  dest: 'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\.next\\server\\pages\\500.html'
 }
-
-Node.js v26.7.0
 npm error Lifecycle script `build` failed with error:
 npm error code 1
 npm error path C:\Windows\System32\SKILLBRIDGE\apps\web
