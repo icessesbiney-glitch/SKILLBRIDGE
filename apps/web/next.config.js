@@ -1,1 +1,1 @@
-﻿module.exports = { reactStrictMode: true, output: 'standalone', eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true }, experimental: { missingSuspenseWithCSRBailout: false } };
+﻿module.exports = { reactStrictMode: true, output: 'standalone', eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true } };
