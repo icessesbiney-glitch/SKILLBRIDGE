@@ -1,0 +1,16 @@
+{
+  "name": "skillbridge",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev"
+  },
+  "dependencies": {
+    "turbo": "^2.11.7"
+  }
+}
