@@ -1,10 +1,8 @@
-"use client";
-
-export default function GlobalError() {
+'use client';
+export default function ErrorBoundary() {
   return (
-    <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif" }}>
-      <h1 style={{ color: "#dc2626" }}>Internal Compilation Boundary</h1>
-      <p>Processing core platform layout components safely...</p>
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+      <h1>500 - Server Error</h1>
     </div>
   );
 }
