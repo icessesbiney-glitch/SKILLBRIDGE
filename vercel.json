@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npm install --no-workspaces --force && npx next build",
+  "outputDirectory": "apps/web/.next"
+}
