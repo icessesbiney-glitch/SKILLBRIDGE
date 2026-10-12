@@ -1,18 +1,1 @@
-﻿{
-    "name":  "skillbridge-monorepo",
-    "version":  "1.0.0",
-    "private":  true,
-    "packageManager":  "npm@10.8.2",
-    "workspaces":  [
-                       "apps/*",
-                       "packages/*"
-                   ],
-    "scripts":  {
-                    "build":  "turbo run build --filter=@skillbridge/web...",
-                    "dev":  "turbo run dev",
-                    "lint":  "turbo run lint"
-                },
-    "devDependencies":  {
-                            "turbo":  "^2.11.7"
-                        }
-}
+﻿{"name":"skillbridge-monorepo","version":"1.0.0","private":true,"packageManager":"npm@10.8.2","workspaces":["apps/*","packages/*"],"scripts":{"build":"turbo run build","dev":"turbo run dev","lint":"turbo run lint","type-check":"turbo run type-check"},"devDependencies":{"turbo":"^2.11.7"}}
