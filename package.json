@@ -1,10 +1,11 @@
-{
-  "name": "skillbridge-root",
-  "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
-  "scripts": {
-    "build": "npm run build -w apps/web"
-  }
+﻿{
+    "name":  "skillbridge-root",
+    "private":  true,
+    "workspaces":  [
+                       "apps/*"
+                   ],
+    "scripts":  {
+                    "build":  "npm run build -w apps/web"
+                },
+    "packageManager":  "npm@10.8.2"
 }
