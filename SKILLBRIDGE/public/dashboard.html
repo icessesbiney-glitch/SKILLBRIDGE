@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner dashboard — SkillBridge</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .dash-shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+  .sidebar {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 30px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .sidebar .brand { color: var(--bg); font-size: 19px; }
+  .sidebar .brand span { color: var(--accent-soft); }
+  .side-nav { display: flex; flex-direction: column; gap: 4px; }
+  .side-nav a {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+  .side-nav a.active { background: rgba(255,255,255,0.08); color: var(--bg); }
+  .side-nav a:hover { color: var(--bg); }
+  .side-foot { margin-top: auto; }
+  .who-box { padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .who-box .name { font-family: var(--ff-display); font-size: 15px; }
+  .who-box .role { font-family: var(--ff-mono); font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .logout-link { display: inline-block; margin-top: 12px; font-family: var(--ff-mono); font-size: 12px; color: var(--accent-soft); cursor: pointer; }
+
+  .main { padding: 40px 44px 60px; }
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 34px; gap: 20px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 30px; }
+  .topbar p { color: var(--ink-soft); margin: 6px 0 0; font-size: 14.5px; }
+
+  .stat-grid { display: grid; grid-template-columns: 1.3fr 0.9fr 0.9fr 1fr; gap: 16px; margin-bottom: 40px; }
+  .stat-card { padding: 22px; }
+  .stat-card .lbl { font-family: var(--ff-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.05em; }
+  .stat-card .val { font-family: var(--ff-display); font-size: 36px; margin-top: 8px; color: var(--accent); }
+
+  .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .panel-head h2 { font-size: 20px; }
+
+  .table { padding: 6px 0; margin-bottom: 44px; }
+  .table .row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr 1.3fr 0.7fr 0.8fr;
+    gap: 14px;
+    padding: 14px 22px;
+    font-size: 14px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .table .row.head {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--ink);
+  }
+  #swaps-body .row:last-child { border-bottom: none; }
+  #swaps-body .row:hover { background: var(--bg-alt); }
+
+  .members-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 40px; }
+  .member-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .member-card .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: var(--ff-mono); font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .member-card .who { font-family: var(--ff-display); font-weight: 600; font-size: 15.5px; }
+  .member-card .loc { font-size: 11.5px; color: var(--ink-faint); margin: 2px 0 8px; }
+  .member-card .skills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: var(--bg-alt); color: var(--ink-soft); }
+  .pill-seek { background: var(--accent-soft); color: var(--accent-dark); }
+  .member-meta { text-align: right; font-size: 13px; flex-shrink: 0; }
+
+  .add-form { display: grid; grid-template-columns: 1.2fr 1fr 1fr 0.7fr auto; gap: 10px; padding: 18px; align-items: end; }
+  .add-form .field { margin: 0; }
+  .add-form label { display:block; font-family: var(--ff-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .add-form input { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); font-size: 13.5px; }
+
+  .reset-row { display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 30px; }
+
+  @media (max-width: 980px) {
+    .dash-shell { grid-template-columns: 1fr; }
+    .sidebar { flex-direction: row; align-items: center; overflow-x: auto; }
+    .side-nav { flex-direction: row; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .members-grid { grid-template-columns: 1fr; }
+    .table .row { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dash-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="brand">Skill<span>Bridge</span></a>
+    <nav class="side-nav">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#swaps">Swap activity</a>
+      <a href="#members">Members</a>
+    </nav>
+    <div class="side-foot">
+      <div class="who-box">
+        <div class="name" id="who-name">—</div>
+        <div class="role">Owner</div>
+        <a class="logout-link" id="logout-link">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="overview">Overview</h1>
+        <p>Everything below is read from your browser's local storage — refresh, and it's still here; clear it, and it resets.</p>
+      </div>
+      <button class="btn btn-ghost" id="reset-btn">Reset demo data</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="card stat-card">
+        <div class="lbl">Members</div>
+        <div class="val" id="stat-members">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="lbl">Active swaps</div>
+        <div class="val" id="stat-active">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="lbl">Pending</div>
+        <div class="val" id="stat-pending">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="lbl">Avg rating</div>
+        <div class="val" id="stat-rating">0.00</div>
+      </div>
+    </div>
+
+    <section id="swaps">
+      <div class="panel-head"><h2>Swap activity</h2></div>
+      <div class="card table">
+        <div class="row head">
+          <div>Member</div><div>Offering</div><div>Seeking</div><div>Status</div><div>Date</div>
+        </div>
+        <div id="swaps-body"></div>
+      </div>
+    </section>
+
+    <section id="members">
+      <div class="panel-head"><h2>Members</h2></div>
+      <div class="card" style="margin-bottom:16px;">
+        <form class="add-form" id="add-member-form">
+          <div class="field">
+            <label for="new-name">Name</label>
+            <input id="new-name" type="text" placeholder="Astrid Bello" required>
+          </div>
+          <div class="field">
+            <label for="new-offer">Offers</label>
+            <input id="new-offer" type="text" placeholder="Cello lessons" required>
+          </div>
+          <div class="field">
+            <label for="new-seek">Seeks</label>
+            <input id="new-seek" type="text" placeholder="Bookkeeping" required>
+          </div>
+          <div class="field">
+            <label for="new-city">City</label>
+            <input id="new-city" type="text" placeholder="Boise, ID" required>
+          </div>
+          <button type="submit" class="btn btn-solid">Add member</button>
+        </form>
+      </div>
+      <div class="members-grid" id="members-list"></div>
+    </section>
+  </main>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  sbSeedIfEmpty();
+  const session = sbRequireSession('login.html');
+  if (session) {
+    document.getElementById('who-name').textContent = session.name;
+    sbRenderAll();
+  }
+
+  document.getElementById('logout-link').addEventListener('click', () => {
+    sbLogout();
+    window.location.href = 'login.html';
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    sbResetDemoData();
+    sbRenderAll();
+  });
+
+  document.getElementById('add-member-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('new-name').value.trim();
+    const offer = document.getElementById('new-offer').value.trim();
+    const seek = document.getElementById('new-seek').value.trim();
+    const city = document.getElementById('new-city').value.trim();
+    if (!name || !offer || !seek || !city) return;
+
+    const members = sbLoad(SB_KEYS.members, []);
+    members.push({
+      id: 'm-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
+      name, initials: sbInitials(name),
+      offering: offer, seeking: seek, city,
+      rating: 4.5, swaps: 0,
+      joined: new Date().toISOString().slice(0, 10),
+    });
+    sbSave(SB_KEYS.members, members);
+    e.target.reset();
+    sbRenderAll();
+  });
+</script>
+</body>
+</html>

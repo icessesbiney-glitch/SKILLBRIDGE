@@ -1,0 +1,14 @@
+﻿import { createClient } from '@supabase/supabase-js'; import { NextResponse } from 'next/server';
+export async function POST(req: Request) {
+  try {
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+    const { vendorId, orderReference, grossAmount } = await req.json();
+    if (!vendorId || !orderReference || !grossAmount) return NextResponse.json({ error: 'Missing keys' }, { status: 400 });
+    const comm = parseFloat((grossAmount * 0.10).toFixed(2)); const net = parseFloat((grossAmount - comm).toFixed(2));
+    await supabase.from('vendor_wallets').insert([{ vendor_id: vendorId, accumulated_earnings: 0.00 }]).onConflict('vendor_id').doNothing();
+    const { data: w } = await supabase.from('vendor_wallets').select('id, accumulated_earnings').eq('vendor_id', vendorId).single();
+    await supabase.from('vendor_wallets').update({ accumulated_earnings: w!.accumulated_earnings + net, updated_at: new Date().toISOString() }).eq('id', w!.id);
+    await supabase.from('vendor_ledger_transactions').insert([{ vendor_wallet_id: w!.id, gross_amount: grossAmount, platform_commission_deducted: comm, net_payout_settled: net, order_reference: orderReference }]);
+    return NextResponse.json({ success: true, gross: grossAmount, commission: comm, net: net }, { status: 200 });
+  } catch (err: any) { return NextResponse.json({ error: err.message }, { status: 500 }); }
+}
