@@ -1,1 +1,1 @@
-\
+module.exports = { reactStrictMode: false, eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true }, output: 'standalone', skipTrailingSlashRedirect: true, images: { unoptimized: true } };
