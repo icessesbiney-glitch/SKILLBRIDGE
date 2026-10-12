@@ -1,1 +1,0 @@
-'use client'; import dynamic from 'next/dynamic'; const AdminGPSDashboard = dynamic(() => import('@/components/admin/AdminGPSDashboard'), { ssr: false }); export default function AdminGPSPage() { return <AdminGPSDashboard />; }

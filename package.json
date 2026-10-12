@@ -1,1 +1,16 @@
-{"name":"skillbridge-monorepo","version":"1.0.0","private":true,"packageManager":"npm@10.8.2","workspaces":["apps/*","packages/ *"],"scripts":{"build":"turbo run build","dev":"turbo run dev","lint":"turbo run lint"},"devDependencies":{"turbo":"^2.11.7"},"dependencies":{"@supabase/supabase-js":"^2.117.3"}}
+{
+  "name": "skillbridge",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev"
+  },
+  "dependencies": {
+    "turbo": "^2.11.7"
+  }
+}

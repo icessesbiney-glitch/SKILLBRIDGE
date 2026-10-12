@@ -77,3 +77,6 @@ apps/web/app/api/paystack-webhook/route.ts
 # Local Environment Secret Rules
 .env.local
 apps/web/.env.local
+
+# Local Netlify folder
+.netlify

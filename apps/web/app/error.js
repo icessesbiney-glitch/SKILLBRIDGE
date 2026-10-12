@@ -1,1 +1,1 @@
-'use client'; export default function Error() { return '500'; }
+'use client'; export default function ErrorBoundary() { return 'Error'; }
