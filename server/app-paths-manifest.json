@@ -1,0 +1,8 @@
+{
+  "/api/delivery-dispatch/route": "app/api/delivery-dispatch/route.js",
+  "/page": "app/page.js",
+  "/api/paystack-webhook/route": "app/api/paystack-webhook/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/delivery/gps/route": "app/api/delivery/gps/route.js",
+  "/api/webhook/paystack/route": "app/api/webhook/paystack/route.js"
+}
