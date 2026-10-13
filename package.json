@@ -1,6 +1,7 @@
 ﻿{
   "name": "skillbridge-root",
   "private": true,
+  "version": "1.0.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -11,7 +12,6 @@
     "type-check": "turbo run type-check"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.0",
     "turbo": "^2.11.7"
   }
 }
