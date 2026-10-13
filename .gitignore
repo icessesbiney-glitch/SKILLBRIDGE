@@ -80,3 +80,6 @@ apps/web/.env.local
 
 # Local Netlify folder
 .netlify
+
+# Historical reference logs
+**/server-reference-manifest.json
