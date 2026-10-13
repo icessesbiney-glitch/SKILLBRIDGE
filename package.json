@@ -11,9 +11,14 @@
                     "build":  "turbo run build",
                     "type-check":  "turbo run type-check",
                     "lint":  "echo \u0027Root lint bypass\u0027",
-                    "test":  "echo \u0027Root test bypass\u0027"
+                    "test":  "echo \u0027Root test bypass\u0027",
+                    "dev:clean":  "cd apps/web \u0026\u0026 Remove-Item -Path .next, .turbo, .cache -Recurse -Force -ErrorAction SilentlyContinue; npx next dev --port 5021"
                 },
     "dependencies":  {
+                         "@next/env":  "^16.4.0",
+                         "@next/swc-win32-x64-msvc":  "^16.4.0",
+                         "baseline-browser-mapping":  "^2.11.28",
+                         "next":  "^16.4.0",
                          "turbo":  "^2.11.7"
                      },
     "packageManager":  "npm@11.19.0"
