@@ -1,24 +1,46 @@
-'use client';
+﻿'use client';
+
 import React from 'react';
-export default function Page() {
+import DashboardMapTracker from '../src/components/dashboard/DashboardMapTracker';
+
+export default function DashboardMasterIndex() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'sans-serif', padding: '2rem' }}>
-      <header style={{ borderBottom: '1px solid #334155', paddingBottom: '1rem', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#38bdf8', margin: 0 }}>SKILLBRIDGE</h1>
-        <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>Global Monorepo Hyperlocal Matrix</p>
+    <main className="min-h-screen bg-slate-950 p-6 flex flex-col gap-6">
+      {/* Global Application Nav Header */}
+      <header className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <h1 className="text-xl font-black text-slate-100 uppercase tracking-wider">
+            SKILLBRIDGE CONTROL HUB
+          </h1>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Hyperlocal Logistics & Dispatch Operational Telemetry
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span className="text-[10px] font-mono bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-1 rounded">
+            SYS STATUS: ONLINE
+          </span>
+        </div>
       </header>
-      <main style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        <div style={{ backgroundColor: '#1e293b', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #334155' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9' }}>?? Live Payment Hub</h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', margin: 0 }}>Gateway Processor: <strong>Paystack Ghana API</strong></p>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>Currency Profile: <strong style={{ color: '#34d399' }}>GHS (?)</strong></p>
+
+      {/* Main Core Dashboard Layout Grid Area */}
+      <section className="w-full max-w-7xl mx-auto grid grid-cols-1 gap-6">
+        {/* Real-time Tracking and Telemetry Map Section Area */}
+        <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 shadow-xl">
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Live Fleet Dispatches
+            </h2>
+            <p className="text-[10px] text-slate-500">
+              Real-time GPS coordinate logging and vehicle state monitors
+            </p>
+          </div>
+          
+          {/* Integrated Core Map Tracking Layer Component */}
+          <DashboardMapTracker />
         </div>
-        <div style={{ backgroundColor: '#1e293b', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #334155' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9' }}>??? Telemetry Routing</h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', margin: 0 }}>Core Data Broker: <strong>Supabase Realtime</strong></p>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>Tracking Target: <strong style={{ color: '#38bdf8' }}>GPS Driver-Rider Grid</strong></p>
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
