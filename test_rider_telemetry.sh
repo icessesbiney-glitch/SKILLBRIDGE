@@ -1,9 +1,9 @@
-﻿#!/bin/bash
-echo "🚀 [SKILLBRIDGE INTEGRATION TEST]: Starting end-to-end hyperlocal auto-dispatch validation sequence..."
+#!/bin/bash
+echo "?? [SKILLBRIDGE INTEGRATION TEST]: Starting end-to-end hyperlocal auto-dispatch validation sequence..."
 API_BASE="http://localhost:3000/api"
 
 # 1. Send dummy telemetry update for an active driver profile cell matrix at Madina, Accra
-echo "📡 Staging active on-duty rider location coordinates at Madina, Accra..."
+echo "?? Staging active on-duty rider location coordinates at Madina, Accra..."
 curl -X POST "$API_BASE/gps" \
   -H "Content-Type: application/json" \
   -d '{
@@ -17,7 +17,7 @@ curl -X POST "$API_BASE/gps" \
 echo -e "\n"
 
 # 2. Trigger the serverless checkout order allocation endpoint
-echo "🛒 Simulating customer checkout placement matrix..."
+echo "?? Simulating customer checkout placement matrix..."
 curl -X POST "$API_BASE/orders/create" \
   -H "Content-Type: application/json" \
   -d '{
@@ -30,4 +30,4 @@ curl -X POST "$API_BASE/orders/create" \
     "total_amount": 45.50
   }'
 
-echo -e "\n\n✅ [TEST SEQUENCE MATRIX RECORDED SUCCESSFULLY]"
+echo -e "\n\n? [TEST SEQUENCE MATRIX RECORDED SUCCESSFULLY]"

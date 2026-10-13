@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "=== EXECUTING MINIFIED LOCAL PAYSTACK WEBHOOK EVENT SIMULATION ==="
 
-WEBHOOK_URL="http://localhost:3000/api/paystack-webhook"
+WEBHOOK_URL="http://localhost:3000/api/orders/create"
 WEBHOOK_SECRET="${PAYSTACK_WEBHOOK_SECRET}"
 MOCK_REF="WITHDRAW_TXN_$(date +%s)"
 
