@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { logTerminalTrackingError } from "../../../utils/errorLogger";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { rider_name, current_status, customer_distance } = await request.json();
+    const body = await request.json();
+    const rider_name = body?.rider_name || "Unknown";
+    const current_status = body?.current_status || "offline";
+    const customer_distance = Number(body?.customer_distance || 0);
     
-    // Core Dispatch Business Logic Rule
     if (current_status === "active" && customer_distance < 0.5) {
-      const templateMessage = `ALERT FOR ${rider_name.toUpperCase()}: You are currently within ${customer_distance}km of the customer destination. Order rejection while on close proximity status violates local platform guidelines and will result in penalties.`;
+      const templateMessage = `ALERT FOR ${rider_name.toUpperCase()}: You are currently within ${customer_distance}km of the destination. Rejections violate platform guidelines.`;
       
       return NextResponse.json({
         status: "dispatched",
