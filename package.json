@@ -1,17 +1,18 @@
-﻿{
-  "name": "skillbridge-root",
-  "private": true,
-  "version": "1.0.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "type-check": "turbo run type-check"
-  },
-  "dependencies": {
-    "turbo": "^2.11.7"
-  }
+{
+    "name":  "skillbridge-root",
+    "private":  true,
+    "version":  "1.0.0",
+    "workspaces":  [
+                       "apps/*",
+                       "packages/*"
+                   ],
+    "scripts":  {
+                    "dev":  "turbo run dev",
+                    "build":  "turbo run build",
+                    "type-check":  "turbo run type-check"
+                },
+    "dependencies":  {
+                         "turbo":  "^2.11.7"
+                     },
+    "packageManager":  "npm@11.19.0"
 }
