@@ -12,13 +12,13 @@ jobs:
       - name: Initialize Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Monorepo Root Workspace Dependencies
         env:
           NEXT_DISABLE_LOCKFILE_PATCH: "true"
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Compile Target Web Build via Turborepo Execution
         env:
