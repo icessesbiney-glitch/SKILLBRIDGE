@@ -1,0 +1,9 @@
+﻿function devclean {
+    $cmd = 'Stop-Process -Id (Get-NetTCPConnection -LocalPort 5021 -ErrorAction SilentlyContinue).OwningProcess -Force -ErrorAction SilentlyContinue; Remove-Item -Path "C:\SKILLBRIDGE\apps\web\.next", "C:\SKILLBRIDGE\apps\web\.turbo", "C:\SKILLBRIDGE\apps\web\.cache" -Recurse -Force -ErrorAction SilentlyContinue'
+    \ = [System.Text.Encoding]::Unicode.GetBytes($cmd)
+    \ = [Convert]::ToBase64String($bytes)
+    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile", "-EncodedCommand", \
+    Start-Sleep -Seconds 2
+    cd C:\SKILLBRIDGE\apps\web
+    npx next dev --port 5021
+}
