@@ -1,4 +1,4 @@
-﻿name: Deploy Web Surface (Production)
+name: Deploy Web Surface (Production)
 on:
   push:
     branches: [main]
