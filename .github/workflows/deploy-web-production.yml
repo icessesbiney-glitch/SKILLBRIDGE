@@ -16,11 +16,13 @@ jobs:
           cache: 'npm'
 
       - name: Install Monorepo Root Workspace Dependencies
+        env:
+          NEXT_DISABLE_LOCKFILE_PATCH: "true"
         run: npm install
 
       - name: Compile Target Web Build via Turborepo Execution
         env:
           NEXT_DISABLE_LOCKFILE_PATCH: "true"
-          NEXT_PUBLIC_SUPABASE_URL: \${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: \${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npx turbo run build --filter=@skillbridge/web
