@@ -3,43 +3,65 @@
 > next build
 
   ▲ Next.js 14.2.35
-  - Environments: .env.local, .env
-  - Experiments (use with caution):
-    · missingSuspenseWithCSRBailout
+  - Environments: .env.local, .env.production, .env
 
    Creating an optimized production build ...
 <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (268kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (267kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
  ✓ Compiled successfully
    Skipping validation of types
    Skipping linting
    Collecting page data ...
-   Generating static pages (0/32) ...
-   Generating static pages (8/32) 
-   Generating static pages (16/32) 
-   Generating static pages (24/32) 
- ✓ Generating static pages (32/32)
+   Generating static pages (0/33) ...
+   Generating static pages (8/33) 
+   Generating static pages (16/33) 
+   Generating static pages (24/33) 
+ ✓ Generating static pages (33/33)
+   Finalizing page optimization ...
+   Collecting build traces ...
 
-> Build error occurred
-Error: ENOENT: no such file or directory, rename 'C:\Windows\System32\SKILLBRIDGE\apps\web\.next\export\500.html' -> 'C:\Windows\System32\SKILLBRIDGE\apps\web\.next\server\pages\500.html'
-    at async Object.rename (node:internal/fs/promises:1510:10)
-    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1873:33
-    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
-    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1924:25
-    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
-    at async C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:1546:17
-    at async Span.traceAsyncFn (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\trace\trace.js:154:20)
-    at async build (C:\Windows\System32\SKILLBRIDGE\node_modules\next\dist\build\index.js:368:9) {
-  errno: -4058,
-  code: 'ENOENT',
-  syscall: 'rename',
-  path: 'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\.next\\export\\500.html',
-  dest: 'C:\\Windows\\System32\\SKILLBRIDGE\\apps\\web\\.next\\server\\pages\\500.html'
-}
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path C:\Windows\System32\SKILLBRIDGE\apps\web
-npm error workspace @skillbridge/web@1.0.0
-npm error location C:\Windows\System32\SKILLBRIDGE\apps\web
-npm error command failed
-npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.08 kB        88.4 kB
+├ ƒ /_not-found                          157 B          87.5 kB
+├ ƒ /404                                 157 B          87.5 kB
+├ ƒ /500                                 157 B          87.5 kB
+├ ƒ /admin/academy-records               157 B          87.5 kB
+├ ○ /admin/compliance                    1.62 kB         153 kB
+├ ○ /admin/gps                           1.96 kB         154 kB
+├ ƒ /api/admin/compliance                0 B                0 B
+├ ƒ /api/alerts                          0 B                0 B
+├ ƒ /api/cashout                         0 B                0 B
+├ ƒ /api/checkout                        0 B                0 B
+├ ○ /api/db-init                         0 B                0 B
+├ ƒ /api/delivery/dispatch               0 B                0 B
+├ ƒ /api/dispatch                        0 B                0 B
+├ ƒ /api/gps                             0 B                0 B
+├ ƒ /api/migration                       0 B                0 B
+├ ƒ /api/orders/create                   0 B                0 B
+├ ƒ /api/paystack-init                   0 B                0 B
+├ ƒ /api/paystack-webhook                0 B                0 B
+├ ƒ /api/rider/payout                    0 B                0 B
+├ ƒ /api/rider/telemetry                 0 B                0 B
+├ ƒ /api/vendor/settle                   0 B                0 B
+├ ƒ /api/wallet/balance                  0 B                0 B
+├ ƒ /api/webhooks/dodo                   0 B                0 B
+├ ƒ /api/webhooks/paystack               0 B                0 B
+├ ƒ /api/withdraw                        0 B                0 B
+├ ○ /auth                                4.17 kB         166 kB
+├ ƒ /checkout/success                    552 B          87.9 kB
+├ ○ /dashboard                           157 B          87.5 kB
+├ ○ /rider/dashboard                     3.13 kB         155 kB
+├ ○ /roadmap                             157 B          87.5 kB
+├ ○ /tasks                               1.05 kB         153 kB
+└ ○ /team                                2.63 kB         164 kB
++ First Load JS shared by all            87.3 kB
+  ├ chunks/1dd3208c-26bdfdab3ae861bd.js  53.6 kB
+  ├ chunks/528-6e381fa93720a864.js       31.7 kB
+  └ other shared chunks (total)          1.95 kB
+
+
+ƒ Middleware                             87 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
