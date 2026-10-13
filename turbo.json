@@ -1,9 +1,14 @@
-{
+﻿{
   "$schema": "https://turbo.build",
+  "globalDependencies": [".env"],
+  "globalEnv": ["NEXT_DISABLE_LOCKFILE_PATCH", "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "PAYSTACK_SECRET_KEY"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "type-check": {
+      "cache": false
     },
     "dev": {
       "cache": false,

@@ -3,18 +3,48 @@
 > next build
 
   ▲ Next.js 14.2.35
-  - Environments: .env.local
+  - Environments: .env.local, .env.production, .env
 
    Creating an optimized production build ...
+ ⚠ Found lockfile missing swc dependencies, patching...
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: C:\Users\ICESSES\AppData\Local\npm-cache\_logs\2026-10-12T23_09_44_479Z-debug-0.log
    Disabled SWC as replacement for Babel because of custom Babel configuration ".babelrc" https://nextjs.org/docs/messages/swc-disabled
    Using external babel configuration from C:\SKILLBRIDGE\apps\web\.babelrc
  ⚠ It looks like there is a custom Babel configuration that can be removed.
+ ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
+TypeError: Cannot read properties of undefined (reading 'os')
+    at fetchPkgInfo (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:73:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 7)
+    at async patchIncorrectLockfile (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:162:26)
+ ⚠ Found lockfile missing swc dependencies, patching...
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: C:\Users\ICESSES\AppData\Local\npm-cache\_logs\2026-10-12T23_10_00_708Z-debug-0.log
    Disabled SWC as replacement for Babel because of custom Babel configuration ".babelrc" https://nextjs.org/docs/messages/swc-disabled
+ ⚠ Found lockfile missing swc dependencies, patching...
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: C:\Users\ICESSES\AppData\Local\npm-cache\_logs\2026-10-12T23_10_03_685Z-debug-0.log
    Disabled SWC as replacement for Babel because of custom Babel configuration ".babelrc" https://nextjs.org/docs/messages/swc-disabled
+   Using external babel configuration from C:\SKILLBRIDGE\apps\web\.babelrc
+ ⚠ It looks like there is a custom Babel configuration that can be removed.
+ ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
+TypeError: Cannot read properties of undefined (reading 'os')
+    at fetchPkgInfo (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:73:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 7)
+    at async patchIncorrectLockfile (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:162:26)
  ✓ Compiled successfully
    Skipping validation of types
    Skipping linting
    Collecting page data ...
+ ⚠ Found lockfile missing swc dependencies, patching...
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: C:\Users\ICESSES\AppData\Local\npm-cache\_logs\2026-10-12T23_10_19_415Z-debug-0.log
 Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
     at C:\SKILLBRIDGE\apps\web\.next\server\chunks\733.js:24:62418
     at new sy (C:\SKILLBRIDGE\apps\web\.next\server\chunks\733.js:24:62600)
@@ -26,6 +56,24 @@ Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
     at t.X (C:\SKILLBRIDGE\apps\web\.next\server\webpack-runtime.js:1:1191)
     at C:\SKILLBRIDGE\apps\web\.next\server\app\api\delivery\gps\route.js:1:1724
     at Object.<anonymous> (C:\SKILLBRIDGE\apps\web\.next\server\app\api\delivery\gps\route.js:1:1773)
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\SKILLBRIDGE\apps\web\.next\server\chunks\733.js:24:62418
+    at new sy (C:\SKILLBRIDGE\apps\web\.next\server\chunks\733.js:24:62600)
+    at sm (C:\SKILLBRIDGE\apps\web\.next\server\chunks\733.js:24:67506)
+    at 9390 (C:\SKILLBRIDGE\apps\web\.next\server\app\api\webhook\paystack\route.js:1:575)
+    at t (C:\SKILLBRIDGE\apps\web\.next\server\webpack-runtime.js:1:127)
+    at r (C:\SKILLBRIDGE\apps\web\.next\server\app\api\webhook\paystack\route.js:1:2473)
+    at C:\SKILLBRIDGE\apps\web\.next\server\app\api\webhook\paystack\route.js:1:2508
+    at t.X (C:\SKILLBRIDGE\apps\web\.next\server\webpack-runtime.js:1:1191)
+    at C:\SKILLBRIDGE\apps\web\.next\server\app\api\webhook\paystack\route.js:1:2486
+    at Object.<anonymous> (C:\SKILLBRIDGE\apps\web\.next\server\app\api\webhook\paystack\route.js:1:2535)
+ ⨯ Failed to patch lockfile, please try uninstalling and reinstalling next in this workspace
+TypeError: Cannot read properties of undefined (reading 'os')
+    at fetchPkgInfo (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:73:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 7)
+    at async patchIncorrectLockfile (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\lib\patch-incorrect-lockfile.js:162:26)
+    at async build (C:\SKILLBRIDGE\apps\web\node_modules\next\dist\build\index.js:2169:9)
 
 > Build error occurred
 Error: Failed to collect page data for /api/delivery/gps
