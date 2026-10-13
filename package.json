@@ -1,16 +1,17 @@
-{
-  "name": "skillbridge",
-  "version": "1.0.0",
+﻿{
+  "name": "skillbridge-root",
   "private": true,
-  "packageManager": "npm@10.8.2",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
+    "dev": "turbo run dev",
     "build": "turbo run build",
-    "dev": "turbo run dev"
+    "type-check": "turbo run type-check"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.43.0",
     "turbo": "^2.11.7"
   }
 }
