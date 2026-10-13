@@ -13,11 +13,14 @@
     "test": "echo \"Pass mobile unit tests\""
   },
   "dependencies": {
-    "expo": "~57.0.26",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "expo": "^44.0.6",
     "expo-status-bar": "~1.11.1",
+    "next": "16.4.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-native": "0.74.5"
+    "react-native": "^0.87.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

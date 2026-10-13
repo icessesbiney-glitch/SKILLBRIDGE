@@ -35,8 +35,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
-    "electron": "^27.0.0",
-    "electron-builder": "^24.13.3",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
     "electron-is-dev": "^3.0.1"
+  },
+  "dependencies": {
+    "next": "16.4.0"
   }
 }
