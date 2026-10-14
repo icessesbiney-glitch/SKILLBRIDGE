@@ -12,12 +12,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
-      - name: Install Complete Workspace Infrastructure
-        run: npm ci --include=workspace
-      - name: Build Optimized Production Core Assets
+      - name: Force Production Package Assembly
+        run: npm install --legacy-peer-deps
+      - name: Compile Optimized Production Web Core
         run: npx next build apps/web
-      - name: Install Global Deployment Engine
+      - name: Bind Cloud Router Infrastructure
         run: npm install -g vercel
-      - name: Push Compiled Static Pages Live
+      - name: Push Prebuilt Production Release Live
         run: vercel deploy --prebuilt --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
