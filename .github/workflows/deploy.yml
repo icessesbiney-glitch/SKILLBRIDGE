@@ -12,8 +12,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Project Workspace Dependencies
-        run: npm install
+          cache: 'npm'
+      - name: Install Complete Workspace Infrastructure
+        run: npm ci --include=workspace
       - name: Build Optimized Production Core Assets
         run: npx next build apps/web
       - name: Install Global Deployment Engine
