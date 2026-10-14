@@ -1,1 +1,7 @@
-module.exports = { reactStrictMode: false, typescript: { ignoreBuildErrors: true }, eslint: { ignoreDuringBuilds: true }, output: 'standalone' };
+/** @type {import('next').NextConfig} */
+module.exports = {
+  reactStrictMode: false,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  output: "standalone"
+};

@@ -1,1 +1,1 @@
-{"name": "skillbridge-root", "version": "1.0.0", "private": true, "workspaces": ["apps/web", "apps/desktop", "apps/mobile", "packages/shared"]}
+{"name":"skillbridge-root","version":"1.0.0","private":true,"workspaces":["apps/web","apps/desktop","apps/mobile","packages/shared"],"scripts":{"build":"turbo run build"}}
