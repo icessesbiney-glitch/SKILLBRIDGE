@@ -20,7 +20,11 @@ jobs:
           node-version: 22
 
       - name: Assemble Workspace Dependencies Scopes Cleanly
-        run: npm install --legacy-peer-deps
+        run: |
+          if [ ! -f package.json ]; then
+            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
+          fi
+          npm install --legacy-peer-deps
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
@@ -57,7 +61,11 @@ jobs:
           node-version: 22
 
       - name: Assemble Workspace Dependencies Scopes Cleanly
-        run: npm install --legacy-peer-deps
+        run: |
+          if [ ! -f package.json ]; then
+            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
+          fi
+          npm install --legacy-peer-deps
 
       - name: Compile Desktop Workspace Production Layout
         run: npx turbo run build --filter=@skillbridge/desktop
@@ -78,7 +86,11 @@ jobs:
           node-version: 22
 
       - name: Assemble Workspace Dependencies Scopes Cleanly
-        run: npm install --legacy-peer-deps
+        run: |
+          if [ ! -f package.json ]; then
+            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
+          fi
+          npm install --legacy-peer-deps
 
       - name: Compile Mobile Expo Application Bundle
         run: npx turbo run build --filter=@skillbridge/mobile
