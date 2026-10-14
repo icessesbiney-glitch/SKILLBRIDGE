@@ -8,12 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Vercel CLI
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Project Workspace Dependencies
+        run: npm install
+      - name: Build Optimized Production Core Assets
+        run: npx next build apps/web
+      - name: Install Global Deployment Engine
         run: npm install -g vercel
-      - name: Pull Vercel Project Settings
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: 'team_link-the-ink'
-          VERCEL_PROJECT_ID: 'skillbridge-web'
-      - name: Build and Push Live to Production
-        run: vercel deploy --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Push Compiled Static Pages Live
+        run: vercel deploy --prebuilt --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
