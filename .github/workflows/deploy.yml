@@ -24,7 +24,7 @@ jobs:
           mkdir -p .vercel
           echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > .vercel/project.json
           npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          npx turbo run build --filter=@skillbridge/web
           npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:                                                                              
           NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"                                     
