@@ -14,6 +14,10 @@ jobs:
           node-version: 22                                                                 
       - name: Force Production Package Assembly        
         run: npm install --legacy-peer-deps         
+      - name: Inject Non-Interactive Vercel Link Hashes
+        run: |
+          mkdir -p .vercel
+          echo '{"orgId":"team_link-the-ink","projectId":"prj_skillbridge"}' > .vercel/project.json
       - name: Compile Optimized Production Web Core 
         run: npx turbo run build --filter=@skillbridge/web
         env:                                                                              
@@ -22,7 +26,5 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"                                
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
-      - name: Link Workspace Configuration Maps Safely
-        run: vercel link --yes --project skillbridge --scope link-the-ink --token=${{ secrets.VERCEL_TOKEN }}
       - name: Push Prebuilt Production Release Live
         run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
