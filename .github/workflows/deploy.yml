@@ -24,8 +24,9 @@ jobs:
         env:                                                                              
           NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"                                     
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy_build_anon_key"                               
-          SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"                                
+          SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
+          DEPLOYED_BY: "Joshua Biney"
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
       - name: Push Prebuilt Production Release Live
-        run: vercel deploy --prebuilt apps/web/.vercel/output --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod --yes --cwd apps/web --token=${{ secrets.VERCEL_TOKEN }}
