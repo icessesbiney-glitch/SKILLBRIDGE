@@ -16,6 +16,10 @@ jobs:
         run: npm install --legacy-peer-deps
       - name: Compile Optimized Production Web Core
         run: npx next build apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy_build_anon_key"
+          SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
       - name: Bind Cloud Router Infrastructure
         run: npm install -g vercel
       - name: Push Prebuilt Production Release Live
