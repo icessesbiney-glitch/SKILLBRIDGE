@@ -1,1 +1,1 @@
-{"name": "skillbridge-root", "private": true, "packageManager": "npm@10.8.2", "workspaces": ["apps/*", "packages/*", "app/*"], "scripts": {"build": "turbo run build"}}
+{"name":"skillbridge","version":"1.0.0","private":true,"scripts":{"build":"next build","start":"next start","dev":"next dev"}}

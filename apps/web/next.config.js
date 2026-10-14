@@ -1,1 +1,0 @@
-module.exports = { reactStrictMode: false, eslint: { ignoreDuringBuilds: true }, typescript: { ignoreBuildErrors: true }, env: { NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co", NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo" } };
