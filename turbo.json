@@ -1,1 +1,1 @@
-{"$schema":"https://turbo.build","tasks":{"build":{"dependsOn":["^build"],"outputs":[".next/**","!.next/cache/**","dist/**",".expo/**"]}}}
+{"$schema": "https://turbo.build", "tasks": {"build": {"dependsOn": ["^build"], "outputs": [".next/**", "!.next/cache/**", "dist/**", ".expo/**"]}}}
