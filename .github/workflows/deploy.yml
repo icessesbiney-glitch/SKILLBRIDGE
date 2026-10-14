@@ -21,16 +21,11 @@ jobs:
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
-          mkdir -p apps/web/.vercel
-          echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
+          mkdir -p .vercel
+          echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > .vercel/project.json
 
-      - name: Authenticate and Pull Vercel Profiles
-        run: |
-          npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
-
-      - name: Compile Monorepo Web Production Core
-        run: |
-          npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+      - name: Compile Optimized Production Web Core
+        run: npx turbo run build --filter=@skillbridge/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
@@ -38,5 +33,4 @@ jobs:
           DEPLOYED_BY: "Joshua Biney"
 
       - name: Push Prebuilt Production Release Live
-        run: |
-          npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+        run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
