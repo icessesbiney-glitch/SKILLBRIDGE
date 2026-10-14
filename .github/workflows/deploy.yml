@@ -23,4 +23,4 @@ jobs:
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
       - name: Push Prebuilt Production Release Live
-        run: vercel deploy --prebuilt --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
