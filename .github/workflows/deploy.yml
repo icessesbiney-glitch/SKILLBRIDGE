@@ -27,11 +27,5 @@ jobs:
       env:
         NEXT_PUBLIC_SUPABASE_URL: 'https://supabase.co'
         NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo'
-    - name: Push Production Release Live to Vercel
-      working-directory: apps/web
-      run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: 'https://supabase.co'
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo'
 
-# Force Deployment Sync Stamp: 20261014182520
+# Force Deployment Sync Stamp: 20261014183237
