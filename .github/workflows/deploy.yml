@@ -21,9 +21,13 @@ jobs:
 
       - name: Assemble Isolated Workspace Dependencies
         run: |
-          npm install --global json
-          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
-          npm install --legacy-peer-deps --workspaces=false
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.workspaces = ['apps/*', 'packages/*'];
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+          npm install --legacy-peer-deps
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
@@ -61,9 +65,13 @@ jobs:
 
       - name: Assemble Isolated Workspace Dependencies
         run: |
-          npm install --global json
-          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
-          npm install --legacy-peer-deps --workspaces=false
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.workspaces = ['apps/*', 'packages/*'];
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+          npm install --legacy-peer-deps
 
       - name: Compile Desktop Workspace Production Layout
         run: npx turbo run build --filter=@skillbridge/desktop
@@ -85,9 +93,13 @@ jobs:
 
       - name: Assemble Isolated Workspace Dependencies
         run: |
-          npm install --global json
-          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
-          npm install --legacy-peer-deps --workspaces=false
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.workspaces = ['apps/*', 'packages/*'];
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+          npm install --legacy-peer-deps
 
       - name: Compile Mobile Expo Application Bundle
         run: npx turbo run build --filter=@skillbridge/mobile
