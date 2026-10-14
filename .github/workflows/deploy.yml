@@ -1,3 +1,46 @@
-\
+name: Cloud Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    name: Build & Deploy Application
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout Source Tree
+      uses: actions/checkout@v4
 
-# Force Deployment Pipeline Core Reset Stamp: 20261014172155
+    - name: Initialize Production Node.js Engine
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Inject Local Application Environmental Properties
+      run: |
+        mkdir -p apps/web
+        echo "NEXT_PUBLIC_SUPABASE_URL=https://supabase.co" > apps/web/.env
+        echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo" >> apps/web/.env
+
+    - name: Assemble Linked Workspace Dependencies
+      run: npm install --legacy-peer-deps --no-audit --no-fund
+
+    - name: Assemble Local Web Sub-Module Packages
+      working-directory: apps/web
+      run: npm install --legacy-peer-deps --no-audit --no-fund
+
+    - name: Compile Optimized Next.js Core
+      working-directory: apps/web
+      run: npx next build
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
+
+    - name: Push Production Release Live to Vercel
+      working-directory: apps/web
+      run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
+
+# Force Deployment Sync Target Run Token: 20261014172752
