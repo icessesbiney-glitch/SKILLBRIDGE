@@ -1,1 +1,1 @@
-{"name":"skillbridge","version":"1.0.0","private":true,"scripts":{"build":"next build","start":"next start","dev":"next dev"}}
+{"name": "skillbridge-root", "version": "1.0.0", "private": true, "scripts": {"build": "npm run build --prefix apps/web", "start": "npm run start --prefix apps/web"}}
