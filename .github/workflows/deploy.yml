@@ -15,7 +15,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 22
-        cache: 'npm'
 
     - name: Assemble Linked Workspace Dependencies
       run: npm install --legacy-peer-deps --no-audit --no-fund
@@ -40,4 +39,4 @@ jobs:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
 
-# Force Infrastructure Refresh Target: 20261014165840
+# Force Deployment Sync Stamp: 20261014170146
