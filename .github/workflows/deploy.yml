@@ -21,8 +21,9 @@ jobs:
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
-          mkdir -p .vercel
+          mkdir -p .vercel apps/web/.vercel
           echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > .vercel/project.json
+          echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
 
       - name: Compile Optimized Production Web Core
         run: npx turbo run build --filter=@skillbridge/web
@@ -33,4 +34,4 @@ jobs:
           DEPLOYED_BY: "Joshua Biney"
 
       - name: Push Prebuilt Production Release Live
-        run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
