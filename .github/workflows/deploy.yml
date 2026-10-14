@@ -15,12 +15,12 @@ jobs:
       - name: Force Production Package Assembly        
         run: npm install --legacy-peer-deps         
       - name: Compile Optimized Production Web Core 
-        run: npx next build apps/web           
+        run: npx turbo run build --filter=web...
         env:                                                                              
           NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"                                     
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy_build_anon_key"                               
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"                                
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
-      - name: Push Prebuilt Production Release Live                                           
+      - name: Push Prebuilt Production Release Live Trick
         run: vercel deploy --prebuilt --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
