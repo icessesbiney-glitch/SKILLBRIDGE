@@ -27,5 +27,7 @@ jobs:
           DEPLOYED_BY: "Joshua Biney"
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
+      - name: Reconcile Monorepo Prebuilt Build Context Locations
+        run: cp -R .vercel/output apps/web/.vercel/output
       - name: Push Prebuilt Production Release Live
         run: vercel deploy apps/web --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
