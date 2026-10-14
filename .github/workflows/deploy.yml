@@ -1,5 +1,8 @@
 name: Cloud Deploy
-on: [push]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
