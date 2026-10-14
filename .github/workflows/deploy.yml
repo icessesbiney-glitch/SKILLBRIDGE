@@ -6,6 +6,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-24.04
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout Source Tree
         uses: actions/checkout@v4
@@ -16,9 +18,7 @@ jobs:
           node-version: 22
 
       - name: Force Production Package Assembly
-        run: |
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
