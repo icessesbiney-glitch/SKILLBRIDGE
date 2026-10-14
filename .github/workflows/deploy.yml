@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: 'team_link-the-ink'
-          vercel-project-id: 'skillbridge-web'
-          vercel-args: '--prod --cwd apps/web'
-          working-directory: ./apps/web
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Pull Vercel Project Settings
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: 'team_link-the-ink'
+          VERCEL_PROJECT_ID: 'skillbridge-web'
+      - name: Build and Push Live to Production
+        run: vercel deploy --prod --cwd apps/web --yes --token=${{ secrets.VERCEL_TOKEN }}
