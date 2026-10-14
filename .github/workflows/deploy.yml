@@ -12,8 +12,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Force Production Package Assembly
-        run: npm install --legacy-peer-deps
+      - name: Link and Install Complete Workspace Infrastructure
+        run: npm install --workspaces --include=workspace --legacy-peer-deps
       - name: Compile Optimized Production Web Core
         run: npx next build apps/web
         env:
