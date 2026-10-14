@@ -19,6 +19,11 @@ jobs:
       - name: Force Production Package Assembly
         run: npm install --legacy-peer-deps
 
+      - name: Inject Non-Interactive Vercel Project Metadata Links
+        run: |
+          mkdir -p apps/web/.vercel
+          echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
+
       - name: Authenticate and Pull Vercel Profiles
         run: |
           npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
