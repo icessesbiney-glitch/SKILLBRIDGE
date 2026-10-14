@@ -1,1 +1,1 @@
-{"name": "skillbridge-root", "private": true, "workspaces": ["apps/web", "apps/desktop", "apps/mobile", "packages/shared"], "devDependencies": {"turbo": "^2.0.0"}}
+{"name": "skillbridge-root", "private": true, "workspaces": ["apps/*", "packages/*", "app/*"], "devDependencies": {"turbo": "^2.0.0"}}
