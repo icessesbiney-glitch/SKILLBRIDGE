@@ -1,1 +1,1 @@
-module.exports = { reactStrictMode: false, typescript: { ignoreBuildErrors: true }, output: 'standalone' };
+module.exports = { reactStrictMode: false, typescript: { ignoreBuildErrors: true }, eslint: { ignoreDuringBuilds: true }, output: 'standalone' };

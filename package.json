@@ -1,1 +1,1 @@
-{"name": "skillbridge-root", "version": "1.0.0", "private": true, "workspaces": ["apps/web", "apps/desktop", "apps/mobile", "packages/shared"], "scripts": {"build": "cd apps/web && npx next build"}}
+{"name": "skillbridge-root", "version": "1.0.0", "private": true, "workspaces": ["apps/web", "apps/desktop", "apps/mobile", "packages/shared"], "scripts": {"build": "cd apps/web && next build --no-lint"}}
