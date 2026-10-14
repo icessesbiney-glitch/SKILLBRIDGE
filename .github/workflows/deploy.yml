@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 jobs:
-  # JOB 1: WEB DEPLOYMENT MATRIX
+  # JOB 1: PRODUCTION WEB SERVICE DEPLOYMENT
   deploy-web:
     name: Build & Deploy Web App
     runs-on: ubuntu-24.04
@@ -19,8 +19,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Force Production Package Assembly
-        run: npm install --legacy-peer-deps
+      - name: Assemble Isolated Workspace Dependencies
+        run: |
+          npm install --global json
+          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
+          npm install --legacy-peer-deps --workspaces=false
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
@@ -31,7 +34,7 @@ jobs:
       - name: Compile Optimized Production Web Core
         run: npx turbo run build --filter=@skillbridge/web
         env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
+          NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
           VERCEL_ORG_ID: "link-the-ink"
@@ -43,7 +46,7 @@ jobs:
       - name: Push Prebuilt Production Release Live
         run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
-  # JOB 2: DESKTOP APP COMPILATION CHECK
+  # JOB 2: DESKTOP APPLICATION STANDALONE CHECK
   build-desktop:
     name: Verify Desktop Core
     runs-on: ubuntu-24.04
@@ -56,15 +59,18 @@ jobs:
         with:
           node-version: 22
 
-      - name: Force Production Package Assembly
-        run: npm install --legacy-peer-deps
+      - name: Assemble Isolated Workspace Dependencies
+        run: |
+          npm install --global json
+          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
+          npm install --legacy-peer-deps --workspaces=false
 
       - name: Compile Desktop Workspace Production Layout
         run: npx turbo run build --filter=@skillbridge/desktop
         env:
           TURBO_TELEMETRY_DISABLED: "1"
 
-  # JOB 3: MOBILE WORKSPACE COMPILATION CHECK
+  # JOB 3: MOBILE WORKSPACE PIPELINE CHECK
   build-mobile:
     name: Verify Mobile Core
     runs-on: ubuntu-24.04
@@ -77,8 +83,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Force Production Package Assembly
-        run: npm install --legacy-peer-deps
+      - name: Assemble Isolated Workspace Dependencies
+        run: |
+          npm install --global json
+          npx json -I -f package.json -e "this.workspaces=['apps/*', 'packages/*']"
+          npm install --legacy-peer-deps --workspaces=false
 
       - name: Compile Mobile Expo Application Bundle
         run: npx turbo run build --filter=@skillbridge/mobile
