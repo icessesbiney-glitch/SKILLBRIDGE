@@ -16,9 +16,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
       - name: Assemble Linked Workspace Dependencies
-        run: npm install --include=dev --legacy-peer-deps
+        run: npm install --include=dev --legacy-peer-deps --no-audit --no-fund
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
           mkdir -p .vercel apps/web/.vercel
@@ -47,9 +46,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
       - name: Assemble Linked Workspace Dependencies
-        run: npm install --include=dev --legacy-peer-deps
+        run: npm install --include=dev --legacy-peer-deps --no-audit --no-fund
       - name: Compile Desktop Workspace Production Layout
         run: npx turbo run build --filter=@skillbridge/desktop
         env:
@@ -64,9 +62,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
       - name: Assemble Linked Workspace Dependencies
-        run: npm install --include=dev --legacy-peer-deps
+        run: npm install --include=dev --legacy-peer-deps --no-audit --no-fund
       - name: Compile Mobile Expo Application Bundle
         run: npx turbo run build --filter=@skillbridge/mobile
         env:
