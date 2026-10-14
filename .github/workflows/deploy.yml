@@ -22,11 +22,7 @@ jobs:
         echo "NEXT_PUBLIC_SUPABASE_URL=https://supabase.co" > apps/web/.env
         echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo" >> apps/web/.env
 
-    - name: Assemble Linked Workspace Dependencies
-      run: npm install --legacy-peer-deps --no-audit --no-fund
-
-    - name: Assemble Local Web Sub-Module Packages
-      working-directory: apps/web
+    - name: Assemble Linked Monorepo Workspace Dependencies
       run: npm install --legacy-peer-deps --no-audit --no-fund
 
     - name: Compile Optimized Next.js Core
@@ -43,4 +39,4 @@ jobs:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
 
-# Force Deployment Sync Target Run Token: 20261014172752
+# Force Deployment Sync Stamp: 20261014173025

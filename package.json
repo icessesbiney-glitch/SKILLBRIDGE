@@ -1,1 +1,1 @@
-{"name": "skillbridge-root", "version": "1.0.0", "private": true, "workspaces": ["apps/web"]}
+{"name": "skillbridge-root", "version": "1.0.0", "private": true, "workspaces": ["apps/web", "packages/*"]}
