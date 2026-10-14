@@ -1,29 +1,29 @@
 name: Cloud Deploy
-on:    
-  push:             
+on:
+  push:
     branches: [main]
   workflow_dispatch:
-jobs:    
-  deploy:                 
+jobs:
+  deploy:
     runs-on: ubuntu-24.04
-    steps:                       
+    steps:
       - name: Checkout Source Tree
-        uses: actions/checkout@v4      
-      
+        uses: actions/checkout@v4
+
       - name: Initialize Production Node.js Engine
         uses: actions/setup-node@v4
-        with:                             
+        with:
           node-version: 22
-          cache: 'npm'                                                                 
-      
-      - name: Force Production Package Assembly        
-        run: npm install --legacy-peer-deps
-        
+          cache: 'npm'
+
+      - name: Force Production Package Assembly
+         run: npm install --legacy-peer-deps
+
       - name: Compile and Push Live to Vercel
         run: |
-          npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:                                                                              
-          NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"                                     
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"                               
+          npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
           DEPLOYED_BY: "Joshua Biney"
