@@ -15,12 +15,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 22
-
-    - name: Inject Local Application Environmental Properties
-      run: |
-        mkdir -p apps/web
-        echo "NEXT_PUBLIC_SUPABASE_URL=https://supabase.co" > apps/web/.env
-        echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo" >> apps/web/.env
+        cache: 'npm'
 
     - name: Assemble Linked Workspace Dependencies
       run: npm install --legacy-peer-deps --no-audit --no-fund
@@ -31,7 +26,6 @@ jobs:
       env:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
-        SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
 
     - name: Push Production Release Live to Vercel
       working-directory: apps/web
@@ -40,4 +34,4 @@ jobs:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
 
-# Force Trigger Token Execution Sequence: 20261014165322
+# Production Sync Hash Sequence: 20261014165603
