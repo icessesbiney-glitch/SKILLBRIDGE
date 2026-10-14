@@ -5,21 +5,11 @@ on:
   workflow_dispatch:
 jobs:    
   deploy:                 
-  ...
-
-$workflow = @'
-name: Cloud Deploy
-on:    
-  push:             
-    branches: [main]
-  workflow_dispatch:
-jobs:    
-  deploy:                 
     runs-on: ubuntu-latest
     steps:                       
       - uses: actions/checkout@v4      
       - name: Setup Node.js Environment
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:                             
           node-version: 22                                                                 
       - name: Force Production Package Assembly        
