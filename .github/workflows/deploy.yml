@@ -14,16 +14,9 @@ jobs:
       - name: Checkout Source Tree
         uses: actions/checkout@v4
 
-      - name: Initialize Production Node.js Engine
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Assemble Workspace Dependencies Scopes Cleanly
+      - name: Overwrite Manifest and Assemble Workspace Dependencies
         run: |
-          if [ ! -f package.json ]; then
-            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          fi
+          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
           npm install --legacy-peer-deps
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
@@ -55,16 +48,9 @@ jobs:
       - name: Checkout Source Tree
         uses: actions/checkout@v4
 
-      - name: Initialize Production Node.js Engine
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Assemble Workspace Dependencies Scopes Cleanly
+      - name: Overwrite Manifest and Assemble Workspace Dependencies
         run: |
-          if [ ! -f package.json ]; then
-            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          fi
+          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
           npm install --legacy-peer-deps
 
       - name: Compile Desktop Workspace Production Layout
@@ -80,16 +66,9 @@ jobs:
       - name: Checkout Source Tree
         uses: actions/checkout@v4
 
-      - name: Initialize Production Node.js Engine
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Assemble Workspace Dependencies Scopes Cleanly
+      - name: Overwrite Manifest and Assemble Workspace Dependencies
         run: |
-          if [ ! -f package.json ]; then
-            echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          fi
+          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
           npm install --legacy-peer-deps
 
       - name: Compile Mobile Expo Application Bundle
