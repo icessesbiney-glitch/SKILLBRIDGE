@@ -5,25 +5,19 @@ on:
   workflow_dispatch:
 jobs:    
   deploy:                 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:                       
-      - name: Checkout Source Tree
-        uses: actions/checkout@v4      
-      
-      - name: Initialize Production Node.js Engine
+      - uses: actions/checkout@v4      
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:                             
-          node-version: 22
-          cache: 'npm'                                                                 
-      
+          node-version: 22                                                                 
       - name: Force Production Package Assembly        
-        run: npm install --legacy-peer-deps
-        
+        run: npm install --legacy-peer-deps         
       - name: Inject Non-Interactive Vercel Link Hashes
         run: |
           mkdir -p apps/web/.vercel
           echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
-      
       - name: Compile Optimized Production Web Core 
         run: |
           cd apps/web
@@ -34,9 +28,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy_build_anon_key"                               
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
           DEPLOYED_BY: "Joshua Biney"
-          
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
-      
       - name: Push Prebuilt Production Release Live
         run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
