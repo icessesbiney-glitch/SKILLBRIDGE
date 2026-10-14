@@ -33,6 +33,8 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: "dummy_build_service_key"
           VERCEL_ORG_ID: "link-the-ink"
           VERCEL_PROJECT_ID: "skillbridge"
+          NEXT_PRIVATE_STANDALONE: "true"
+          DISABLE_ESLINT_PLUGIN: "true"
           DEPLOYED_BY: "Joshua Biney"
 
       - name: Push Prebuilt Production Release Live
