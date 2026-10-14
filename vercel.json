@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npx turbo run build --filter=@skillbridge/web",
+  "outputDirectory": "apps/web/.next"
+}
