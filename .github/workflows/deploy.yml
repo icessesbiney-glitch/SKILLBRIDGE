@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 jobs:
-  # JOB 1: PRODUCTION WEB SERVICE DEPLOYMENT
+  # JOB 1: PRODUCTION NEXT.JS WEB SURFACE DEPLOYMENT
   deploy-web:
     name: Build & Deploy Web App
     runs-on: ubuntu-24.04
@@ -18,11 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
-      - name: Overwrite Manifest and Assemble Workspace Dependencies
-        run: |
-          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          npm install --legacy-peer-deps
+      - name: Force Production Package Assembly
+        run: npm install --legacy-peer-deps
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
@@ -45,7 +44,7 @@ jobs:
       - name: Push Prebuilt Production Release Live
         run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
-  # JOB 2: DESKTOP APPLICATION COMPILATION CHECK
+  # JOB 2: DESKTOP WORKSPACE COMPILATION CHECK
   build-desktop:
     name: Verify Desktop Core
     runs-on: ubuntu-24.04
@@ -57,18 +56,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
-      - name: Overwrite Manifest and Assemble Workspace Dependencies
-        run: |
-          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          npm install --legacy-peer-deps
+      - name: Force Production Package Assembly
+        run: npm install --legacy-peer-deps
 
       - name: Compile Desktop Workspace Production Layout
         run: npx turbo run build --filter=@skillbridge/desktop
         env:
           TURBO_TELEMETRY_DISABLED: "1"
 
-  # JOB 3: MOBILE EXPO WORKSPACE COMPILATION CHECK
+  # JOB 3: MOBILE WORKSPACE PIPELINE CHECK
   build-mobile:
     name: Verify Mobile Core
     runs-on: ubuntu-24.04
@@ -80,11 +78,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
-      - name: Overwrite Manifest and Assemble Workspace Dependencies
-        run: |
-          echo '{"name":"skillbridge-root","private":true,"workspaces":["apps/*","packages/*"]}' > package.json
-          npm install --legacy-peer-deps
+      - name: Force Production Package Assembly
+        run: npm install --legacy-peer-deps
 
       - name: Compile Mobile Expo Application Bundle
         run: npx turbo run build --filter=@skillbridge/mobile

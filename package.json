@@ -1,18 +1,11 @@
 {
-  "name": "skillbridge",
-  "version": "1.0.0",
+  "name": "skillbridge-root",
   "private": true,
-  "packageManager": "npm@10.8.2",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint"
-  },
   "devDependencies": {
-    "turbo": "^2.1.7"
+    "turbo": "^2.0.0"
   }
 }
