@@ -16,7 +16,7 @@ jobs:
       with:
         node-version: 22
 
-    - name: Assemble Workspace Core Dependencies
+    - name: Assemble Workspace Linked Dependencies
       run: npm install --legacy-peer-deps --no-audit --no-fund
 
     - name: Inject Local Application Environmental Properties
@@ -25,13 +25,8 @@ jobs:
         echo "NEXT_PUBLIC_SUPABASE_URL=https://supabase.co" > apps/web/.env
         echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo" >> apps/web/.env
 
-    - name: Assemble Local Web Sub-Module Packages
-      working-directory: apps/web
-      run: npm install --legacy-peer-deps --no-audit --no-fund
-
-    - name: Compile Optimized Next.js Core
-      working-directory: apps/web
-      run: npx next build
+    - name: Compile Optimized Monorepo Next.js Core
+      run: npx turbo run build --filter=@skillbridge/web
       env:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
@@ -43,4 +38,4 @@ jobs:
         NEXT_PUBLIC_SUPABASE_URL: "https://supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
 
-# Force Infrastructure Refresh Target: 20261014170759
+# Force Monorepo Execution Chain Sequence: 20261014170857
