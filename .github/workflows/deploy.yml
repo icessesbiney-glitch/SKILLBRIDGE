@@ -16,7 +16,8 @@ jobs:
         run: npm install --legacy-peer-deps         
       - name: Inject Non-Interactive Vercel Link Hashes
         run: |
-          mkdir -p apps/web/.vercel
+          mkdir -p .vercel apps/web/.vercel
+          echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > .vercel/project.json
           echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
       - name: Compile Optimized Production Web Core 
         run: npx turbo run build --filter=@skillbridge/web
@@ -27,4 +28,4 @@ jobs:
       - name: Bind Cloud Router Infrastructure                                                
         run: npm install -g vercel                                                            
       - name: Push Prebuilt Production Release Live
-        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
