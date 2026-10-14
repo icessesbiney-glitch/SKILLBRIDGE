@@ -19,11 +19,9 @@ jobs:
         with:
           node-version: 22
 
-      - name: Assemble Isolated Workspace Dependencies
+      - name: Assemble Linked Workspace Dependencies
         run: |
-          cd apps/web
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --include=dev
 
       - name: Inject Non-Interactive Vercel Project Metadata Links
         run: |
@@ -32,9 +30,7 @@ jobs:
           echo '{"orgId":"link-the-ink","projectId":"skillbridge"}' > apps/web/.vercel/project.json
 
       - name: Compile Optimized Production Web Core
-        run: |
-          cd apps/web
-          npx next build
+        run: npx turbo run build --filter=@skillbridge/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: "https://aolfuonsuaeoitumuvqc.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo"
@@ -61,16 +57,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Assemble Isolated Workspace Dependencies
+      - name: Assemble Linked Workspace Dependencies
         run: |
-          cd apps/desktop
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --include=dev
 
       - name: Compile Desktop Workspace Production Layout
-        run: |
-          cd apps/desktop
-          npm run build --if-present
+        run: npx turbo run build --filter=@skillbridge/desktop
+        env:
+          TURBO_TELEMETRY_DISABLED: "1"
 
   # JOB 3: MOBILE EXPO WORKSPACE COMPILATION CHECK
   build-mobile:
@@ -85,13 +79,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Assemble Isolated Workspace Dependencies
+      - name: Assemble Linked Workspace Dependencies
         run: |
-          cd apps/mobile
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --include=dev
 
       - name: Compile Mobile Expo Application Bundle
-        run: |
-          cd apps/mobile
-          npm run build --if-present
+        run: npx turbo run build --filter=@skillbridge/mobile
+        env:
+          TURBO_TELEMETRY_DISABLED: "1"
