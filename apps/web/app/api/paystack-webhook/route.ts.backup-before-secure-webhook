@@ -1,0 +1,1 @@
+import{NextResponse}from'next/server';export async function POST(r:Request){try{return NextResponse.json({status:'success',received:true,info:'Unblocked'});}catch(e:any){return NextResponse.json({error:e.message},{status:400});}}

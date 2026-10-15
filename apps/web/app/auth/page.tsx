@@ -11,7 +11,7 @@ import { getSafeNextPath } from './nextPath';
 
 export const dynamic = 'force-dynamic';
 
-// Hardcoded clean values to pass Dodo review instantly
+// SkillBridge registration options.
 const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
 const educationLevels = [
   'Independent Application Builder',

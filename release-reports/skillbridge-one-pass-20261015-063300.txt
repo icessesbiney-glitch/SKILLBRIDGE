@@ -1,0 +1,68 @@
+2026-10-15 06:33:03 ===== SKILLBRIDGE SINGLE-PASS COMPLETION =====
+2026-10-15 06:33:03 ===== EXISTING PROJECT =====
+2026-10-15 06:33:03 Branch: main
+2026-10-15 06:33:03 ===== PRIOR RELEASE REPORT =====
+2026-10-15 06:33:03 Prior report: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\recovery-20261015-063006.txt
+2026-10-15 06:33:03 PRIOR: 2026-10-15 06:30:10 ===== SKILLBRIDGE RECOVERY =====
+2026-10-15 06:33:03 PRIOR: 2026-10-15 06:30:19 ===== CHECK PRODUCTION CONFIGURATION NAMES =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:22 ===== SUPABASE MIGRATION PREFLIGHT =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:22 BLOCKED: Supabase CLI is not installed; migration was not applied.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:22 ===== TYPESCRIPT AND BUILD =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:26 TypeScript check passed.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:28 Production build passed.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:28 ===== RETRY EXISTING VERCEL DEPLOYMENT =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:30:28 Vercel deployment attempt 1 of 3.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:35 Vercel production deployment succeeded.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:35 ===== LIVE PAGE SMOKE TESTS =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:36 HTTP 307 /
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:37 HTTP 200 /auth
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:38 HTTP 200 /dashboard
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 HTTP 200 /tasks
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 HTTP 200 /team
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 ===== PAYMENT ACCEPTANCE LIMITS =====
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 No real charge was initiated by this script.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 A live Paystack test payment, authenticated learner submission, duplicate webhook replay, invalid-signature test, and withdrawal test still need verified test credentials and an authenticated test account.
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 Supabase migration applied by this run: False
+2026-10-15 06:33:04 PRIOR: 2026-10-15 06:31:39 Report: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\recovery-20261015-063006.txt
+2026-10-15 06:33:04 ===== REQUIRED FEATURE FILES =====
+2026-10-15 06:33:04 FOUND apps\web\app\api\paystack-init\route.ts
+2026-10-15 06:33:04 FOUND apps\web\app\api\paystack-webhook\route.ts
+2026-10-15 06:33:04 FOUND apps\web\app\api\webhooks\paystack\route.ts
+2026-10-15 06:33:04 FOUND apps\web\app\api\withdraw\route.ts
+2026-10-15 06:33:04 FOUND apps\web\components\PaystackCheckoutButton.tsx
+2026-10-15 06:33:04 FOUND apps\web\components\TaskWorkspace.tsx
+2026-10-15 06:33:04 FOUND apps\web\components\WalletBalanceDisplay.tsx
+2026-10-15 06:33:04 FOUND apps\web\components\WithdrawalForm.tsx
+2026-10-15 06:33:04 FOUND supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql
+2026-10-15 06:33:04 ===== TYPESCRIPT =====
+2026-10-15 06:33:07 TypeScript PASSED.
+2026-10-15 06:33:07 ===== PRODUCTION BUILD =====
+2026-10-15 06:33:09 Production build PASSED.
+2026-10-15 06:33:09 ===== VERCEL EXISTING PROJECT =====
+2026-10-15 06:33:13 Existing Vercel link: .\.vercel\project.json
+2026-10-15 06:33:13 ===== RETRY PRODUCTION DEPLOYMENT =====
+2026-10-15 06:33:13 Deployment attempt 1 of 3
+2026-10-15 06:34:06 Production deployment command succeeded.
+2026-10-15 06:34:07 ===== LIVE ROUTE TESTS =====
+2026-10-15 06:34:08 HTTP 307 /
+2026-10-15 06:34:09 HTTP 200 /auth
+2026-10-15 06:34:09 HTTP 200 /dashboard
+2026-10-15 06:34:10 HTTP 200 /tasks
+2026-10-15 06:34:11 HTTP 200 /team
+2026-10-15 06:34:11 ===== SUPABASE MIGRATION STATUS =====
+2026-10-15 06:34:11 BLOCKED: Supabase CLI not installed; migration status not verified.
+2026-10-15 06:34:11 ===== PAYSTACK SOURCE INDICATORS =====
+2026-10-15 06:34:11 Reviewing apps\web\app\api\paystack-webhook\route.ts
+2026-10-15 06:34:11 Signature header indicator: True
+2026-10-15 06:34:11 HMAC indicator: True
+2026-10-15 06:34:11 charge.success indicator: True
+2026-10-15 06:34:11 Wallet credit indicator: True
+2026-10-15 06:34:11 Reviewing apps\web\app\api\webhooks\paystack\route.ts
+2026-10-15 06:34:11 Signature header indicator: False
+2026-10-15 06:34:11 HMAC indicator: False
+2026-10-15 06:34:11 charge.success indicator: False
+2026-10-15 06:34:11 Wallet credit indicator: False
+2026-10-15 06:34:11 ===== END-TO-END ACCEPTANCE STATUS =====
+2026-10-15 06:34:12 NOT VERIFIED by source/build checks alone: sign-in, authenticated task submissions, file uploads, real Supabase RLS, Paystack test payment, invalid webhook signature rejection, duplicate webhook idempotency, and withdrawal/payout correctness.
+2026-10-15 06:34:12 No real charge or withdrawal was initiated.
+2026-10-15 06:34:12 Report saved: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\skillbridge-one-pass-20261015-063300.txt

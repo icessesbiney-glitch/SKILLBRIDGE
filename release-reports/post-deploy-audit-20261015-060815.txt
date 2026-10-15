@@ -1,0 +1,534 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015060816
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 17740
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+===== 1. EXISTING PROJECT =====
+Root: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix
+Root package exists: True
+Web package exists: True
+Existing Next build exists: True
+
+===== 2. VERCEL LOGIN =====
+Vercel CLI 64.0.2 (Node.js 26.7.0)
+> Logged in as icessesbiney-5084
+> Active team: link-the-ink (LINK THE INK)
+> Active team plan: Hobby
+
+===== 3. PRODUCTION ENVIRONMENT VARIABLE NAMES =====
+Review names only. Do not print or share secret values.
+Vercel CLI 64.0.2 (Node.js 26.7.0)
+> Environment Variables found for link-the-ink/skillbridge-web [425ms]
+
+ name                               value                       type      environments        created
+ SUPABASE_SERVICE_ROLE_KEY          Hidden                      Secret    Production          7h ago
+ PAYSTACK_SECRET_KEY                Hidden                      Secret    Production          7h ago
+ NEXT_PUBLIC_SITE_URL               eyJ2IjoidjIiLCJjIj…         Config    Production          7h ago
+ NEXT_PUBLIC_SUPABASE_ANON_KEY      eyJ2IjoidjIiLCJjIj…         Config    Production          7h ago
+ NEXT_PUBLIC_SUPABASE_URL           eyJ2IjoidjIiLCJjIj…         Config    Production          7h ago
+
+===== 4. INSPECT EXISTING DEPLOYMENT =====
+Vercel CLI 64.0.2 (Node.js 26.7.0)
+> Fetched deployment "skillbridge-12xo685vv-link-the-ink.vercel.app" in link-the-ink [2s]
+
+  General
+
+    id          dpl_9a374xcELXxkdjXmPtsWxNRqWUbD
+    name        skillbridge-web
+    target      production
+    status      ● Ready
+    url         https://skillbridge-12xo685vv-link-the-ink.vercel.app
+    created     Thu Oct 15 2026 05:55:08 GMT+0100 (British Summer Time) [13m ago]
+
+
+  Build Machine
+
+    requested build machine basic
+    actual assigned cores   2 vCPU (actual assignment)
+    memory                  8192 MiB
+    selection type          fixed
+    selection source        plan-default
+
+
+  Duration
+
+    build duration      50s
+    post-build duration 23s
+    billable duration   2m
+    CPU Minutes Usage   4 minutes (2m x 2vCPU)
+
+
+  Aliases
+
+    ╶ https://skillbridge-web-snowy.vercel.app
+    ╶ https://skillbridge-web-link-the-ink.vercel.app
+
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ index (1.43MB) [iad1]
+    ├── λ admin/compliance (1.43MB) [iad1]
+    ├── λ admin/compliance.rsc (1.43MB) [iad1]
+    ├── λ admin/gps (1.43MB) [iad1]
+    ├── λ admin/gps.rsc (1.43MB) [iad1]
+    └── 57 output items hidden
+
+===== 5. LIVE PAGE CHECKS =====
+/ : HTTP 200
+/auth : HTTP 200
+/dashboard : HTTP 200
+/tasks : HTTP 200
+/roadmap : HTTP 200
+/team : HTTP 200
+
+===== 6. API REACHABILITY CHECKS =====
+PS>TerminatingError(Invoke-WebRequest): "{"message":"Protected by Vercel Authentication","mcp":"With an authorized Vercel MCP connection (https:\/\/mcp.vercel.com), call web_fetch_vercel_url with url set to the full deployment URL.","protection":{"vercel_auth_callback":"https:\/\/vercel.com\/sso-api?url=https%3A%2F%2Fskillbridge-12xo685vv-link-the-ink.vercel.app%2Fapi%2Fwallet%2Fbalance&nonce=ba9526d7bab8c39d95d11dd9ec435c483502aea498637e14d61a24f082250521","auto_vercel_auth_redirect":true,"password_enabled":false,"vercel_auth_enabled":true},"access":"vercel curl ","error":{"message":"Protected deployment","code":"401"}}"
+/api/wallet/balance : HTTP 401
+PS>TerminatingError(Invoke-WebRequest): "{"access":"vercel curl ","error":{"message":"Protected deployment","code":"401"},"mcp":"With an authorized Vercel MCP connection (https:\/\/mcp.vercel.com), call web_fetch_vercel_url with url set to the full deployment URL.","message":"Protected by Vercel Authentication","protection":{"password_enabled":false,"vercel_auth_enabled":true,"vercel_auth_callback":"https:\/\/vercel.com\/sso-api?url=https%3A%2F%2Fskillbridge-12xo685vv-link-the-ink.vercel.app%2Fapi%2Fpaystack-init&nonce=efdd62557dd19b8df933da1caedf6b308158e43a8cc24eac4412daf4e0f9fc8d","auto_vercel_auth_redirect":true}}"
+/api/paystack-init : HTTP 401
+PS>TerminatingError(Invoke-WebRequest): "{"access":"vercel curl ","protection":{"password_enabled":false,"vercel_auth_enabled":true,"vercel_auth_callback":"https:\/\/vercel.com\/sso-api?url=https%3A%2F%2Fskillbridge-12xo685vv-link-the-ink.vercel.app%2Fapi%2Fpaystack-webhook&nonce=1641061adc8ec0e1366cd7c53a6cee3a4b42129be2191888ac3568aaf74a7cf1","auto_vercel_auth_redirect":true},"error":{"message":"Protected deployment","code":"401"},"mcp":"With an authorized Vercel MCP connection (https:\/\/mcp.vercel.com), call web_fetch_vercel_url with url set to the full deployment URL.","message":"Protected by Vercel Authentication"}"
+/api/paystack-webhook : HTTP 401
+PS>TerminatingError(Invoke-WebRequest): "{"protection":{"auto_vercel_auth_redirect":true,"password_enabled":false,"vercel_auth_enabled":true,"vercel_auth_callback":"https:\/\/vercel.com\/sso-api?url=https%3A%2F%2Fskillbridge-12xo685vv-link-the-ink.vercel.app%2Fapi%2Fwebhooks%2Fpaystack&nonce=893d57758574cb9286105003a1427ee66d3faffa800aeec3d8f8a16b7d4ae908"},"mcp":"With an authorized Vercel MCP connection (https:\/\/mcp.vercel.com), call web_fetch_vercel_url with url set to the full deployment URL.","access":"vercel curl ","error":{"code":"401","message":"Protected deployment"},"message":"Protected by Vercel Authentication"}"
+/api/webhooks/paystack : HTTP 401
+PS>TerminatingError(Invoke-WebRequest): "{"access":"vercel curl ","error":{"message":"Protected deployment","code":"401"},"mcp":"With an authorized Vercel MCP connection (https:\/\/mcp.vercel.com), call web_fetch_vercel_url with url set to the full deployment URL.","message":"Protected by Vercel Authentication","protection":{"password_enabled":false,"vercel_auth_enabled":true,"vercel_auth_callback":"https:\/\/vercel.com\/sso-api?url=https%3A%2F%2Fskillbridge-12xo685vv-link-the-ink.vercel.app%2Fapi%2Fwithdraw&nonce=027cfd7fca718f72c19fc0fad924bc2e2c2007376d64c1ca49ad2cb20ec4ced7","auto_vercel_auth_redirect":true}}"
+/api/withdraw : HTTP 401
+
+===== 7. PAYMENT AND TASK SOURCE CHECK =====
+
+--- apps\web\app\api\paystack-init\route.ts ---
+File exists.
+Found: PAYSTACK_SECRET_KEY
+REVIEW: x-paystack-signature not found (may use an alternative implementation)
+REVIEW: createHmac not found (may use an alternative implementation)
+REVIEW: charge.success not found (may use an alternative implementation)
+Found: paystack_transactions
+
+--- apps\web\app\api\paystack-webhook\route.ts ---
+File exists.
+Found: PAYSTACK_SECRET_KEY
+Found: x-paystack-signature
+Found: createHmac
+Found: charge.success
+Found: paystack_transactions
+
+--- apps\web\app\api\webhooks\paystack\route.ts ---
+File exists.
+REVIEW: PAYSTACK_SECRET_KEY not found (may use an alternative implementation)
+REVIEW: x-paystack-signature not found (may use an alternative implementation)
+REVIEW: createHmac not found (may use an alternative implementation)
+REVIEW: charge.success not found (may use an alternative implementation)
+REVIEW: paystack_transactions not found (may use an alternative implementation)
+
+--- apps\web\app\api\withdraw\route.ts ---
+File exists.
+
+--- apps\web\components\TaskWorkspace.tsx ---
+File exists.
+Found task-flow marker: task_submissions
+Found task-flow marker: submissionText
+Found task-flow marker: isSubmitting
+
+===== 8. REBUILD EXISTING PROJECT =====
+
+> skillbridge-root@1.0.0 build
+> turbo run build --filter=@skillbridge/web
+
+
+   • turbo 2.11.8
+   • Packages in scope: @skillbridge/web
+   • Running build in 1 package
+   • Remote caching disabled
+
+@skillbridge/web:build: cache miss, executing 22edd4d28dc7f8f6
+@skillbridge/web:build:
+@skillbridge/web:build: > @skillbridge/web@1.0.0 build
+@skillbridge/web:build: > next build
+@skillbridge/web:build:
+@skillbridge/web:build:   ▲ Next.js 14.2.35
+@skillbridge/web:build:   - Environments: .env.local, .env.production
+@skillbridge/web:build:
+@skillbridge/web:build:    Creating an optimized production build ...
+@skillbridge/web:build:  ✓ Compiled successfully
+@skillbridge/web:build:    Skipping validation of types
+@skillbridge/web:build:    Skipping linting
+@skillbridge/web:build:    Collecting page data ...
+@skillbridge/web:build:    Generating static pages (0/18) ...
+@skillbridge/web:build:    Generating static pages (4/18)
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\com
+pliance\page.js:1:6996)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1944 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\com
+pliance\page.js:1:2400)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811)
+@skillbridge/web:build:     at s (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:88330)
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-serv
+er\app-page.runtime.prod.js:12:98875 {
+@skillbridge/web:build:   digest: '2250888736'
+@skillbridge/web:build: }
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11947)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11465)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 5353 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard
+\page.js:1:2079)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811) {
+@skillbridge/web:build:   digest: '2606314936'
+@skillbridge/web:build: }
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/dashboard". Read more: https://nextjs.org/docs/messages/prere
+nder-error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11947)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11465)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 5353 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard
+\page.js:1:2079)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811)
+@skillbridge/web:build:    Generating static pages (8/18)
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\907.js
+:1:9155)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 3803 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\907.js
+:1:1025)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 6134 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\tasks\pag
+e.js:1:1903)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811) {
+@skillbridge/web:build:   digest: '1406767598'
+@skillbridge/web:build: }
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/admin/compliance". Read more: https://nextjs.org/docs/message
+s/prerender-error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\com
+pliance\page.js:1:6996)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1944 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\com
+pliance\page.js:1:2400)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811)
+@skillbridge/web:build:     at s (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:88330)
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-serv
+er\app-page.runtime.prod.js:12:98875
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/tasks". Read more: https://nextjs.org/docs/messages/prerender
+-error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\907.js
+:1:9155)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 3803 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\907.js
+:1:1025)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 6134 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\tasks\pag
+e.js:1:1903)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811)
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:7747)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:7265)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:3944)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811) {
+@skillbridge/web:build:   digest: '3044899945'
+@skillbridge/web:build: }
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/team". Read more: https://nextjs.org/docs/messages/prerender-
+error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:7747)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:7265)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page
+.js:1:3944)
+@skillbridge/web:build:     at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\ser
+ver\webpack-runtime.js:1:127)
+@skillbridge/web:build:     at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\
+next-server\app-page.runtime.prod.js:17:18811)
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11947)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11465)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:8144)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 8931 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:2332) {
+@skillbridge/web:build:   digest: '2890071710'
+@skillbridge/web:build: }
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/auth". Read more: https://nextjs.org/docs/messages/prerender-
+error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:2
+4:67506)
+@skillbridge/web:build:     at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11947)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack   Genera
+ting static pages (13/18)
+@skillbridge/web:build: -runtime.js:1:127)
+@skillbridge/web:build:     at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:11465)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:8144)
+@skillbridge/web:build:     at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.
+js:1:127)
+@skillbridge/web:build:     at 8931 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page
+.js:1:2332)
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:2
+4:67506)
+@skillbridge/web:build:     at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashbo
+ard\page.js:1:10495)
+@skillbridge/web:build:     at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:134808)
+@skillbridge/web:build:     at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:137693)
+@skillbridge/web:build:     at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:138168)
+@skillbridge/web:build:     at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\comp
+iled\next-server\app-page.runtime.prod.js:12:135777)
+@skillbridge/web:build:     at stringify (<anonymous>)
+@skillbridge/web:build:     at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:142242) {
+@skillbridge/web:build:   digest: '2657596145'
+@skillbridge/web:build: }
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:2
+4:67506)
+@skillbridge/web:build:     at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashbo
+ard\page.js:1:10495)
+@skillbridge/web:build:     at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:134808)
+@skillbridge/web:build:     at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:137693)
+@skillbridge/web:build:     at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:138168)
+@skillbridge/web:build:     at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\comp
+iled\next-server\app-page.runtime.prod.js:12:135777)
+@skillbridge/web:build:     at stringify (<anonymous>)
+@skillbridge/web:build:     at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:142242) {
+@skillbridge/web:build:   digest: '2657596145'
+@skillbridge/web:build: }
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:2
+4:67506)
+@skillbridge/web:build:     at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashbo
+ard\page.js:1:10495)
+@skillbridge/web:build:     at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:134808)
+@skillbridge/web:build:     at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:137693)
+@skillbridge/web:build:     at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:138168)
+@skillbridge/web:build:     at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\comp
+iled\next-server\app-page.runtime.prod.js:12:135777)
+@skillbridge/web:build:     at stringify (<anonymous>)
+@skillbridge/web:build:     at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:142242) {
+@skillbridge/web:build:   digest: '2657596145'
+@skillbridge/web:build: }
+@skillbridge/web:build:
+@skillbridge/web:build: Error occurred prerendering page "/rider/dashboard". Read more: https://nextjs.org/docs/messages
+/prerender-error
+@skillbridge/web:build:
+@skillbridge/web:build: Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+@skillbridge/web:build:     at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62
+418
+@skillbridge/web:build:     at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.
+js:24:62600)
+@skillbridge/web:build:     at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:2
+4:67506)
+@skillbridge/web:build:     at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashbo
+ard\page.js:1:10495)
+@skillbridge/web:build:     at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:134808)
+@skillbridge/web:build:     at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-s
+erver\app-page.runtime.prod.js:12:137693)
+@skillbridge/web:build:     at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:138168)
+@skillbridge/web:build:     at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\comp
+iled\next-server\app-page.runtime.prod.js:12:135777)
+@skillbridge/web:build:     at stringify (<anonymous>)
+@skillbridge/web:build:     at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-
+server\app-page.runtime.prod.js:12:142242)
+@skillbridge/web:build:  ✓ Generating static pages (18/18)
+@skillbridge/web:build:
+@skillbridge/web:build: > Export encountered errors on following paths:
+@skillbridge/web:build:         /admin/compliance/page: /admin/compliance
+@skillbridge/web:build:         /auth/page: /auth
+@skillbridge/web:build:         /dashboard/page: /dashboard
+@skillbridge/web:build:         /rider/dashboard/page: /rider/dashboard
+@skillbridge/web:build:         /tasks/page: /tasks
+@skillbridge/web:build:         /team/page: /team
+@skillbridge/web:build: npm error Lifecycle script `build` failed with error:
+@skillbridge/web:build: npm error code 1
+@skillbridge/web:build: npm error path C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+@skillbridge/web:build: npm error workspace @skillbridge/web@1.0.0
+@skillbridge/web:build: npm error location C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+@skillbridge/web:build: npm error command failed
+@skillbridge/web:build: npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
+@skillbridge/web#build:  ERROR  command (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web) C:\Program Files\node
+js\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js run build exited (1)
+
+ Tasks:    0 successful, 1 total
+Cached:    0 cached, 1 total
+  Time:    30.802s
+Failed:    @skillbridge/web#build
+
+ ERROR  run failed: command  exited (1)
+
+AUDIT STOPPED: Production build failed. Do not deploy until the reported build error is fixed.
+**********************
+Windows PowerShell transcript end
+End time: 20261015060928
+**********************

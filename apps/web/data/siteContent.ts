@@ -18,11 +18,21 @@ export const deploymentSteps = [
 ];
 
 export const learnerBands = [
-  { band: "Advanced Development Tier", rate: "Paid Access" }
+  {
+    title: 'Beginner Learners',
+    range: 'Starter level',
+    summary: 'Build practical skills with guided beginner tasks.',
+    points: ['Learn the task requirements', 'Submit your own work', 'Receive review feedback']
+  }
 ];
 
 export const learningResources = [
-  { title: "Dodo Payments API Handbook", type: "Documentation" }
+  {
+    title: 'Paystack API Handbook',
+    type: 'Documentation',
+    label: 'Paystack API Handbook',
+    href: 'https://paystack.com/docs/'
+  }
 ];
 
 export const mentorGuidance = [

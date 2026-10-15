@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-
 import { useAuthSession } from '../hooks/useAuthSession';
 
 export default function PaystackCheckoutButton() {
@@ -14,28 +13,40 @@ export default function PaystackCheckoutButton() {
 
   const handleCheckout = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!email) {
+
+    if (!session?.access_token || !email) {
       setMessage('Sign in before funding your wallet.');
       return;
     }
 
     setLoading(true);
     setMessage('');
+
     try {
       const response = await fetch('/api/paystack-init', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, email }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ amount }),
       });
+
       const result = await response.json();
 
-      if (result.authorization_url) {
-        window.location.href = result.authorization_url;
+      if (!response.ok) {
+        setMessage(result.error || 'Could not start the payment.');
         return;
       }
-      setMessage(result.error || 'Could not start the payment.');
-    } catch (error) {
-      setMessage('Could not reach the payment gateway.');
+
+      if (result.authorization_url) {
+        window.location.assign(result.authorization_url);
+        return;
+      }
+
+      setMessage('Paystack did not return a payment link.');
+    } catch {
+      setMessage('Could not reach the payment gateway. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -45,22 +56,33 @@ export default function PaystackCheckoutButton() {
     <article className="sb-card">
       <span className="sb-status-pill">Paystack</span>
       <h3>Fund your wallet</h3>
-      <p>Pay securely with card or mobile money. Your wallet is credited once Paystack confirms the charge.</p>
+      <p>
+        Pay securely with a supported Paystack payment method. Your wallet
+        should be credited only after the server verifies the payment.
+      </p>
+
       <form className="sb-form" onSubmit={handleCheckout} aria-busy={loading}>
         <label className="sb-field">
           <span>Amount (GHS)</span>
           <input
             type="number"
             min="1"
+            max="1000000"
             step="0.01"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(event) => setAmount(event.target.value)}
             required
           />
         </label>
-        <button type="submit" className="sb-button" disabled={loading || !email}>
+
+        <button
+          type="submit"
+          className="sb-button"
+          disabled={loading || !session?.access_token || !email}
+        >
           {loading ? 'Connecting to Paystack...' : `Pay GHS ${amount || '0'}`}
         </button>
+
         {message ? <p role="status">{message}</p> : null}
       </form>
     </article>

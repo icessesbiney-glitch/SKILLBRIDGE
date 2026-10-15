@@ -1,0 +1,782 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015051329
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\ICESSES\AppData\Local\Programs\Microsoft VS Code\16507d91be\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 16728
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\mastery-final-audit.txt
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cICESSES\x5cDownloads\x5cSKILLBRIDGE-live-fixPS C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix> ]633;B
+]633;D]633;A]633;P;Cwd=C:\x5cUsers\x5cICESSES\x5cDownloads\x5cSKILLBRIDGE-live-fixPS C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix> ]633;B
+PS>try {
+    Write-Host "`n===== 1. GIT STATUS =====" -ForegroundColor Cyan
+    git status --short
+    git branch --show-current
+
+    Write-Host "`n===== 2. PAYSTACK MIGRATION =====" -ForegroundColor Cyan
+    $migration = ".\supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql"
+    if (Test-Path $migration) {
+        $lines = Get-Content $migration
+        $lines | Select-Object -Skip 90 -First 115
+    } else {
+        Write-Host "Paystack hardening migration not found."
+    }
+
+    Write-Host "`n===== 3. WALLET SCHEMA DEFINITIONS =====" -ForegroundColor Cyan
+    foreach ($file in @(
+        ".\database\schema.sql",
+        ".\database\marketplace_production_schema.sql",
+        ".\database\RELEASE_PRODUCTION_PAYLOAD.sql"
+    )) {
+        if (Test-Path $file) {
+            Write-Host "`n--- $file ---"
+            Select-String -Path $file -Pattern "CREATE TABLE.*platform_wallets|CREATE TABLE.*paystack_transactions|CREATE TABLE.*paystack_wallet_ledger|CREATE OR REPLACE FUNCTION.*credit_paystack_wallet|available_balance|balance_cents|total_earnings|paystack_transactions|paystack_wallet_ledger" -Context 1,5
+        }
+    }
+
+    Write-Host "`n===== 4. PAYSTACK ROUTES =====" -ForegroundColor Cyan
+    foreach ($file in @(
+        ".\apps\web\app\api\paystack-init\route.ts",
+        ".\apps\web\app\api\paystack-webhook\route.ts",
+        ".\apps\web\app\api\webhooks\paystack\route.ts",
+        ".\apps\web\app\api\wallet\balance\route.ts",
+        ".\apps\web\app\api\withdraw\route.ts"
+    )) {
+        if (Test-Path $file) {
+            Write-Host "`n--- $file ---"
+            Select-String -Path $file -Pattern "PAYSTACK_SECRET_KEY|x-paystack-signature|charge.success|transaction/verify|credit_paystack_wallet|paystack_transactions|paystack_wallet_ledger|platform_wallets|user_wallets|available_balance|balance_cents|withdraw|transfer" -Context 1,2
+        } else {
+            Write-Host "Not present: $file"
+        }
+    }
+
+    Write-Host "`n===== 5. TASK SUBMISSION AND FILE UPLOAD =====" -ForegroundColor Cyan
+    $taskFile = ".\apps\web\components\TaskWorkspace.tsx"
+    if (Test-Path $taskFile) {
+        Select-String -Path $taskFile -Pattern "task_catalog|task_submissions|activeTask\.id|submission_text|file_storage_path|storage\.from|\.upload\(|type=file|input.*file|applicant_id|submitted_at" -Context 2,4
+    } else {
+        Write-Host "TaskWorkspace.tsx not found at expected path."
+    }
+
+    Write-Host "`n===== 6. PAYMENT PROVIDER REFERENCES =====" -ForegroundColor Cyan
+    Get-ChildItem ".\apps\web\app\api" -Recurse -File -Filter "route.ts" |
+        Select-String -Pattern "dodopayments|DODO_PAYMENTS_API_KEY|PAYSTACK_SECRET_KEY|api\.paystack\.co|transfer\.recipient|transfer\.initiate" |
+        Select-Object Path, LineNumber, Line
+
+    Write-Host "`n===== 7. ENVIRONMENT KEY NAMES ONLY =====" -ForegroundColor Cyan
+    foreach ($file in @(".\.env.example", ".\apps\web\.env.example")) {
+        if (Test-Path $file) {
+            Write-Host "--- $file ---"
+            Select-String -Path $file -Pattern "SUPABASE_URL|SUPABASE_ANON_KEY|SUPABASE_PUBLISHABLE_KEY|SUPABASE_SERVICE_ROLE_KEY|PAYSTACK_SECRET_KEY|NEXT_PUBLIC_SITE_URL" |
+                ForEach-Object { ($_.Line -split "=",2)[0] }
+        }
+    }
+
+    Write-Host "`n===== 8. TYPESCRIPT CHECK =====" -ForegroundColor Cyan
+    npx tsc --noEmit -p ".\apps\web\tsconfig.json"
+    Write-Host "TYPESCRIPT_EXIT_CODE=$LASTEXITCODE"
+
+    Write-Host "`n===== 9. PRODUCTION BUILD =====" -ForegroundColor Cyan
+    npm --workspace apps/web run build
+    Write-Host "BUILD_EXIT_CODE=$LASTEXITCODE"
+
+    Write-Host "`n===== 10. FINAL GIT STATUS =====" -ForegroundColor Cyan
+    git status --short
+    git diff --check
+    Write-Host "GIT_DIFF_CHECK_EXIT_CODE=$LASTEXITCODE"
+
+    Write-Host "`n===== AUDIT REPORT =====" -ForegroundColor Green
+    Write-Host $report
+}
+finally {
+    Stop-Transcript
+}
+
+===== 1. GIT STATUS =====
+
+
+
+===== 2. PAYSTACK MIGRATION =====
+CREATE POLICY "SkillBridge task files owner delete"
+ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+CREATE OR REPLACE FUNCTION public.credit_paystack_wallet(
+  p_reference text,
+  p_paystack_transaction_id bigint,
+  p_amount numeric,
+  p_currency text,
+  p_user_id uuid
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  payment_row public.paystack_transactions%ROWTYPE;
+BEGIN
+  IF p_reference IS NULL OR p_reference = ''
+     OR p_paystack_transaction_id IS NULL OR p_paystack_transaction_id <= 0
+     OR p_amount IS NULL OR p_amount <= 0
+     OR p_currency <> 'GHS' OR p_user_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Invalid payment parameters.');
+  END IF;
+
+  SELECT * INTO payment_row
+  FROM public.paystack_transactions
+  WHERE reference = p_reference
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment reference not found.');
+  END IF;
+
+  IF payment_row.user_id <> p_user_id
+     OR payment_row.currency <> p_currency
+     OR payment_row.amount <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment details do not match.');
+  END IF;
+
+  IF payment_row.status = 'success' THEN
+    IF EXISTS (
+      SELECT 1 FROM public.paystack_wallet_ledger
+      WHERE reference = p_reference
+        AND user_id = p_user_id
+        AND amount = p_amount
+        AND paystack_transaction_id = p_paystack_transaction_id
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'already_processed', true);
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'error', 'Payment marked successful without matching ledger entry.');
+  END IF;
+
+  IF payment_row.status <> 'initialized' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment is not awaiting credit.');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.paystack_wallet_ledger
+    WHERE reference = p_reference
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Ledger reference already exists.');
+  END IF;
+
+  INSERT INTO public.paystack_wallet_ledger
+    (reference, paystack_transaction_id, user_id, amount, currency)
+  VALUES
+    (p_reference, p_paystack_transaction_id, p_user_id, p_amount, p_currency);
+
+  INSERT INTO public.platform_wallets
+    (user_id, available_balance, total_earnings, updated_at)
+  VALUES
+    (p_user_id, p_amount, p_amount, now())
+  ON CONFLICT (user_id) DO UPDATE
+  SET available_balance = public.platform_wallets.available_balance + EXCLUDED.available_balance,
+      total_earnings = public.platform_wallets.total_earnings + EXCLUDED.total_earnings,
+      updated_at = now();
+
+  UPDATE public.paystack_transactions
+  SET status = 'success',
+      paystack_transaction_id = p_paystack_transaction_id,
+      updated_at = now()
+  WHERE reference = p_reference;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) TO service_role;
+
+ALTER TABLE public.paystack_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paystack_wallet_ledger ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.paystack_wallet_ledger FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.paystack_transactions TO service_role;
+GRANT ALL ON public.paystack_wallet_ledger TO service_role;
+
+===== 3. WALLET SCHEMA DEFINITIONS =====
+
+--- .\database\schema.sql ---
+
+  database\schema.sql:42:
+> database\schema.sql:43:create table
+public.platform_wallets (
+  database\schema.sql:44:    user_id uuid
+references auth.users on delete cascade
+primary key,
+> database\schema.sql:45:
+available_balance numeric(10,2) default
+0.00 not null,
+> database\schema.sql:46:
+total_earnings numeric(10,2) default 0.00
+not null,
+  database\schema.sql:47:    updated_at
+timestamp with time zone default
+timezone('utc'::text, now()) not null
+  database\schema.sql:48:);
+  database\schema.sql:49:
+  database\schema.sql:50:create table
+public.dodo_payments_log (
+  database\schema.sql:51:    id uuid
+default gen_random_uuid() primary key,
+  database\schema.sql:74:begin
+> database\schema.sql:75:    insert into
+public.platform_wallets (user_id,
+available_balance, total_earnings)
+  database\schema.sql:76:    values
+(target_user_id, amount_to_add,
+amount_to_add)
+  database\schema.sql:77:    on conflict
+(user_id) do update
+> database\schema.sql:78:    set
+available_balance =
+public.platform_wallets.available_balance
++ amount_to_add,
+> database\schema.sql:79:
+total_earnings =
+public.platform_wallets.total_earnings +
+amount_to_add,
+  database\schema.sql:80:
+updated_at = now();
+  database\schema.sql:81:end;
+  database\schema.sql:82:$$ language
+plpgsql security definer;
+
+--- .\database\marketplace_production_schema.sql ---
+  database\marketplace_production_schema.s
+ql:19:
+> database\marketplace_production_schema.s
+ql:20:CREATE TABLE IF NOT EXISTS
+public.platform_wallets (
+  database\marketplace_production_schema.s
+ql:21:    id UUID PRIMARY KEY DEFAULT
+gen_random_uuid(),
+  database\marketplace_production_schema.s
+ql:22:    profile_id UUID REFERENCES
+public.profiles(id) ON DELETE RESTRICT
+NOT NULL UNIQUE,
+> database\marketplace_production_schema.s
+ql:23:    balance_cents BIGINT DEFAULT 0
+NOT NULL CONSTRAINT
+check_positive_balance CHECK
+(balance_cents >= 0),
+  database\marketplace_production_schema.s
+ql:24:    currency TEXT DEFAULT 'GHS' NOT
+NULL,
+  database\marketplace_production_schema.s
+ql:25:    updated_at TIMESTAMPTZ DEFAULT
+TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\marketplace_production_schema.s
+ql:26:);
+  database\marketplace_production_schema.s
+ql:27:
+  database\marketplace_production_schema.s
+ql:28:CREATE OR REPLACE FUNCTION public.ha
+ndle_new_profile_wallet_provision()
+  database\marketplace_production_schema.s
+ql:30:BEGIN
+> database\marketplace_production_schema.s
+ql:31:    INSERT INTO
+public.platform_wallets (profile_id,
+balance_cents, currency)
+  database\marketplace_production_schema.s
+ql:32:    VALUES (NEW.id, 0, 'GHS') ON
+CONFLICT (profile_id) DO NOTHING;
+  database\marketplace_production_schema.s
+ql:33:    RETURN NEW;
+  database\marketplace_production_schema.s
+ql:34:END;
+  database\marketplace_production_schema.s
+ql:35:$$;
+  database\marketplace_production_schema.s
+ql:36:
+
+--- .\database\RELEASE_PRODUCTION_PAYLOAD.sql ---
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+25:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+26:CREATE TABLE IF NOT EXISTS
+public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+27:    id UUID PRIMARY KEY DEFAULT
+gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+28:    profile_id UUID REFERENCES
+public.profiles(id) ON DELETE RESTRICT
+NOT NULL UNIQUE,
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+29:    balance_cents BIGINT DEFAULT 0 NOT
+NULL CONSTRAINT check_positive_balance
+CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+30:    currency TEXT DEFAULT 'GHS' NOT
+NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+31:    updated_at TIMESTAMPTZ DEFAULT
+TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+32:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+33:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+34:CREATE OR REPLACE FUNCTION public.handl
+e_new_profile_wallet_provision()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+36:BEGIN
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+37:    INSERT INTO
+public.platform_wallets (profile_id,
+balance_cents, currency)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+38:    VALUES (NEW.id, 0, 'GHS') ON
+CONFLICT (profile_id) DO NOTHING;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+39:    RETURN NEW;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+40:END;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+41:$$;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+42:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+51:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+52:CREATE TABLE IF NOT EXISTS
+public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+53:    id UUID PRIMARY KEY DEFAULT
+gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+54:    profile_id UUID REFERENCES
+public.profiles(id) ON DELETE RESTRICT
+NOT NULL UNIQUE,
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+55:    balance_cents BIGINT DEFAULT 0 NOT
+NULL CONSTRAINT check_positive_balance
+CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+56:    currency TEXT DEFAULT 'GHS' NOT
+NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+57:    updated_at TIMESTAMPTZ DEFAULT
+TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+58:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+59:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+60:CREATE TABLE IF NOT EXISTS
+public.ledger_entries (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+84:BEGIN
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+85:    SELECT id, balance_cents INTO
+current_wallet_id, available_cents
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+86:    FROM public.platform_wallets
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+87:    WHERE profile_id =
+target_profile_id
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+88:    FOR UPDATE;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+89:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+90:    IF current_wallet_id IS NULL THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+102:    UPDATE public.platform_wallets
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+103:    SET balance_cents = balance_cents
+- requested_amount_cents,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+104:        updated_at = NOW()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+105:    WHERE id = current_wallet_id;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+106:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+107:    INSERT INTO public.ledger_entries
+(wallet_id, amount_cents, entry_type,
+reference_id)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+108:    VALUES (current_wallet_id,
+-requested_amount_cents, 'withdrawal',
+payment_reference);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+113:        'withdrawn_cents',
+requested_amount_cents,
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+114:        'remaining_balance_cents',
+(available_cents - requested_amount_cents)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+115:    );
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+116:END;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+117:$$;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+118:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+119:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+136:    target_wallet_id UUID;
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+137:    new_balance_cents BIGINT;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+138:BEGIN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+139:    -- 1. Identify internal profile
+reference identities from user email
+records
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+140:    SELECT id INTO matched_profile_id
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+141:    FROM public.profiles
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+142:    WHERE phone_number =
+target_user_email OR legal_name =
+target_user_email
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+149:    -- 2. Obtain explicit system
+row-level lock states to safeguard
+against race validations
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+150:    SELECT id, balance_cents INTO
+target_wallet_id, new_balance_cents
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+151:    FROM public.platform_wallets
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+152:    WHERE profile_id =
+matched_profile_id
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+153:    FOR UPDATE;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+154:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+155:    -- Automatically provision a
+ledger wallet state if one does not exist
+yet
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+156:    IF target_wallet_id IS NULL THEN
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+157:        INSERT INTO
+public.platform_wallets (profile_id,
+balance_cents, currency)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+158:        VALUES (matched_profile_id,
+amount_cents_to_add, 'GHS')
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+159:        RETURNING id, balance_cents
+INTO target_wallet_id, new_balance_cents;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+160:    ELSE
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+161:        UPDATE public.platform_wallets
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+162:        SET balance_cents =
+balance_cents + amount_cents_to_add,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+163:            updated_at =
+TIMEZONE('utc'::text, NOW())
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+164:        WHERE id = target_wallet_id
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+165:        RETURNING balance_cents INTO
+new_balance_cents;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+166:    END IF;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+167:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+168:    -- 3. Log matching auditing data
+tracks inside ledger logs
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+169:    INSERT INTO public.ledger_entries
+(wallet_id, amount_cents, entry_type,
+reference_id)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+170:    VALUES (target_wallet_id,
+amount_cents_to_add, 'payout',
+transaction_reference_id);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+174:        'wallet_id', target_wallet_id,
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:
+175:        'updated_balance_cents',
+new_balance_cents
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+176:    );
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+177:END;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+178:$$;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+179:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:
+180:
+
+===== 4. PAYSTACK ROUTES =====
+
+--- .\apps\web\app\api\paystack-init\route.ts ---
+  apps\web\app\api\paystack-init\route.ts:
+14:    const serviceKey =
+process.env.SUPABASE_SERVICE_ROLE_KEY;
+> apps\web\app\api\paystack-init\route.ts:
+15:    const paystackKey =
+process.env.PAYSTACK_SECRET_KEY;
+  apps\web\app\api\paystack-init\route.ts:
+16:
+  apps\web\app\api\paystack-init\route.ts:
+17:    if (!url || !anonKey ||
+!serviceKey) {
+  apps\web\app\api\paystack-init\route.ts:
+65:    const { error: insertError } =
+await admin
+> apps\web\app\api\paystack-init\route.ts:
+66:      .from("paystack_transactions")
+  apps\web\app\api\paystack-init\route.ts:
+67:      .insert({
+  apps\web\app\api\paystack-init\route.ts:
+68:        user_id: authData.user.id,
+  apps\web\app\api\paystack-init\route.ts:
+102:    if (!gatewayResponse.ok ||
+!gateway.status ||
+!gateway.data?.authorization_url) {
+> apps\web\app\api\paystack-init\route.ts:
+103:      await
+admin.from("paystack_transactions")
+  apps\web\app\api\paystack-init\route.ts:
+104:        .update({ status: "failed",
+updated_at: new Date().toISOString() })
+  apps\web\app\api\paystack-init\route.ts:
+105:        .eq("reference", reference)
+
+--- .\apps\web\app\api\paystack-webhook\route.ts ---
+  apps\web\app\api\paystack-webhook\route.
+ts:8:export async function POST(request:
+Request) {
+> apps\web\app\api\paystack-webhook\route.
+ts:9:  const secret =
+process.env.PAYSTACK_SECRET_KEY;
+> apps\web\app\api\paystack-webhook\route.
+ts:10:  const signature = request.headers.
+get("x-paystack-signature");
+  apps\web\app\api\paystack-webhook\route.
+ts:11:
+  apps\web\app\api\paystack-webhook\route.
+ts:12:  if (!secret) {
+  apps\web\app\api\paystack-webhook\route.
+ts:33:
+> apps\web\app\api\paystack-webhook\route.
+ts:34:  if (event.event !==
+"charge.success") {
+  apps\web\app\api\paystack-webhook\route.
+ts:35:    return NextResponse.json({
+received: true, ignored: true });
+  apps\web\app\api\paystack-webhook\route.
+ts:36:  }
+  apps\web\app\api\paystack-webhook\route.
+ts:55:    const { data: payment, error:
+lookupError } = await admin
+> apps\web\app\api\paystack-webhook\route.
+ts:56:      .from("paystack_transactions")
+  apps\web\app\api\paystack-webhook\route.
+ts:57:      .select("user_id,reference,amo
+unt,currency,status")
+  apps\web\app\api\paystack-webhook\route.
+ts:58:      .eq("reference", reference)
+  apps\web\app\api\paystack-webhook\route.
+ts:75:    const verifyResponse = await
+fetch(
+> apps\web\app\api\paystack-webhook\route.
+ts:76:      `https://api.paystack.co/trans
+action/verify/${encodeURIComponent(referen
+ce)}`,
+  apps\web\app\api\paystack-webhook\route.
+ts:77:      {
+  apps\web\app\api\paystack-webhook\route.
+ts:78:        headers: { Authorization:
+`Bearer ${secret}` },
+  apps\web\app\api\paystack-webhook\route.
+ts:105:    const { data: creditResult,
+error: creditError } = await admin.rpc(
+> apps\web\app\api\paystack-webhook\route.
+ts:106:      "credit_paystack_wallet",
+  apps\web\app\api\paystack-webhook\route.
+ts:107:      {
+  apps\web\app\api\paystack-webhook\route.
+ts:108:        p_reference: reference,
+
+--- .\apps\web\app\api\webhooks\paystack\route.ts ---
+
+--- .\apps\web\app\api\wallet\balance\route.ts ---
+  apps\web\app\api\wallet\balance\route.ts
+:53:    const { data: wallet, error:
+walletError } = await supabase
+> apps\web\app\api\wallet\balance\route.ts
+:54:      .from("platform_wallets")
+> apps\web\app\api\wallet\balance\route.ts
+:55:      .select("available_balance,
+total_earnings")
+  apps\web\app\api\wallet\balance\route.ts
+:56:      .eq("user_id", authData.user.id)
+  apps\web\app\api\wallet\balance\route.ts
+:57:      .maybeSingle();
+  apps\web\app\api\wallet\balance\route.ts
+:66:
+> apps\web\app\api\wallet\balance\route.ts
+:67:    const balance = wallet ?
+Number(wallet.available_balance) : 0;
+  apps\web\app\api\wallet\balance\route.ts
+:68:
+  apps\web\app\api\wallet\balance\route.ts
+:69:    if (!Number.isFinite(balance) ||
+balance < 0) {
+
+--- .\apps\web\app\api\withdraw\route.ts ---
+  apps\web\app\api\withdraw\route.ts:8:
+ {
+> apps\web\app\api\withdraw\route.ts:9:
+   error: "Withdrawals are temporarily
+unavailable while secure Paystack
+Transfers are being implemented.",
+  apps\web\app\api\withdraw\route.ts:10:
+  },
+  apps\web\app\api\withdraw\route.ts:11:
+  { status: 501 },
+
+===== 5. TASK SUBMISSION AND FILE UPLOAD =====
+
+apps\web\components\TaskWorkspace.tsx:37:
+
+apps\web\components\TaskWorkspace.tsx:38:
+     const { data, error } = await
+supabase
+>
+apps\web\components\TaskWorkspace.tsx:39:
+       .from('task_catalog')
+
+apps\web\components\TaskWorkspace.tsx:40:
+       .select('id, title, description,
+level, pay, visibility')
+
+apps\web\components\TaskWorkspace.tsx:41:
+       .order('created_at', { ascending:
+false });
+
+apps\web\components\TaskWorkspace.tsx:42:
+
+apps\web\components\TaskWorkspace.tsx:43:
+     if (error) {
+
+apps\web\components\TaskWorkspace.tsx:105:
+  apps\web\components\TaskWorkspace.tsx:10
+6:      const { error:
+submissionInsertError } = await supabase
+> apps\web\components\TaskWorkspace.tsx:10
+7:        .from('task_submissions')
+  apps\web\components\TaskWorkspace.tsx:10
+8:        .insert({
+> apps\web\components\TaskWorkspace.tsx:10
+9:          task_id: activeTask.id,
+  apps\web\components\TaskWorkspace.tsx:11
+0:          user_id: user.id,
+> apps\web\components\TaskWorkspace.tsx:11
+1:          applicant_id: user.id,
+> apps\web\components\TaskWorkspace.tsx:11
+2:          submission_text: cleanedText,
+  apps\web\components\TaskWorkspace.tsx:11
+3:          status: 'submitted',
+> apps\web\components\TaskWorkspace.tsx:11
+4:          submitted_at: new
+Date().toISOString(),
+  apps\web\components\TaskWorkspace.tsx:11
+5:        });
+
+apps\web\components\TaskWorkspace.tsx:116:
+  apps\web\components\TaskWorkspace.tsx:11
+7:      if (submissionInsertError) {
+  apps\web\components\TaskWorkspace.tsx:11
+8:        throw new
+Error(submissionInsertError.message);
+
+===== 6. PAYMENT PROVIDER REFERENCES =====
+
+Path       : C:\Users\ICESSES\Downloads\SK
+             ILLBRIDGE-live-fix\apps\web\a
+             pp\api\paystack-init\route.ts
+LineNumber : 15
+Line       :     const paystackKey = proce
+             ss.env.PAYSTACK_SECRET_KEY;
+
+
+Path       : C:\Users\ICESSES\Downloads\SK
+             ILLBRIDGE-live-fix\apps\web\a
+             pp\api\paystack-init\route.ts
+LineNumber : 83
+Line       :     const gatewayResponse =
+             await fetch("https://api.pays
+             tack.co/transaction/initializ
+             e", {
+
+
+Path       : C:\Users\ICESSES\Downloads\SK
+             ILLBRIDGE-live-fix\apps\web\a
+             pp\api\paystack-webhook\route
+             .ts
+LineNumber : 9
+Line       :   const secret = process.env.
+             PAYSTACK_SECRET_KEY;
+
+
+Path       : C:\Users\ICESSES\Downloads\SK
+             ILLBRIDGE-live-fix\apps\web\a
+             pp\api\paystack-webhook\route
+             .ts
+LineNumber : 76
+Line       :       `https://api.paystack.c
+             o/transaction/verify/${encode
+             URIComponent(reference)}`,
+
+
+===== 7. ENVIRONMENT KEY NAMES ONLY =====
+--- .\.env.example ---
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+PAYSTACK_SECRET_KEY
+
+===== 8. TYPESCRIPT CHECK =====
+
+TYPESCRIPT_EXIT_CODE=0
+
+===== 9. PRODUCTION BUILD =====
+
+BUILD_EXIT_CODE=0
+
+===== 10. FINAL GIT STATUS =====
+
+
+GIT_DIFF_CHECK_EXIT_CODE=0
+
+===== AUDIT REPORT =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\mastery-final-audit.txt
+**********************
+Windows PowerShell transcript end
+End time: 20261015051355
+**********************

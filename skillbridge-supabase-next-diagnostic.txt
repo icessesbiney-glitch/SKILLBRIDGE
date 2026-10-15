@@ -1,0 +1,104 @@
+SKILLBRIDGE SUPABASE DIAGNOSTIC
+Generated: 2026-10-15T04:16:29
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
+  // Defensive fallbacks to insulate the Next.js prerender layer from crashing in CI containers
+  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
+  const clientKey = supabaseKey || "placeholder-anon-key";
+
+  return createServerClient(
+    clientUrl,
+    clientKey,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => 
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This safely catches and ignores exceptions if middleware refreshes active sessions.
+          }
+        },
+      },
+    },
+  );
+};
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.EXPO_PUBLIC_SUPABASE_URL;
+
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
+const clientKey = supabaseKey || "placeholder-anon-key";
+
+export const supabase = createSupabaseClient(clientUrl, clientKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: typeof window !== "undefined",
+  },
+});
+
+export const createClient = () =>
+  createSupabaseClient(clientUrl, clientKey);
+
+export const getAdminSupabase = () => {
+  if (!supabaseUrl || !/^https?:\/\//i.test(supabaseUrl)) {
+    throw new Error("A valid Supabase project URL is required.");
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured.");
+  }
+
+  return createSupabaseClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+};
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request: { headers: request.headers } });
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      getAll() { return request.cookies.getAll(); },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) return NextResponse.redirect(new URL("/auth", request.url));
+    const userRole = user.user_metadata?.role_tier;
+    if (userRole !== "admin_central") return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+  return response;
+}
+
+export const config = { matcher: ["/admin/:path*", "/dashboard/:path*"] };

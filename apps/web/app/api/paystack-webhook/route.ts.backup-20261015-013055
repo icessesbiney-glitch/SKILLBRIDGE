@@ -1,0 +1,78 @@
+﻿import { createHmac, timingSafeEqual } from "node:crypto";
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(request: Request) {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+  const signature = request.headers.get("x-paystack-signature");
+
+  if (!secret) {
+    return NextResponse.json(
+      { error: "Paystack webhook is not configured." },
+      { status: 503 },
+    );
+  }
+
+  if (!signature) {
+    return NextResponse.json(
+      { error: "Missing Paystack signature." },
+      { status: 401 },
+    );
+  }
+
+  const rawBody = await request.text();
+  const expected = createHmac("sha512", secret)
+    .update(rawBody)
+    .digest("hex");
+
+  const suppliedBuffer = Buffer.from(signature, "hex");
+  const expectedBuffer = Buffer.from(expected, "hex");
+
+  if (
+    suppliedBuffer.length !== expectedBuffer.length ||
+    !timingSafeEqual(suppliedBuffer, expectedBuffer)
+  ) {
+    return NextResponse.json(
+      { error: "Invalid Paystack signature." },
+      { status: 401 },
+    );
+  }
+
+  let event: { event?: string; data?: { reference?: string } };
+
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid webhook JSON." },
+      { status: 400 },
+    );
+  }
+
+  if (event.event !== "charge.success") {
+    return NextResponse.json({ received: true, ignored: true });
+  }
+
+  if (!event.data?.reference) {
+    return NextResponse.json(
+      { error: "Payment reference is missing." },
+      { status: 400 },
+    );
+  }
+
+  // A verified signature alone does not prove the transaction should
+  // credit a wallet. Verify the transaction and apply an idempotent
+  // database credit only after the live schema and RPC are confirmed.
+  return NextResponse.json(
+    {
+      received: true,
+      verifiedSignature: true,
+      processed: false,
+      message:
+        "Signature verified. Wallet credit is not enabled until transaction verification and the database credit RPC are configured.",
+    },
+    { status: 202 },
+  );
+}

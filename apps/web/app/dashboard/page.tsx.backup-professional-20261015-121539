@@ -1,0 +1,38 @@
+﻿'use client';
+
+import { useAuthSession } from '../../hooks/useAuthSession';
+import TaskWorkspace from '../../components/TaskWorkspace';
+
+export default function DashboardPage() {
+  const { isConfigured, isLoading, session } = useAuthSession();
+
+  return (
+    <main className="space-y-6 py-6">
+      <header className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <p className="text-sm font-semibold text-blue-700">SKILLBRIDGE OPERATIONS</p>
+        <h1 className="mt-2 text-3xl font-bold text-gray-900">
+          Repository status and deployment readiness
+        </h1>
+        <p className="mt-3 text-gray-600">
+          Validation runs without suppressing errors.
+        </p>
+        <p className="mt-1 text-gray-600">
+          Workflow files now match the repository structure.
+        </p>
+        <div className="mt-4 text-sm text-gray-600">
+          {isLoading
+            ? 'Checking your sign-in status...'
+            : session?.user?.email
+              ? `Signed in as ${session.user.email}`
+              : isConfigured
+                ? 'Sign in to access your learner workspace.'
+                : 'Authentication needs configuration.'}
+        </div>
+      </header>
+
+      <section aria-label="Learner task workspace">
+        <TaskWorkspace />
+      </section>
+    </main>
+  );
+}

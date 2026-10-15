@@ -26,7 +26,7 @@ export default function TeamPage() {
                 <article key={member.name} className="sb-card">
                   <span className="sb-status-pill">{member.role}</span>
                   <h2>{member.name}</h2>
-                  <p>{member.focus}</p>
+                  <p>{member.bio}</p>
                 </article>
               ))}
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../utils/supabaseClient";
 
 interface WalletData {
   balance_cents: number;
@@ -12,10 +12,7 @@ export default function VendorWalletCard({ profileId }: { profileId: string }) {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-  );
+
 
   useEffect(() => {
     async function fetchWalletState() {

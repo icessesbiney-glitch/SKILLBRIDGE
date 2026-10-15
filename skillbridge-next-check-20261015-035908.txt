@@ -1,0 +1,172 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015035908
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\ICESSES\AppData\Local\Programs\Microsoft VS Code\16507d91be\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 16728
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+===== A. LOCATE NEXT CONFIGURATION =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\next.config.js
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\next.config.mjs
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\next.config.js
+
+===== B. DATABASE FUNCTION DEFINITIONS IN LOCAL FILES =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\marketplace_production_schema.sql:20: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:26: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:52: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:32: create table public.task_submissions (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:43: create table public.platform_wallets (
+
+===== C. WEB TASK SUBMISSION IMPLEMENTATION =====
+    e.preventDefault();
+
+    if (!activeTask) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionError('');
+    setSuccessMessage('');
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw new Error(userError.message);
+      }
+
+      if (!user) {
+        throw new Error('You must be signed in before submitting a task.');
+      }
+
+      const cleanedText = submissionText.trim();
+
+      if (!cleanedText) {
+        throw new Error('Please enter your task work before submitting.');
+      }
+
+      const { error: submissionInsertError } = await supabase
+        .from('task_submissions')
+        .insert({
+          task_id: activeTask.id,
+          user_id: user.id,
+          applicant_id: user.id,
+          submission_text: cleanedText,
+          status: 'submitted',
+          submitted_at: new Date().toISOString(),
+        });
+
+      if (submissionInsertError) {
+        throw new Error(submissionInsertError.message);
+      }
+
+      setSuccessMessage(
+        `Your submission for "${activeTask.title}" was sent successfully.`,
+      );
+      setSubmissionText('');
+    } catch (error) {
+      console.error('Task submission error:', error);
+
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong while submitting your task.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="sb-stack">
+      {/* Learner bands */}
+'use client';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://aolfuonsuaeoitumuvqc.supabase.co';
+const supabaseAnonKey = 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE';
+const clientSupabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export default function TasksPage() {
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState('');
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    clientSupabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
+      if (data) setSubmissions(data);
+    });
+  }, []);
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return setMsg('Please select a file');
+    setMsg('Uploading asset file...');
+    try {
+      const { data: { user } } = await clientSupabase.auth.getUser();
+      if (!user) throw new Error('Unauthenticated user instance');
+      const path = `${user.id}/${Date.now()}_${file.name}`;
+
+      const { error: uploadErr } = await clientSupabase.storage.from('task-deliverables').upload(path, file);
+      if (uploadErr) throw uploadErr;
+
+      await clientSupabase.from('task_submissions').insert({
+        task_id: '00000000-0000-0000-0000-000000000000',
+        user_id: user.id,
+        notes_text: notes,
+        file_storage_path: path,
+        file_size_bytes: file.size,
+        status: 'Pending Review'
+      });
+      setMsg('Task uploaded into the ledger successfully!');
+    } catch (err: any) {
+      setMsg(`Upload runtime failure: ${err.message}`);
+    }
+  };
+
+  return (
+    <div className="p-8 max-w-xl mx-auto space-y-4">
+      <h2 className="text-xl font-bold">SkillBridge Task Submission Portal</h2>
+      <input type="file" onChange={e => setFile(e.target.files?.[0] ?? null)} className="border p-2 w-full" />
+      <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add transaction task notes..." className="border p-2 w-full" />
+      <button onClick={handleUpload} className="bg-blue-600 text-white p-2 w-full">Upload File Deliverable</button>
+      <p className="text-sm font-semibold">{msg}</p>
+    </div>
+  );
+}
+
+===== D. BUILD =====
+
+PRODUCTION_BUILD_EXIT_CODE=1
+
+===== E. PATCH CHECK =====
+
+GIT_DIFF_CHECK_EXIT_CODE=0
+
+===== F. WORKING TREE =====
+
+
+===== RESULTS =====
+PRODUCTION_BUILD_EXIT_CODE=1
+GIT_DIFF_CHECK_EXIT_CODE=0
+**********************
+Windows PowerShell transcript end
+End time: 20261015035932
+**********************

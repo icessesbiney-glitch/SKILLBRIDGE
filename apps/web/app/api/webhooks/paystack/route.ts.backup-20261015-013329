@@ -1,0 +1,1 @@
+export { runtime, dynamic, POST } from "../../paystack-webhook/route";

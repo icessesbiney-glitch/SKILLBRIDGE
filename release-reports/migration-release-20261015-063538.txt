@@ -1,0 +1,2 @@
+2026-10-15 06:35:42 ===== SKILLBRIDGE MIGRATION AND RELEASE =====
+2026-10-15 06:35:42 BLOCKED: supabase/config.toml is missing. Stopping rather than guessing project configuration.

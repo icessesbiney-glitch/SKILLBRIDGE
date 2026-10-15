@@ -1,0 +1,317 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015035731
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 16772
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+===== 1. WEBHOOK CREDIT LOGIC =====
+
+    if (payment.status === "success") {
+      return NextResponse.json({ received: true, processed: true, already_processed: true });
+    }
+
+    if (payment.status !== "initialized") {
+      return NextResponse.json({ received: true, ignored: true });
+    }
+
+    const verifyResponse = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: { Authorization: `Bearer ${secret}` },
+        cache: "no-store",
+      },
+    );
+
+    const verification = await verifyResponse.json();
+    const verified = verification?.data;
+
+    if (!verifyResponse.ok || !verification?.status || !verified) {
+      console.error("Paystack verification request failed for reference:", reference);
+      return NextResponse.json({ error: "Could not verify payment." }, { status: 502 });
+    }
+
+    const expectedPesewas = Math.round(Number(payment.amount) * 100);
+    if (
+      verified.status !== "success" ||
+      !Number.isSafeInteger(verified.id) ||
+      verified.id <= 0 ||
+      verified.reference !== reference ||
+      verified.currency !== "GHS" ||
+      !Number.isSafeInteger(expectedPesewas) ||
+      verified.amount !== expectedPesewas
+    ) {
+      console.error("Paystack verification mismatch for reference:", reference);
+      return NextResponse.json({ error: "Payment verification did not match the saved transaction." }, { status: 400 });
+    }
+
+    const { data: creditResult, error: creditError } = await admin.rpc(
+      "credit_paystack_wallet",
+      {
+        p_reference: reference,
+        p_paystack_transaction_id: verified.id,
+        p_amount: Number(payment.amount),
+        p_currency: verified.currency,
+        p_user_id: payment.user_id,
+      },
+    );
+
+    if (creditError) {
+      console.error("Wallet credit RPC failed:", creditError.message);
+      return NextResponse.json({ error: "Wallet credit failed; Paystack may retry this webhook." }, { status: 500 });
+    }
+
+    const creditPayload = Array.isArray(creditResult)
+      ? creditResult[0]
+      : creditResult;
+
+    if (
+      !creditPayload ||
+      typeof creditPayload !== "object" ||
+      creditPayload.success !== true
+    ) {
+      console.error("Paystack wallet credit RPC did not explicitly confirm success.");
+      return NextResponse.json(
+        { error: "Wallet credit was not confirmed. Paystack may retry this webhook." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ received: true, processed: true, result: creditResult });
+  } catch (error) {
+    console.error("Paystack webhook processing error:", error);
+    return NextResponse.json({ error: "Payment processing failed; retry is possible." }, { status: 500 });
+  }
+}
+
+===== 2. PAYMENT INITIALIZATION =====
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+
+    if (!url || !anonKey || !serviceKey) {
+      return NextResponse.json(
+        { error: "Supabase server configuration is incomplete." },
+        { status: 503 },
+      );
+    }
+    if (!paystackKey) {
+      return NextResponse.json(
+        { error: "Paystack is not configured." },
+        { status: 503 },
+      );
+    }
+
+    const authorization = req.headers.get("authorization") || "";
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+      return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+    }
+
+    const authClient = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: authData, error: authError } =
+      await authClient.auth.getUser(match[1]);
+
+    if (authError || !authData.user || !authData.user.email) {
+      return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const rawAmount = String(body?.amount ?? "").trim();
+
+    if (!/^\d{1,7}(\.\d{1,2})?$/.test(rawAmount)) {
+      return NextResponse.json({ error: "Enter a valid amount in GHS." }, { status: 400 });
+    }
+
+    const amount = Number(rawAmount);
+    const pesewas = Math.round(amount * 100);
+
+    if (!Number.isSafeInteger(pesewas) || pesewas < 100 || pesewas > 100000000) {
+      return NextResponse.json({ error: "Amount must be between GHS 1.00 and GHS 1,000,000.00." }, { status: 400 });
+    }
+
+    const admin = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const reference = `SB-${randomUUID()}`;
+    const { error: insertError } = await admin
+      .from("paystack_transactions")
+      .insert({
+        user_id: authData.user.id,
+        email: authData.user.email,
+        reference,
+        amount: (pesewas / 100).toFixed(2),
+        currency: "GHS",
+        status: "initialized",
+        metadata: { platform: "skillbridge" },
+      });
+
+    if (insertError) {
+      console.error("Unable to create payment record:", insertError.message);
+      return NextResponse.json({ error: "Could not create the payment record." }, { status: 500 });
+    }
+
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_URL || req.nextUrl.origin).replace(/\/+$/, "");
+    const gatewayResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${paystackKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: authData.user.email,
+        amount: pesewas,
+        currency: "GHS",
+        reference,
+        callback_url: `${siteUrl}/dashboard?payment=return&reference=${encodeURIComponent(reference)}`,
+        metadata: { user_id: authData.user.id, platform: "skillbridge" },
+      }),
+      cache: "no-store",
+    });
+
+    const gateway = await gatewayResponse.json();
+
+    if (!gatewayResponse.ok || !gateway.status || !gateway.data?.authorization_url) {
+      await admin.from("paystack_transactions")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("reference", reference)
+        .eq("status", "initialized");
+
+      console.error("Paystack initialization failed:", gateway.message || gateway.status);
+      return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+    }
+
+    return NextResponse.json({
+      authorization_url: gateway.data.authorization_url,
+      reference,
+    });
+  } catch (error) {
+    console.error("Payment initialization error:", error);
+    return NextResponse.json({ error: "Unable to start payment." }, { status: 500 });
+  }
+}
+
+===== 3. LOCAL SQL DEFINITIONS =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\driver_locations_schema.sql:10: alter table public.driver_locations enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\driver_locations_schema.sql:13: create policy "Allow public location discovery" on public.driver_locations
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\driver_locations_schema.sql:16: create policy "Allow service upserts" on public.driver_locations
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\marketplace_production_schema.sql:20: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\marketplace_production_schema.sql:31: INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:26: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:37: INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:52: CREATE TABLE IF NOT EXISTS public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:62: wallet_id UUID REFERENCES public.platform_wallets(id) ON DELETE RESTRICT NOT NULL,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:69: ALTER TABLE public.platform_wallets ENABLE ROW LEVEL SECURITY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:70: ALTER TABLE public.ledger_entries ENABLE ROW LEVEL SECURITY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:86: FROM public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:102: UPDATE public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:151: FROM public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:157: INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql:161: UPDATE public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:32: create table public.task_submissions (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:43: create table public.platform_wallets (
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:59: alter table public.courses enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:60: alter table public.learners enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:61: alter table public.quizzes enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:62: alter table public.task_submissions enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:63: alter table public.platform_wallets enable row level security;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:65: create policy "Allow public read access to courses" on public.courses for select using (true);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:66: create policy "Allow public read access to quizzes" on public.quizzes for select using (true);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:67: create policy "Allow users to view own learner data" on public.learners for select using (auth.uid() = user_id);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:68: create policy "Allow users to edit own learner data" on public.learners for update using (auth.uid() = user_id);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:69: create policy "Allow users to process task submissions" on public.task_submissions for all using (auth.uid() = user_id);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:70: create policy "Secure balance visualization" on public.platform_wallets for select using (auth.uid() = user_id);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:75: insert into public.platform_wallets (user_id, available_balance, total_earnings)
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:78: set available_balance = public.platform_wallets.available_balance + amount_to_add,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql:79: total_earnings = public.platform_wallets.total_earnings + amount_to_add,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\supabase_wallet_triggers.sql:31: FROM public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\supabase_wallet_triggers.sql:37: INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\supabase_wallet_triggers.sql:41: UPDATE public.platform_wallets
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\20261007_admin_gps_tracking.sql:17: ALTER TABLE public.admin_gps_tracking ENABLE ROW LEVEL SECURITY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\20261007_admin_gps_tracking.sql:20: CREATE POLICY "Only administrators can read live tracking data"
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_config_payload.sql:5: ALTER TABLE public.admin_gps_tracking ENABLE ROW LEVEL SECURITY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_config_payload.sql:9: CREATE POLICY "Allow authenticated admins read access"
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_master_config.sql:5: ALTER TABLE public.admin_gps_tracking ENABLE ROW LEVEL SECURITY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_master_config.sql:9: CREATE POLICY "Allow authenticated admins read access"
+
+===== 4. TASK SUBMISSION AND FILE UPLOAD =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:16: clientSupabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:26: const { data: { user } } = await clientSupabase.auth.getUser();
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:28: const path = `${user.id}/${Date.now()}_${file.name}`;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:30: const { error: uploadErr } = await clientSupabase.storage.from('task-deliverables').upload(path, file);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:33: await clientSupabase.from('task_submissions').insert({
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\tasks\page.tsx:35: user_id: user.id,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:28: const [submissionText, setSubmissionText] = useState('');
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:70: setSubmissionText('');
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:90: } = await supabase.auth.getUser();
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:100: const cleanedText = submissionText.trim();
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:107: .from('task_submissions')
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:108: .insert({
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:110: user_id: user.id,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:111: applicant_id: user.id,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:124: setSubmissionText('');
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:466: value={submissionText}
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:467: onChange={(e) => setSubmissionText(e.target.value)}
+
+===== 5. PAYOUT ROUTE STATUS =====
+
+--- apps/web/app/api/withdraw/route.ts ---
+error: "Withdrawals are temporarily unavailable while secure Paystack Transfers are being implemented.",
+{ status: 501 },
+
+--- apps/web/app/api/cashout/route.ts ---
+error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+{ status: 501 },
+
+--- apps/web/app/api/rider/payout/route.ts ---
+error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+{ status: 501 },
+
+--- apps/web/app/api/vendor/settle/route.ts ---
+error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+{ status: 501 },
+
+===== 6. ENVIRONMENT VARIABLE NAMES ONLY =====
+--- .env.example ---
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+PAYSTACK_SECRET_KEY
+NEXT_PUBLIC_URL
+SKILLBRIDGE_DESKTOP_WEB_URL
+
+===== 7. NEXT.JS CONFIGURATION FILES =====
+
+
+===== 8. TYPESCRIPT VALIDATION =====
+
+TYPESCRIPT_EXIT_CODE=0
+
+===== 9. PATCH VALIDATION =====

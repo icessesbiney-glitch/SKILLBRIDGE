@@ -1,0 +1,658 @@
+===== DATABASE TABLES AND WALLET FUNCTIONS =====
+
+> database\marketplace_production_schema.sql:20:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\marketplace_production_schema.sql:21:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\marketplace_production_schema.sql:22:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\marketplace_production_schema.sql:23:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\marketplace_production_schema.sql:24:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\marketplace_production_schema.sql:25:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\marketplace_production_schema.sql:26:);
+  database\marketplace_production_schema.sql:27:
+  database\marketplace_production_schema.sql:28:CREATE OR REPLACE FUNCTION public.handle_new_profile_wallet_provision()
+  database\marketplace_production_schema.sql:29:RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+  database\marketplace_production_schema.sql:30:BEGIN
+  database\marketplace_production_schema.sql:31:    INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+  database\marketplace_production_schema.sql:32:    VALUES (NEW.id, 0, 'GHS') ON CONFLICT (profile_id) DO NOTHING;
+  database\marketplace_production_schema.sql:33:    RETURN NEW;
+  database\marketplace_production_schema.sql:34:END;
+  database\marketplace_production_schema.sql:35:$$;
+  database\marketplace_production_schema.sql:36:
+  database\marketplace_production_schema.sql:37:CREATE OR REPLACE TRIGGER trigger_on_profile_signup_provision_wallet
+  database\marketplace_production_schema.sql:38:    AFTER INSERT ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.handle_new_profile_wallet_provision();
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:26:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:27:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:28:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:29:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:30:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:31:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:32:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:33:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:34:CREATE OR REPLACE FUNCTION public.handle_new_profile_wallet_provision()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:35:RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:36:BEGIN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:37:    INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:38:    VALUES (NEW.id, 0, 'GHS') ON CONFLICT (profile_id) DO NOTHING;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:39:    RETURN NEW;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:40:END;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:41:$$;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:42:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:43:CREATE OR REPLACE TRIGGER trigger_on_profile_signup_provision_wallet
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:44:    AFTER INSERT ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.handle_new_profile_wallet_provision();
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:45:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:46:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:47:-- FILE SOURCE TARGET: supabase_wallet_logic.sql
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:48:-- =========================================================================
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:49:-- SKILLBRIDGE PRODUCTION SYSTEM WALLET LEDGER ROUTINES
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:50:-- =========================================================================
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:51:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:52:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:53:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:54:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:55:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:56:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:57:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:58:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:59:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:60:CREATE TABLE IF NOT EXISTS public.ledger_entries (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:61:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:62:    wallet_id UUID REFERENCES public.platform_wallets(id) ON DELETE RESTRICT NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:63:    amount_cents BIGINT NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:64:    entry_type TEXT NOT NULL CONSTRAINT check_entry_type CHECK (entry_type IN ('payout', 'withdrawal', 'commission')),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:65:    reference_id TEXT UNIQUE NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:66:    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:67:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:68:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:69:ALTER TABLE public.platform_wallets ENABLE ROW LEVEL SECURITY;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:70:ALTER TABLE public.ledger_entries ENABLE ROW LEVEL SECURITY;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:71:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:72:CREATE OR REPLACE FUNCTION public.execute_wallet_withdrawal(
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:73:    target_profile_id UUID,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:74:    requested_amount_cents BIGINT,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:75:    payment_reference TEXT
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:76:)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:77:RETURNS JSONB
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:78:LANGUAGE plpgsql
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:79:SECURITY DEFINER
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:80:AS $$
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:81:DECLARE
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:82:    current_wallet_id UUID;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:83:    available_cents BIGINT;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:84:BEGIN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:85:    SELECT id, balance_cents INTO current_wallet_id, available_cents
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:86:    FROM public.platform_wallets
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:87:    WHERE profile_id = target_profile_id
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:88:    FOR UPDATE;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:89:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:90:    IF current_wallet_id IS NULL THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:91:        RETURN jsonb_build_object('success', false, 'error', 'Wallet not initialized.');
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:92:    END IF;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:93:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:94:    IF requested_amount_cents < 5000 THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:95:        RETURN jsonb_build_object('success', false, 'error', 'Withdrawal must meet 50 GHS minimum.');
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:96:    END IF;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:97:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:98:    IF available_cents < requested_amount_cents THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:99:        RETURN jsonb_build_object('success', false, 'error', 'Insufficient funds available.');
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:100:    END IF;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:101:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:102:    UPDATE public.platform_wallets
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:103:    SET balance_cents = balance_cents - requested_amount_cents,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:104:        updated_at = NOW()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:105:    WHERE id = current_wallet_id;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:106:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:107:    INSERT INTO public.ledger_entries (wallet_id, amount_cents, entry_type, reference_id)
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:125:CREATE OR REPLACE FUNCTION public.increment_wallet_balance(
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:126:    target_user_email TEXT,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:127:    amount_cents_to_add BIGINT,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:128:    transaction_reference_id TEXT
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:129:)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:130:RETURNS JSONB
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:131:LANGUAGE plpgsql
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:132:SECURITY DEFINER
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:133:AS $$
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:134:DECLARE
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:135:    matched_profile_id UUID;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:136:    target_wallet_id UUID;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:137:    new_balance_cents BIGINT;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:138:BEGIN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:139:    -- 1. Identify internal profile reference identities from user email records
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:140:    SELECT id INTO matched_profile_id 
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:141:    FROM public.profiles 
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:142:    WHERE phone_number = target_user_email OR legal_name = target_user_email
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:143:    LIMIT 1;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:144:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:145:    IF matched_profile_id IS NULL THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:146:        RETURN jsonb_build_object('success', false, 'error', 'Unable to resolve marketplace user profile identity matching given credentials.');
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:147:    END IF;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:148:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:149:    -- 2. Obtain explicit system row-level lock states to safeguard against race validations
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:150:    SELECT id, balance_cents INTO target_wallet_id, new_balance_cents
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:151:    FROM public.platform_wallets
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:152:    WHERE profile_id = matched_profile_id
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:153:    FOR UPDATE;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:154:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:155:    -- Automatically provision a ledger wallet state if one does not exist yet
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:156:    IF target_wallet_id IS NULL THEN
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:157:        INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:158:        VALUES (matched_profile_id, amount_cents_to_add, 'GHS')
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:159:        RETURNING id, balance_cents INTO target_wallet_id, new_balance_cents;
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:160:    ELSE
+> database\schema.sql:32:create table public.task_submissions (
+  database\schema.sql:33:    id uuid default gen_random_uuid() primary key,
+  database\schema.sql:34:    task_id uuid not null,
+  database\schema.sql:35:    user_id uuid references auth.users on delete cascade not null,
+  database\schema.sql:36:    notes_text text,
+  database\schema.sql:37:    file_storage_path text not null,
+  database\schema.sql:38:    file_size_bytes bigint,
+  database\schema.sql:39:    status text check (status in ('Pending Review', 'Approved', 'Completed', 'Disbursed', 'Rejected')) default 'Pending Review',
+  database\schema.sql:40:    submitted_at timestamp with time zone default timezone('utc'::text, now()) not null    
+  database\schema.sql:41:);
+  database\schema.sql:42:
+> database\schema.sql:43:create table public.platform_wallets (
+  database\schema.sql:44:    user_id uuid references auth.users on delete cascade primary key,
+  database\schema.sql:45:    available_balance numeric(10,2) default 0.00 not null,
+  database\schema.sql:46:    total_earnings numeric(10,2) default 0.00 not null,
+  database\schema.sql:47:    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+  database\schema.sql:48:);
+  database\schema.sql:49:
+  database\schema.sql:50:create table public.dodo_payments_log (
+  database\schema.sql:51:    id uuid default gen_random_uuid() primary key,
+  database\schema.sql:52:    payment_id text unique not null,
+  database\schema.sql:53:    user_id uuid not null,
+  database\schema.sql:54:    amount numeric(10,2) not null,
+  database\schema.sql:55:    status text not null,
+  database\schema.sql:56:    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  database\schema.sql:57:);
+  database\schema.sql:58:
+  database\schema.sql:59:alter table public.courses enable row level security;
+  database\schema.sql:60:alter table public.learners enable row level security;
+  database\schema.sql:61:alter table public.quizzes enable row level security;
+  database\schema.sql:62:alter table public.task_submissions enable row level security;
+  database\schema.sql:63:alter table public.platform_wallets enable row level security;
+  database\schema.sql:64:
+  database\schema.sql:65:create policy "Allow public read access to courses" on public.courses for select using (true);
+  database\schema.sql:66:create policy "Allow public read access to quizzes" on public.quizzes for select using (true);
+  database\schema.sql:67:create policy "Allow users to view own learner data" on public.learners for select using (auth.uid() = user_id);
+  database\schema.sql:68:create policy "Allow users to edit own learner data" on public.learners for update using (auth.uid() = user_id);
+  database\schema.sql:69:create policy "Allow users to process task submissions" on public.task_submissions for all using (auth.uid() = user_id);
+  database\schema.sql:70:create policy "Secure balance visualization" on public.platform_wallets for select using (auth.uid() = user_id);
+  database\schema.sql:71:
+> database\schema.sql:72:create or replace function public.increment_wallet_balance(target_user_id uuid, amount_to_add numeric)
+  database\schema.sql:73:returns void as $$
+  database\schema.sql:74:begin
+  database\schema.sql:75:    insert into public.platform_wallets (user_id, available_balance, total_earnings)
+  database\schema.sql:76:    values (target_user_id, amount_to_add, amount_to_add)
+  database\schema.sql:77:    on conflict (user_id) do update
+  database\schema.sql:78:    set available_balance = public.platform_wallets.available_balance + amount_to_add,
+  database\schema.sql:79:        total_earnings = public.platform_wallets.total_earnings + amount_to_add,
+  database\schema.sql:80:        updated_at = now();
+  database\schema.sql:81:end;
+  database\schema.sql:82:$$ language plpgsql security definer;
+> database\supabase_wallet_triggers.sql:5:CREATE OR REPLACE FUNCTION public.increment_wallet_balance(
+  database\supabase_wallet_triggers.sql:6:    target_user_email TEXT,
+  database\supabase_wallet_triggers.sql:7:    amount_cents_to_add BIGINT,
+  database\supabase_wallet_triggers.sql:8:    transaction_reference_id TEXT
+  database\supabase_wallet_triggers.sql:9:)
+  database\supabase_wallet_triggers.sql:10:RETURNS JSONB
+  database\supabase_wallet_triggers.sql:11:LANGUAGE plpgsql
+  database\supabase_wallet_triggers.sql:12:SECURITY DEFINER
+  database\supabase_wallet_triggers.sql:13:AS $$
+  database\supabase_wallet_triggers.sql:14:DECLARE
+  database\supabase_wallet_triggers.sql:15:    matched_profile_id UUID;
+  database\supabase_wallet_triggers.sql:16:    target_wallet_id UUID;
+  database\supabase_wallet_triggers.sql:17:    new_balance_cents BIGINT;
+  database\supabase_wallet_triggers.sql:18:BEGIN
+  database\supabase_wallet_triggers.sql:19:    -- 1. Identify internal profile reference identities from user email records
+  database\supabase_wallet_triggers.sql:20:    SELECT id INTO matched_profile_id 
+  database\supabase_wallet_triggers.sql:21:    FROM public.profiles 
+  database\supabase_wallet_triggers.sql:22:    WHERE phone_number = target_user_email OR legal_name = target_user_email
+  database\supabase_wallet_triggers.sql:23:    LIMIT 1;
+  database\supabase_wallet_triggers.sql:24:
+  database\supabase_wallet_triggers.sql:25:    IF matched_profile_id IS NULL THEN
+  database\supabase_wallet_triggers.sql:26:        RETURN jsonb_build_object('success', false, 'error', 'Unable to resolve marketplace user profile identity matching given credentials.');
+  database\supabase_wallet_triggers.sql:27:    END IF;
+  database\supabase_wallet_triggers.sql:28:
+  database\supabase_wallet_triggers.sql:29:    -- 2. Obtain explicit system row-level lock states to safeguard against race validations
+  database\supabase_wallet_triggers.sql:30:    SELECT id, balance_cents INTO target_wallet_id, new_balance_cents
+  database\supabase_wallet_triggers.sql:31:    FROM public.platform_wallets
+  database\supabase_wallet_triggers.sql:32:    WHERE profile_id = matched_profile_id
+  database\supabase_wallet_triggers.sql:33:    FOR UPDATE;
+  database\supabase_wallet_triggers.sql:34:
+  database\supabase_wallet_triggers.sql:35:    -- Automatically provision a ledger wallet state if one does not exist yet
+  database\supabase_wallet_triggers.sql:36:    IF target_wallet_id IS NULL THEN
+  database\supabase_wallet_triggers.sql:37:        INSERT INTO public.platform_wallets (profile_id, balance_cents, currency)
+  database\supabase_wallet_triggers.sql:38:        VALUES (matched_profile_id, amount_cents_to_add, 'GHS')
+  database\supabase_wallet_triggers.sql:39:        RETURNING id, balance_cents INTO target_wallet_id, new_balance_cents;
+  database\supabase_wallet_triggers.sql:40:    ELSE
+
+
+
+
+===== TASK PAGE =====
+'use client';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://aolfuonsuaeoitumuvqc.supabase.co';
+const supabaseAnonKey = 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE';
+const clientSupabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export default function TasksPage() {
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState('');
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    clientSupabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
+      if (data) setSubmissions(data);
+    });
+  }, []);
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return setMsg('Please select a file');
+    setMsg('Uploading asset file...');
+    try {
+      const { data: { user } } = await clientSupabase.auth.getUser();
+      if (!user) throw new Error('Unauthenticated user instance');
+      const path = `${user.id}/${Date.now()}_${file.name}`;
+
+      const { error: uploadErr } = await clientSupabase.storage.from('task-deliverables').upload(path, file);
+      if (uploadErr) throw uploadErr;
+
+      await clientSupabase.from('task_submissions').insert({
+        task_id: '00000000-0000-0000-0000-000000000000',
+        user_id: user.id,
+        notes_text: notes,
+        file_storage_path: path,
+        file_size_bytes: file.size,
+        status: 'Pending Review'
+      });
+      setMsg('Task uploaded into the ledger successfully!');
+    } catch (err: any) {
+      setMsg(`Upload runtime failure: ${err.message}`);
+    }
+  };
+
+  return (
+    <div className="p-8 max-w-xl mx-auto space-y-4">
+      <h2 className="text-xl font-bold">SkillBridge Task Submission Portal</h2>
+      <input type="file" onChange={e => setFile(e.target.files?.[0] ?? null)} className="border p-2 w-full" />
+      <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add transaction task notes..." className="border p-2 w-full" />
+      <button onClick={handleUpload} className="bg-blue-600 text-white p-2 w-full">Upload File Deliverable</button>
+      <p className="text-sm font-semibold">{msg}</p>
+    </div>
+  );
+}
+
+===== TASK WORKSPACE SUBMISSION CODE =====
+
+  apps\web\components\TaskWorkspace.tsx:31:  const [submissionError, setSubmissionError] = useState('');
+  apps\web\components\TaskWorkspace.tsx:32:
+  apps\web\components\TaskWorkspace.tsx:33:  useEffect(() => {
+  apps\web\components\TaskWorkspace.tsx:34:    async function loadTasks() {
+  apps\web\components\TaskWorkspace.tsx:35:      setIsLoadingTasks(true);
+  apps\web\components\TaskWorkspace.tsx:36:      setTaskError('');
+  apps\web\components\TaskWorkspace.tsx:37:
+  apps\web\components\TaskWorkspace.tsx:38:      const { data, error } = await supabase
+> apps\web\components\TaskWorkspace.tsx:39:        .from('task_catalog')
+  apps\web\components\TaskWorkspace.tsx:40:        .select('id, title, description, level, pay, visibility')
+  apps\web\components\TaskWorkspace.tsx:41:        .order('created_at', { ascending: false });
+  apps\web\components\TaskWorkspace.tsx:42:
+  apps\web\components\TaskWorkspace.tsx:43:      if (error) {
+  apps\web\components\TaskWorkspace.tsx:44:        console.error('Task catalog error:', error);
+  apps\web\components\TaskWorkspace.tsx:45:        setTaskError('We could not load the available tasks.');
+  apps\web\components\TaskWorkspace.tsx:46:        setTasks([]);
+  apps\web\components\TaskWorkspace.tsx:47:      } else {
+  apps\web\components\TaskWorkspace.tsx:48:        setTasks((data ?? []) as Task[]);
+  apps\web\components\TaskWorkspace.tsx:49:      }
+  apps\web\components\TaskWorkspace.tsx:50:
+  apps\web\components\TaskWorkspace.tsx:51:      setIsLoadingTasks(false);
+  apps\web\components\TaskWorkspace.tsx:52:    }
+  apps\web\components\TaskWorkspace.tsx:53:
+  apps\web\components\TaskWorkspace.tsx:54:    loadTasks();
+  apps\web\components\TaskWorkspace.tsx:55:  }, []);
+  apps\web\components\TaskWorkspace.tsx:56:
+  apps\web\components\TaskWorkspace.tsx:57:  const filteredTasks = useMemo(() => {
+  apps\web\components\TaskWorkspace.tsx:67:
+  apps\web\components\TaskWorkspace.tsx:68:  const handleStartTask = (task: Task) => {
+  apps\web\components\TaskWorkspace.tsx:69:    setActiveTask(task);
+  apps\web\components\TaskWorkspace.tsx:70:    setSubmissionText('');
+  apps\web\components\TaskWorkspace.tsx:71:    setSuccessMessage('');
+  apps\web\components\TaskWorkspace.tsx:72:    setSubmissionError('');
+  apps\web\components\TaskWorkspace.tsx:73:  };
+  apps\web\components\TaskWorkspace.tsx:74:
+> apps\web\components\TaskWorkspace.tsx:75:  const handleFormSubmit = async (e: React.FormEvent) => {
+  apps\web\components\TaskWorkspace.tsx:76:    e.preventDefault();
+  apps\web\components\TaskWorkspace.tsx:77:
+  apps\web\components\TaskWorkspace.tsx:78:    if (!activeTask) {
+  apps\web\components\TaskWorkspace.tsx:79:      return;
+  apps\web\components\TaskWorkspace.tsx:80:    }
+  apps\web\components\TaskWorkspace.tsx:81:
+  apps\web\components\TaskWorkspace.tsx:82:    setIsSubmitting(true);
+  apps\web\components\TaskWorkspace.tsx:83:    setSubmissionError('');
+  apps\web\components\TaskWorkspace.tsx:84:    setSuccessMessage('');
+  apps\web\components\TaskWorkspace.tsx:85:
+  apps\web\components\TaskWorkspace.tsx:86:    try {
+  apps\web\components\TaskWorkspace.tsx:87:      const {
+  apps\web\components\TaskWorkspace.tsx:88:        data: { user },
+  apps\web\components\TaskWorkspace.tsx:89:        error: userError,
+  apps\web\components\TaskWorkspace.tsx:90:      } = await supabase.auth.getUser();
+  apps\web\components\TaskWorkspace.tsx:91:
+  apps\web\components\TaskWorkspace.tsx:92:      if (userError) {
+  apps\web\components\TaskWorkspace.tsx:93:        throw new Error(userError.message);
+  apps\web\components\TaskWorkspace.tsx:99:
+  apps\web\components\TaskWorkspace.tsx:100:      const cleanedText = submissionText.trim();
+  apps\web\components\TaskWorkspace.tsx:101:
+  apps\web\components\TaskWorkspace.tsx:102:      if (!cleanedText) {
+  apps\web\components\TaskWorkspace.tsx:103:        throw new Error('Please enter your task work before submitting.');
+  apps\web\components\TaskWorkspace.tsx:104:      }
+  apps\web\components\TaskWorkspace.tsx:105:
+  apps\web\components\TaskWorkspace.tsx:106:      const { error: submissionInsertError } = await supabase
+> apps\web\components\TaskWorkspace.tsx:107:        .from('task_submissions')
+  apps\web\components\TaskWorkspace.tsx:108:        .insert({
+  apps\web\components\TaskWorkspace.tsx:109:          task_id: activeTask.id,
+  apps\web\components\TaskWorkspace.tsx:110:          user_id: user.id,
+  apps\web\components\TaskWorkspace.tsx:111:          applicant_id: user.id,
+> apps\web\components\TaskWorkspace.tsx:112:          submission_text: cleanedText,
+  apps\web\components\TaskWorkspace.tsx:113:          status: 'submitted',
+  apps\web\components\TaskWorkspace.tsx:114:          submitted_at: new Date().toISOString(),
+  apps\web\components\TaskWorkspace.tsx:115:        });
+  apps\web\components\TaskWorkspace.tsx:116:
+  apps\web\components\TaskWorkspace.tsx:117:      if (submissionInsertError) {
+  apps\web\components\TaskWorkspace.tsx:118:        throw new Error(submissionInsertError.message);
+  apps\web\components\TaskWorkspace.tsx:119:      }
+  apps\web\components\TaskWorkspace.tsx:120:
+  apps\web\components\TaskWorkspace.tsx:121:      setSuccessMessage(
+  apps\web\components\TaskWorkspace.tsx:122:        `Your submission for "${activeTask.title}" was sent successfully.`,
+  apps\web\components\TaskWorkspace.tsx:123:      );
+  apps\web\components\TaskWorkspace.tsx:124:      setSubmissionText('');
+  apps\web\components\TaskWorkspace.tsx:125:    } catch (error) {
+  apps\web\components\TaskWorkspace.tsx:126:      console.error('Task submission error:', error);
+  apps\web\components\TaskWorkspace.tsx:127:
+  apps\web\components\TaskWorkspace.tsx:128:      setSubmissionError(
+  apps\web\components\TaskWorkspace.tsx:129:        error instanceof Error
+  apps\web\components\TaskWorkspace.tsx:130:          ? error.message
+  apps\web\components\TaskWorkspace.tsx:434:                }}
+  apps\web\components\TaskWorkspace.tsx:435:              >
+  apps\web\components\TaskWorkspace.tsx:436:                {submissionError}
+  apps\web\components\TaskWorkspace.tsx:437:              </div>
+  apps\web\components\TaskWorkspace.tsx:438:            )}
+  apps\web\components\TaskWorkspace.tsx:439:
+  apps\web\components\TaskWorkspace.tsx:440:            {!successMessage && (
+  apps\web\components\TaskWorkspace.tsx:441:              <form
+> apps\web\components\TaskWorkspace.tsx:442:                onSubmit={handleFormSubmit}
+  apps\web\components\TaskWorkspace.tsx:443:                style={{
+  apps\web\components\TaskWorkspace.tsx:444:                  display: 'flex',
+  apps\web\components\TaskWorkspace.tsx:445:                  flexDirection: 'column',
+  apps\web\components\TaskWorkspace.tsx:446:                  gap: '1rem',
+  apps\web\components\TaskWorkspace.tsx:447:                }}
+  apps\web\components\TaskWorkspace.tsx:448:              >
+  apps\web\components\TaskWorkspace.tsx:449:                <div>
+  apps\web\components\TaskWorkspace.tsx:450:                  <label
+  apps\web\components\TaskWorkspace.tsx:451:                    htmlFor="task-submission-text"
+  apps\web\components\TaskWorkspace.tsx:452:                    style={{
+  apps\web\components\TaskWorkspace.tsx:453:                      display: 'block',
+  apps\web\components\TaskWorkspace.tsx:454:                      fontSize: '0.875rem',
+  apps\web\components\TaskWorkspace.tsx:455:                      fontWeight: '600',
+  apps\web\components\TaskWorkspace.tsx:456:                      marginBottom: '0.5rem',
+  apps\web\components\TaskWorkspace.tsx:457:                      color: '#374151',
+  apps\web\components\TaskWorkspace.tsx:458:                    }}
+  apps\web\components\TaskWorkspace.tsx:459:                  >
+  apps\web\components\TaskWorkspace.tsx:460:                    Your task work
+
+
+
+
+===== PAYSTACK INITIALIZATION =====
+
+  apps\web\app\api\paystack-init\route.ts:63:
+  apps\web\app\api\paystack-init\route.ts:64:    const reference = `SB-${randomUUID()}`;
+  apps\web\app\api\paystack-init\route.ts:65:    const { error: insertError } = await admin
+> apps\web\app\api\paystack-init\route.ts:66:      .from("paystack_transactions")
+> apps\web\app\api\paystack-init\route.ts:67:      .insert({
+  apps\web\app\api\paystack-init\route.ts:68:        user_id: authData.user.id,
+  apps\web\app\api\paystack-init\route.ts:69:        email: authData.user.email,
+  apps\web\app\api\paystack-init\route.ts:70:        reference,
+  apps\web\app\api\paystack-init\route.ts:71:        amount: (pesewas / 100).toFixed(2),
+  apps\web\app\api\paystack-init\route.ts:72:        currency: "GHS",
+  apps\web\app\api\paystack-init\route.ts:73:        status: "initialized",
+  apps\web\app\api\paystack-init\route.ts:74:        metadata: { platform: "skillbridge" },
+  apps\web\app\api\paystack-init\route.ts:75:      });
+  apps\web\app\api\paystack-init\route.ts:76:
+  apps\web\app\api\paystack-init\route.ts:77:    if (insertError) {
+  apps\web\app\api\paystack-init\route.ts:100:    const gateway = await gatewayResponse.json();
+  apps\web\app\api\paystack-init\route.ts:101:
+  apps\web\app\api\paystack-init\route.ts:102:    if (!gatewayResponse.ok || !gateway.status || !gateway.data?.authorization_url) {
+> apps\web\app\api\paystack-init\route.ts:103:      await admin.from("paystack_transactions")
+  apps\web\app\api\paystack-init\route.ts:104:        .update({ status: "failed", updated_at: new Date().toISOString() })
+  apps\web\app\api\paystack-init\route.ts:105:        .eq("reference", reference)
+  apps\web\app\api\paystack-init\route.ts:106:        .eq("status", "initialized");
+  apps\web\app\api\paystack-init\route.ts:107:
+  apps\web\app\api\paystack-init\route.ts:108:      console.error("Paystack initialization failed:", gateway.message || gateway.status);
+  apps\web\app\api\paystack-init\route.ts:109:      return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+  apps\web\app\api\paystack-init\route.ts:110:    }
+  apps\web\app\api\paystack-init\route.ts:111:
+  apps\web\app\api\paystack-init\route.ts:112:    return NextResponse.json({
+  apps\web\app\api\paystack-init\route.ts:113:      authorization_url: gateway.data.authorization_url,
+
+
+
+
+===== PAYSTACK WEBHOOK CREDIT CALL =====
+
+  apps\web\app\api\paystack-webhook\route.ts:10:  const signature = request.headers.get("x-paystack-signature");
+  apps\web\app\api\paystack-webhook\route.ts:11:
+  apps\web\app\api\paystack-webhook\route.ts:12:  if (!secret) {
+> apps\web\app\api\paystack-webhook\route.ts:13:    return NextResponse.json({ error: "Payment service is not configured." }, { status: 503 });
+  apps\web\app\api\paystack-webhook\route.ts:14:  }
+  apps\web\app\api\paystack-webhook\route.ts:15:  if (!signature || !/^[a-f0-9]{128}$/i.test(signature)) {
+> apps\web\app\api\paystack-webhook\route.ts:16:    return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+  apps\web\app\api\paystack-webhook\route.ts:17:  }
+  apps\web\app\api\paystack-webhook\route.ts:18:
+  apps\web\app\api\paystack-webhook\route.ts:19:  const rawBody = await request.text();
+  apps\web\app\api\paystack-webhook\route.ts:20:  const expected = createHmac("sha512", secret).update(rawBody).digest();
+  apps\web\app\api\paystack-webhook\route.ts:21:  const supplied = Buffer.from(signature, "hex");
+  apps\web\app\api\paystack-webhook\route.ts:22:
+  apps\web\app\api\paystack-webhook\route.ts:23:  if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
+> apps\web\app\api\paystack-webhook\route.ts:24:    return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+  apps\web\app\api\paystack-webhook\route.ts:25:  }
+  apps\web\app\api\paystack-webhook\route.ts:26:
+  apps\web\app\api\paystack-webhook\route.ts:27:  let event: { event?: string; data?: { reference?: string } };
+  apps\web\app\api\paystack-webhook\route.ts:28:  try {
+  apps\web\app\api\paystack-webhook\route.ts:29:    event = JSON.parse(rawBody);
+  apps\web\app\api\paystack-webhook\route.ts:30:  } catch {
+> apps\web\app\api\paystack-webhook\route.ts:31:    return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+  apps\web\app\api\paystack-webhook\route.ts:32:  }
+  apps\web\app\api\paystack-webhook\route.ts:33:
+  apps\web\app\api\paystack-webhook\route.ts:34:  if (event.event !== "charge.success") {
+  apps\web\app\api\paystack-webhook\route.ts:35:    return NextResponse.json({ received: true, ignored: true });
+  apps\web\app\api\paystack-webhook\route.ts:36:  }
+  apps\web\app\api\paystack-webhook\route.ts:37:
+  apps\web\app\api\paystack-webhook\route.ts:38:  const reference = event.data?.reference;
+  apps\web\app\api\paystack-webhook\route.ts:39:  if (!reference) {
+> apps\web\app\api\paystack-webhook\route.ts:40:    return NextResponse.json({ error: "Payment reference is missing." }, { status: 400 });
+  apps\web\app\api\paystack-webhook\route.ts:41:  }
+  apps\web\app\api\paystack-webhook\route.ts:42:
+  apps\web\app\api\paystack-webhook\route.ts:43:  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  apps\web\app\api\paystack-webhook\route.ts:44:  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  apps\web\app\api\paystack-webhook\route.ts:45:  if (!url || !serviceKey) {
+  apps\web\app\api\paystack-webhook\route.ts:46:    console.error("Missing server-side Supabase configuration for webhook.");
+> apps\web\app\api\paystack-webhook\route.ts:47:    return NextResponse.json({ error: "Payment processing is not configured." }, { status: 503 });
+  apps\web\app\api\paystack-webhook\route.ts:48:  }
+  apps\web\app\api\paystack-webhook\route.ts:49:
+  apps\web\app\api\paystack-webhook\route.ts:50:  const admin = createClient(url, serviceKey, {
+  apps\web\app\api\paystack-webhook\route.ts:51:    auth: { persistSession: false, autoRefreshToken: false },
+  apps\web\app\api\paystack-webhook\route.ts:52:  });
+  apps\web\app\api\paystack-webhook\route.ts:53:
+  apps\web\app\api\paystack-webhook\route.ts:54:  try {
+  apps\web\app\api\paystack-webhook\route.ts:55:    const { data: payment, error: lookupError } = await admin
+> apps\web\app\api\paystack-webhook\route.ts:56:      .from("paystack_transactions")
+> apps\web\app\api\paystack-webhook\route.ts:57:      .select("user_id,reference,amount,currency,status")
+  apps\web\app\api\paystack-webhook\route.ts:58:      .eq("reference", reference)
+  apps\web\app\api\paystack-webhook\route.ts:59:      .maybeSingle();
+  apps\web\app\api\paystack-webhook\route.ts:60:
+  apps\web\app\api\paystack-webhook\route.ts:61:    if (lookupError) throw lookupError;
+  apps\web\app\api\paystack-webhook\route.ts:62:    if (!payment || !payment.user_id) {
+  apps\web\app\api\paystack-webhook\route.ts:63:      console.error("Unknown Paystack reference:", reference);
+> apps\web\app\api\paystack-webhook\route.ts:64:      return NextResponse.json({ error: "Payment reference not found." }, { status: 404 });
+  apps\web\app\api\paystack-webhook\route.ts:65:    }
+  apps\web\app\api\paystack-webhook\route.ts:66:
+> apps\web\app\api\paystack-webhook\route.ts:67:    if (payment.status === "success") {
+  apps\web\app\api\paystack-webhook\route.ts:68:      return NextResponse.json({ received: true, processed: true, already_processed: true });
+  apps\web\app\api\paystack-webhook\route.ts:69:    }
+  apps\web\app\api\paystack-webhook\route.ts:70:
+> apps\web\app\api\paystack-webhook\route.ts:71:    if (payment.status !== "initialized") {
+  apps\web\app\api\paystack-webhook\route.ts:72:      return NextResponse.json({ received: true, ignored: true });
+  apps\web\app\api\paystack-webhook\route.ts:73:    }
+  apps\web\app\api\paystack-webhook\route.ts:74:
+  apps\web\app\api\paystack-webhook\route.ts:75:    const verifyResponse = await fetch(
+  apps\web\app\api\paystack-webhook\route.ts:76:      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+  apps\web\app\api\paystack-webhook\route.ts:77:      {
+  apps\web\app\api\paystack-webhook\route.ts:78:        headers: { Authorization: `Bearer ${secret}` },
+  apps\web\app\api\paystack-webhook\route.ts:79:        cache: "no-store",
+  apps\web\app\api\paystack-webhook\route.ts:83:    const verification = await verifyResponse.json();
+  apps\web\app\api\paystack-webhook\route.ts:84:    const verified = verification?.data;
+  apps\web\app\api\paystack-webhook\route.ts:85:
+> apps\web\app\api\paystack-webhook\route.ts:86:    if (!verifyResponse.ok || !verification?.status || !verified) {
+  apps\web\app\api\paystack-webhook\route.ts:87:      console.error("Paystack verification request failed for reference:", reference);
+> apps\web\app\api\paystack-webhook\route.ts:88:      return NextResponse.json({ error: "Could not verify payment." }, { status: 502 });
+  apps\web\app\api\paystack-webhook\route.ts:89:    }
+  apps\web\app\api\paystack-webhook\route.ts:90:
+  apps\web\app\api\paystack-webhook\route.ts:91:    const expectedPesewas = Math.round(Number(payment.amount) * 100);
+  apps\web\app\api\paystack-webhook\route.ts:92:    if (
+> apps\web\app\api\paystack-webhook\route.ts:93:      verified.status !== "success" ||
+  apps\web\app\api\paystack-webhook\route.ts:94:      !Number.isSafeInteger(verified.id) ||
+  apps\web\app\api\paystack-webhook\route.ts:95:      verified.id <= 0 ||
+  apps\web\app\api\paystack-webhook\route.ts:96:      verified.reference !== reference ||
+  apps\web\app\api\paystack-webhook\route.ts:97:      verified.currency !== "GHS" ||
+  apps\web\app\api\paystack-webhook\route.ts:98:      !Number.isSafeInteger(expectedPesewas) ||
+  apps\web\app\api\paystack-webhook\route.ts:99:      verified.amount !== expectedPesewas
+  apps\web\app\api\paystack-webhook\route.ts:100:    ) {
+  apps\web\app\api\paystack-webhook\route.ts:101:      console.error("Paystack verification mismatch for reference:", reference);
+> apps\web\app\api\paystack-webhook\route.ts:102:      return NextResponse.json({ error: "Payment verification did not match the saved transaction." }, { status: 400 });
+  apps\web\app\api\paystack-webhook\route.ts:103:    }
+  apps\web\app\api\paystack-webhook\route.ts:104:
+  apps\web\app\api\paystack-webhook\route.ts:105:    const { data: creditResult, error: creditError } = await admin.rpc(
+> apps\web\app\api\paystack-webhook\route.ts:106:      "credit_paystack_wallet",
+  apps\web\app\api\paystack-webhook\route.ts:107:      {
+> apps\web\app\api\paystack-webhook\route.ts:108:        p_reference: reference,
+  apps\web\app\api\paystack-webhook\route.ts:109:        p_paystack_transaction_id: verified.id,
+  apps\web\app\api\paystack-webhook\route.ts:110:        p_amount: Number(payment.amount),
+  apps\web\app\api\paystack-webhook\route.ts:111:        p_currency: verified.currency,
+> apps\web\app\api\paystack-webhook\route.ts:112:        p_user_id: payment.user_id,
+  apps\web\app\api\paystack-webhook\route.ts:113:      },
+  apps\web\app\api\paystack-webhook\route.ts:114:    );
+  apps\web\app\api\paystack-webhook\route.ts:115:
+  apps\web\app\api\paystack-webhook\route.ts:116:    if (creditError) {
+  apps\web\app\api\paystack-webhook\route.ts:117:      console.error("Wallet credit RPC failed:", creditError.message);
+> apps\web\app\api\paystack-webhook\route.ts:118:      return NextResponse.json({ error: "Wallet credit failed; Paystack may retry this webhook." }, { status: 500 });
+  apps\web\app\api\paystack-webhook\route.ts:119:    }
+  apps\web\app\api\paystack-webhook\route.ts:120:
+  apps\web\app\api\paystack-webhook\route.ts:121:    const creditPayload = Array.isArray(creditResult)
+  apps\web\app\api\paystack-webhook\route.ts:122:      ? creditResult[0]
+  apps\web\app\api\paystack-webhook\route.ts:123:      : creditResult;
+  apps\web\app\api\paystack-webhook\route.ts:124:
+  apps\web\app\api\paystack-webhook\route.ts:125:    if (
+  apps\web\app\api\paystack-webhook\route.ts:126:      !creditPayload ||
+  apps\web\app\api\paystack-webhook\route.ts:130:      console.error("Paystack wallet credit RPC did not explicitly confirm success.");
+  apps\web\app\api\paystack-webhook\route.ts:131:      return NextResponse.json(
+  apps\web\app\api\paystack-webhook\route.ts:132:        { error: "Wallet credit was not confirmed. Paystack may retry this webhook." },
+> apps\web\app\api\paystack-webhook\route.ts:133:        { status: 500 },
+  apps\web\app\api\paystack-webhook\route.ts:134:      );
+  apps\web\app\api\paystack-webhook\route.ts:135:    }
+  apps\web\app\api\paystack-webhook\route.ts:136:
+  apps\web\app\api\paystack-webhook\route.ts:137:    return NextResponse.json({ received: true, processed: true, result: creditResult });
+  apps\web\app\api\paystack-webhook\route.ts:138:  } catch (error) {
+  apps\web\app\api\paystack-webhook\route.ts:139:    console.error("Paystack webhook processing error:", error);
+> apps\web\app\api\paystack-webhook\route.ts:140:    return NextResponse.json({ error: "Payment processing failed; retry is possible." }, { status: 500 });
+  apps\web\app\api\paystack-webhook\route.ts:141:  }
+  apps\web\app\api\paystack-webhook\route.ts:142:}
+
+
+
+
+===== CURRENT GIT CHANGES =====
+D  .env.production
+ M .gitignore
+D  apps/web/.env.production
+ M apps/web/app/admin/academy-records/page.tsx
+ M apps/web/app/admin/compliance/page.tsx
+ M apps/web/app/api/admin/compliance/route.ts
+ M apps/web/app/api/cashout/route.ts
+ M apps/web/app/api/checkout/route.ts
+ M apps/web/app/api/paystack-init/route.ts
+ M apps/web/app/api/paystack-webhook/route.ts
+ M apps/web/app/api/rider/payout/route.ts
+ M apps/web/app/api/vendor/settle/route.ts
+ M apps/web/app/api/wallet/balance/route.ts
+ M apps/web/app/api/webhooks/dodo/route.ts
+ M apps/web/app/api/webhooks/paystack/route.ts
+ M apps/web/app/api/withdraw/route.ts
+ M apps/web/app/dashboard/page.tsx
+ M apps/web/app/page.js
+ M apps/web/app/tasks/page.tsx
+ M apps/web/app/team/page.tsx
+ M apps/web/components/PaystackCheckoutButton.tsx
+ M apps/web/components/TaskWorkspace.tsx
+ M apps/web/components/WalletBalanceDisplay.tsx
+ M apps/web/components/WithdrawalForm.tsx
+ M apps/web/components/dashboard/VendorWalletCard.tsx
+ M apps/web/components/delivery/RiderWalletCard.tsx
+ M apps/web/data/siteContent.ts
+ M apps/web/package.json
+ M apps/web/tsconfig.json
+ M apps/web/utils/supabase/client.ts
+ M package-lock.json
+ M package.json
+?? .gitignore.backup-20261015-023244
+?? .turbo/
+?? apps/web/.turbo/
+?? apps/web/app/admin/academy-records/page.tsx.backup-20261014-201627
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021616
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021755
+?? apps/web/app/api/admin/compliance/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/cashout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/checkout/route.ts.backup-disabled-20261015-022517
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-024947
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-025136
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-030141
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-before-secure-webhook
+?? apps/web/app/api/paystack-webhook/route.ts.backup-transaction-id-check-20261015-022013
+?? apps/web/app/api/rider/payout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/vendor/settle/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/wallet/balance/route.ts.backup-20261015-023046
+?? apps/web/app/api/webhooks/dodo/route.ts.backup-disabled-20261015-022116
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013055
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013329
+?? apps/web/app/api/withdraw/route.ts.backup-safe-disabled-20261015-014022
+?? apps/web/app/dashboard/layout.tsx
+?? apps/web/app/page.js.backup-before-dashboard
+?? apps/web/components/PaystackCheckoutButton.tsx.backup-20261015-013329
+?? apps/web/components/WalletBalanceDisplay.tsx.backup-wallet-fix-20261015-020639
+?? apps/web/components/WithdrawalForm.tsx.backup-20261015-022735
+?? apps/web/components/WithdrawalForm.tsx.backup-before-withdrawal-ui-fix-20261015-022701
+?? apps/web/components/delivery/RiderWalletCard.tsx.backup-20261015-023046
+?? apps/web/next.config.mjs.backup-20261014-211646
+?? apps/web/next.config.mjs.disabled-20261014-211646
+?? apps/web/skillbridge-completion-run.txt
+?? backups/
+?? release-audit.txt
+?? release-reports/
+?? skillbridge-audit-20261015-030445/
+?? skillbridge-audit-report.txt
+?? skillbridge-build-diagnostics.txt
+?? skillbridge-completion-pass-20261015-035731.txt
+?? skillbridge-completion-run.txt
+?? skillbridge-final-check-20261015-030739.txt
+?? skillbridge-final-fix-input.txt
+?? skillbridge-next-check-20261015-035908.txt
+?? skillbridge-next-pass-20261015-030828.txt
+?? skillbridge-release-audit-20261015-030538.txt
+?? skillbridge-source-backup-20261015-030828/
+?? skillbridge-supabase-next-diagnostic.txt

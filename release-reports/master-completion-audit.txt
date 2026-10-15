@@ -1,0 +1,374 @@
+SKILLBRIDGE MASTER COMPLETION AUDIT
+Date: 2026-10-15T05:07:07
+
+===== TYPESCRIPT CHECK =====
+
+TypeScript exit code: 0
+
+===== PAYSTACK HARDENING MIGRATION =====
+-- SkillBridge Paystack credits and task submission compatibility.
+-- Expected wallet schema: platform_wallets(user_id, available_balance, total_earnings).
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'user_id'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.user_id is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'available_balance'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.available_balance is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF to_regclass('public.task_submissions') IS NULL THEN
+    RAISE EXCEPTION 'public.task_submissions is missing.';
+  END IF;
+END;
+$$;
+
+CREATE TABLE IF NOT EXISTS public.paystack_transactions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  email text NOT NULL,
+  reference text NOT NULL UNIQUE,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL DEFAULT 'GHS' CHECK (currency = 'GHS'),
+  status text NOT NULL DEFAULT 'initialized',
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  paystack_transaction_id bigint,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.paystack_transactions
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS currency text DEFAULT 'GHS',
+  ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS paystack_transaction_id bigint,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+CREATE UNIQUE INDEX IF NOT EXISTS paystack_transactions_reference_uidx
+  ON public.paystack_transactions(reference);
+
+CREATE TABLE IF NOT EXISTS public.paystack_wallet_ledger (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference text NOT NULL UNIQUE,
+  paystack_transaction_id bigint NOT NULL UNIQUE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL CHECK (currency = 'GHS'),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.task_submissions
+  ADD COLUMN IF NOT EXISTS submission_text text;
+
+ALTER TABLE public.task_submissions
+  ALTER COLUMN file_storage_path DROP NOT NULL;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('task-deliverables', 'task-deliverables', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "SkillBridge task files owner insert" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner insert"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner read" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner read"
+ON storage.objects FOR SELECT TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner delete" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner delete"
+ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+CREATE OR REPLACE FUNCTION public.credit_paystack_wallet(
+  p_reference text,
+  p_paystack_transaction_id bigint,
+  p_amount numeric,
+  p_currency text,
+  p_user_id uuid
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  payment_row public.paystack_transactions%ROWTYPE;
+BEGIN
+  IF p_reference IS NULL OR p_reference = ''
+     OR p_paystack_transaction_id IS NULL OR p_paystack_transaction_id <= 0
+     OR p_amount IS NULL OR p_amount <= 0
+     OR p_currency <> 'GHS' OR p_user_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Invalid payment parameters.');
+  END IF;
+
+  SELECT * INTO payment_row
+  FROM public.paystack_transactions
+  WHERE reference = p_reference
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment reference not found.');
+  END IF;
+
+  IF payment_row.user_id <> p_user_id
+     OR payment_row.currency <> p_currency
+     OR payment_row.amount <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment details do not match.');
+  END IF;
+
+  IF payment_row.status = 'success' THEN
+    IF EXISTS (
+      SELECT 1 FROM public.paystack_wallet_ledger
+      WHERE reference = p_reference
+        AND user_id = p_user_id
+        AND amount = p_amount
+        AND paystack_transaction_id = p_paystack_transaction_id
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'already_processed', true);
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'error', 'Payment marked successful without matching ledger entry.');
+  END IF;
+
+  IF payment_row.status <> 'initialized' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment is not awaiting credit.');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.paystack_wallet_ledger
+    WHERE reference = p_reference
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Ledger reference already exists.');
+  END IF;
+
+  INSERT INTO public.paystack_wallet_ledger
+    (reference, paystack_transaction_id, user_id, amount, currency)
+  VALUES
+    (p_reference, p_paystack_transaction_id, p_user_id, p_amount, p_currency);
+
+  INSERT INTO public.platform_wallets
+    (user_id, available_balance, total_earnings, updated_at)
+  VALUES
+    (p_user_id, p_amount, p_amount, now())
+  ON CONFLICT (user_id) DO UPDATE
+  SET available_balance = public.platform_wallets.available_balance + EXCLUDED.available_balance,
+      total_earnings = public.platform_wallets.total_earnings + EXCLUDED.total_earnings,
+      updated_at = now();
+
+  UPDATE public.paystack_transactions
+  SET status = 'success',
+      paystack_transaction_id = p_paystack_transaction_id,
+      updated_at = now()
+  WHERE reference = p_reference;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) TO service_role;
+
+ALTER TABLE public.paystack_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paystack_wallet_ledger ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.paystack_wallet_ledger FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.paystack_transactions TO service_role;
+GRANT ALL ON public.paystack_wallet_ledger TO service_role;
+
+===== WALLET AND PAYMENT SQL DEFINITIONS =====
+
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:28:$$;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:29:
+> supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:30:CREATE TABLE IF NOT EXISTS public.paystack_transactions (
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:31:  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:32:  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:33:  email text NOT NULL,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:34:  reference text NOT NULL UNIQUE,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:35:  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:36:  currency text NOT NULL DEFAULT 'GHS' CHECK (currency = 'GHS'),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:37:  status text NOT NULL DEFAULT 'initialized',
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:38:  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:52:  ON public.paystack_transactions(reference);
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:53:
+> supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:54:CREATE TABLE IF NOT EXISTS public.paystack_wallet_ledger (
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:55:  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:56:  reference text NOT NULL UNIQUE,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:57:  paystack_transaction_id bigint NOT NULL UNIQUE,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:58:  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:59:  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:60:  currency text NOT NULL CHECK (currency = 'GHS'),
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:61:  created_at timestamptz NOT NULL DEFAULT now()
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:62:);
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:96:);
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:97:
+> supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:98:CREATE OR REPLACE FUNCTION public.credit_paystack_wallet(
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:99:  p_reference text,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:100:  p_paystack_transaction_id bigint,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:101:  p_amount numeric,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:102:  p_currency text,
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:103:  p_user_id uuid
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:104:)
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:105:RETURNS jsonb
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:106:LANGUAGE plpgsql
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:182:$$;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:183:
+> supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:184:REVOKE ALL ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) FROM PUBLIC;
+> supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:185:GRANT EXECUTE ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) TO service_role;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:186:
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:187:ALTER TABLE public.paystack_transactions ENABLE ROW LEVEL SECURITY;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:188:ALTER TABLE public.paystack_wallet_ledger ENABLE ROW LEVEL SECURITY;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:189:REVOKE ALL ON public.paystack_wallet_ledger FROM anon, authenticated;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:190:GRANT SELECT, INSERT, UPDATE ON public.paystack_transactions TO service_role;
+  supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql:191:GRANT ALL ON public.paystack_wallet_ledger TO service_role;
+  database\marketplace_production_schema.sql:18:);
+  database\marketplace_production_schema.sql:19:
+> database\marketplace_production_schema.sql:20:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\marketplace_production_schema.sql:21:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\marketplace_production_schema.sql:22:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\marketplace_production_schema.sql:23:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\marketplace_production_schema.sql:24:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\marketplace_production_schema.sql:25:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\marketplace_production_schema.sql:26:);
+  database\marketplace_production_schema.sql:27:
+  database\marketplace_production_schema.sql:28:CREATE OR REPLACE FUNCTION public.handle_new_profile_wallet_provision()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:24:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:25:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:26:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:27:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:28:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:29:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:30:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:31:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:32:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:33:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:34:CREATE OR REPLACE FUNCTION public.handle_new_profile_wallet_provision()
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:50:-- =========================================================================
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:51:
+> database\RELEASE_PRODUCTION_PAYLOAD.sql:52:CREATE TABLE IF NOT EXISTS public.platform_wallets (
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:53:    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:54:    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:55:    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:56:    currency TEXT DEFAULT 'GHS' NOT NULL,
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:57:    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:58:);
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:59:
+  database\RELEASE_PRODUCTION_PAYLOAD.sql:60:CREATE TABLE IF NOT EXISTS public.ledger_entries (
+  database\schema.sql:30:);
+  database\schema.sql:31:
+> database\schema.sql:32:create table public.task_submissions (
+  database\schema.sql:33:    id uuid default gen_random_uuid() primary key,
+  database\schema.sql:34:    task_id uuid not null,
+  database\schema.sql:35:    user_id uuid references auth.users on delete cascade not null,
+  database\schema.sql:36:    notes_text text,
+  database\schema.sql:37:    file_storage_path text not null,
+  database\schema.sql:38:    file_size_bytes bigint,
+  database\schema.sql:39:    status text check (status in ('Pending Review', 'Approved', 'Completed', 'Disbursed', 'Rejected')) default 'Pending Review',
+  database\schema.sql:40:    submitted_at timestamp with time zone default timezone('utc'::text, now()) not null    
+  database\schema.sql:41:);
+  database\schema.sql:42:
+> database\schema.sql:43:create table public.platform_wallets (
+  database\schema.sql:44:    user_id uuid references auth.users on delete cascade primary key,
+  database\schema.sql:45:    available_balance numeric(10,2) default 0.00 not null,
+  database\schema.sql:46:    total_earnings numeric(10,2) default 0.00 not null,
+  database\schema.sql:47:    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+  database\schema.sql:48:);
+  database\schema.sql:49:
+  database\schema.sql:50:create table public.dodo_payments_log (
+  database\schema.sql:51:    id uuid default gen_random_uuid() primary key,
+
+
+
+
+===== TASK SUBMISSION CODE =====
+
+  apps\web\components\TaskWorkspace.tsx:36:      setTaskError('');
+  apps\web\components\TaskWorkspace.tsx:37:
+  apps\web\components\TaskWorkspace.tsx:38:      const { data, error } = await supabase
+> apps\web\components\TaskWorkspace.tsx:39:        .from('task_catalog')
+  apps\web\components\TaskWorkspace.tsx:40:        .select('id, title, description, level, pay, visibility')
+  apps\web\components\TaskWorkspace.tsx:41:        .order('created_at', { ascending: false });
+  apps\web\components\TaskWorkspace.tsx:42:
+  apps\web\components\TaskWorkspace.tsx:43:      if (error) {
+  apps\web\components\TaskWorkspace.tsx:44:        console.error('Task catalog error:', error);
+  apps\web\components\TaskWorkspace.tsx:45:        setTaskError('We could not load the available tasks.');
+  apps\web\components\TaskWorkspace.tsx:46:        setTasks([]);
+  apps\web\components\TaskWorkspace.tsx:72:    setSubmissionError('');
+  apps\web\components\TaskWorkspace.tsx:73:  };
+  apps\web\components\TaskWorkspace.tsx:74:
+> apps\web\components\TaskWorkspace.tsx:75:  const handleFormSubmit = async (e: React.FormEvent) => {
+  apps\web\components\TaskWorkspace.tsx:76:    e.preventDefault();
+  apps\web\components\TaskWorkspace.tsx:77:
+  apps\web\components\TaskWorkspace.tsx:78:    if (!activeTask) {
+  apps\web\components\TaskWorkspace.tsx:79:      return;
+  apps\web\components\TaskWorkspace.tsx:80:    }
+  apps\web\components\TaskWorkspace.tsx:81:
+  apps\web\components\TaskWorkspace.tsx:82:    setIsSubmitting(true);
+  apps\web\components\TaskWorkspace.tsx:104:      }
+  apps\web\components\TaskWorkspace.tsx:105:
+  apps\web\components\TaskWorkspace.tsx:106:      const { error: submissionInsertError } = await supabase
+> apps\web\components\TaskWorkspace.tsx:107:        .from('task_submissions')
+  apps\web\components\TaskWorkspace.tsx:108:        .insert({
+  apps\web\components\TaskWorkspace.tsx:109:          task_id: activeTask.id,
+  apps\web\components\TaskWorkspace.tsx:110:          user_id: user.id,
+  apps\web\components\TaskWorkspace.tsx:111:          applicant_id: user.id,
+> apps\web\components\TaskWorkspace.tsx:112:          submission_text: cleanedText,
+  apps\web\components\TaskWorkspace.tsx:113:          status: 'submitted',
+  apps\web\components\TaskWorkspace.tsx:114:          submitted_at: new Date().toISOString(),
+  apps\web\components\TaskWorkspace.tsx:115:        });
+  apps\web\components\TaskWorkspace.tsx:116:
+  apps\web\components\TaskWorkspace.tsx:117:      if (submissionInsertError) {
+  apps\web\components\TaskWorkspace.tsx:118:        throw new Error(submissionInsertError.message);
+  apps\web\components\TaskWorkspace.tsx:119:      }
+  apps\web\components\TaskWorkspace.tsx:440:
+  apps\web\components\TaskWorkspace.tsx:441:            {!successMessage && (
+  apps\web\components\TaskWorkspace.tsx:442:              <form
+> apps\web\components\TaskWorkspace.tsx:443:                onSubmit={handleFormSubmit}
+  apps\web\components\TaskWorkspace.tsx:444:                style={{
+  apps\web\components\TaskWorkspace.tsx:445:                  display: 'flex',
+  apps\web\components\TaskWorkspace.tsx:446:                  flexDirection: 'column',
+  apps\web\components\TaskWorkspace.tsx:447:                  gap: '1rem',
+  apps\web\components\TaskWorkspace.tsx:448:                }}
+  apps\web\components\TaskWorkspace.tsx:449:              >
+  apps\web\components\TaskWorkspace.tsx:450:                <div>
+
+
+
+
+===== PAYMENT ROUTE CONFIGURATION =====
+
+apps\web\app\api\paystack-init\route.ts:14:    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+apps\web\app\api\paystack-init\route.ts:15:    const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+apps\web\app\api\paystack-init\route.ts:66:      .from("paystack_transactions")
+apps\web\app\api\paystack-init\route.ts:103:      await admin.from("paystack_transactions")
+apps\web\app\api\paystack-webhook\route.ts:9:  const secret = process.env.PAYSTACK_SECRET_KEY;
+apps\web\app\api\paystack-webhook\route.ts:10:  const signature = request.headers.get("x-paystack-signature");
+apps\web\app\api\paystack-webhook\route.ts:44:  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+apps\web\app\api\paystack-webhook\route.ts:56:      .from("paystack_transactions")
+apps\web\app\api\paystack-webhook\route.ts:76:      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+apps\web\app\api\paystack-webhook\route.ts:106:      "credit_paystack_wallet",
+
+
+

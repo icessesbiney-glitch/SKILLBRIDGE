@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
@@ -66,41 +66,9 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
 
   const handleWithdrawalRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amountInput || !mobileNumber || loading) return;
-    
-    const cashoutValue = parseFloat(amountInput);
-    if (cashoutValue <= 0 || cashoutValue > balance) {
-      setStatusMessage('❌ Invalid withdrawal cashout balance bounds execution value.');
-      return;
-    }
-
-    setLoading(true);
-    setStatusMessage('📡 Initializing Paystack mobile money transfer protocols...');
-
-    try {
-      const response = await fetch('/api/rider/payout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          riderProfileId,
-          mobileNumber,
-          bankCode: network,
-          withdrawalAmount: cashoutValue
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error || 'Serverless gateway exception network error');
-      
-      setStatusMessage(`✅ [SUCCESS] Transfer processed cleanly. Ref ID: ${result.reference}`);
-      setAmountInput('');
-      fetchWalletMetrics();
-    } catch (err: any) {
-      setStatusMessage(`❌ [PAYMENT ERROR]: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    setStatusMessage(
+      "Rider payouts are temporarily unavailable while secure Paystack Transfers are implemented. Your wallet has not been debited."
+    );
   };
 
   return (
@@ -152,10 +120,10 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
 
         <button
           type="submit"
-          disabled={loading || !amountInput || !mobileNumber}
+          disabled={true}
           className="w-full py-2.5 bg-cyan-950/40 border border-cyan-500 text-cyan-400 uppercase font-bold rounded-lg hover:bg-cyan-900 transition-colors disabled:opacity-40"
         >
-          {loading ? 'Disbursing Funds...' : 'Request Instant Payout'}
+          'Payouts Temporarily Unavailable'
         </button>
       </form>
 

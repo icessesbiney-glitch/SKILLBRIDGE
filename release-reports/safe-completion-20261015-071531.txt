@@ -1,0 +1,118 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015071531
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 4788
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+===== 1. PROTECT CURRENT WORK =====
+## main...origin/main
+D  .env.production
+ M .gitignore
+D  apps/web/.env.production
+ M apps/web/app/admin/academy-records/page.tsx
+ M apps/web/app/admin/compliance/page.tsx
+ M apps/web/app/api/admin/compliance/route.ts
+ M apps/web/app/api/cashout/route.ts
+ M apps/web/app/api/checkout/route.ts
+ M apps/web/app/api/paystack-init/route.ts
+ M apps/web/app/api/paystack-webhook/route.ts
+ M apps/web/app/api/rider/payout/route.ts
+ M apps/web/app/api/vendor/settle/route.ts
+ M apps/web/app/api/wallet/balance/route.ts
+ M apps/web/app/api/webhooks/dodo/route.ts
+ M apps/web/app/api/webhooks/paystack/route.ts
+ M apps/web/app/api/withdraw/route.ts
+ M apps/web/app/dashboard/page.tsx
+ M apps/web/app/page.js
+ M apps/web/app/tasks/page.tsx
+ M apps/web/app/team/page.tsx
+ M apps/web/components/PaystackCheckoutButton.tsx
+ M apps/web/components/TaskWorkspace.tsx
+ M apps/web/components/WalletBalanceDisplay.tsx
+ M apps/web/components/WithdrawalForm.tsx
+ M apps/web/components/dashboard/VendorWalletCard.tsx
+ M apps/web/components/delivery/RiderWalletCard.tsx
+ M apps/web/data/siteContent.ts
+ M apps/web/package.json
+ M apps/web/tsconfig.json
+ M apps/web/utils/supabase/client.ts
+ M package-lock.json
+ M package.json
+?? .gitignore.backup-20261015-023244
+?? .turbo/
+?? apps/web/.turbo/
+?? apps/web/app/admin/academy-records/page.tsx.backup-20261014-201627
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021616
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021755
+?? apps/web/app/api/admin/compliance/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/cashout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/checkout/route.ts.backup-disabled-20261015-022517
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-024947
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-025136
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-030141
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-before-secure-webhook
+?? apps/web/app/api/paystack-webhook/route.ts.backup-transaction-id-check-20261015-022013
+?? apps/web/app/api/rider/payout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/vendor/settle/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/wallet/balance/route.ts.backup-20261015-023046
+?? apps/web/app/api/wallet/balance/route.ts.backup-20261015-044155
+?? apps/web/app/api/wallet/balance/route.ts.backup-final-20261015-045020
+?? apps/web/app/api/wallet/balance/route.ts.backup-tsfix-20261015-044529
+?? apps/web/app/api/webhooks/dodo/route.ts.backup-disabled-20261015-022116
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013055
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013329
+?? apps/web/app/api/withdraw/route.ts.backup-safe-disabled-20261015-014022
+?? apps/web/app/dashboard/layout.tsx
+?? apps/web/app/page.js.backup-before-dashboard
+?? apps/web/app/tasks/page.tsx.backup-20261015-044155
+?? apps/web/components/PaystackCheckoutButton.tsx.backup-20261015-013329
+?? apps/web/components/TaskWorkspace.tsx.backup-20261015-044155
+?? apps/web/components/TaskWorkspace.tsx.backup-final-20261015-045020
+?? apps/web/components/TaskWorkspace.tsx.backup-tsfix-20261015-044529
+?? apps/web/components/WalletBalanceDisplay.tsx.backup-wallet-fix-20261015-020639
+?? apps/web/components/WithdrawalForm.tsx.backup-20261015-022735
+?? apps/web/components/WithdrawalForm.tsx.backup-before-withdrawal-ui-fix-20261015-022701
+?? apps/web/components/delivery/RiderWalletCard.tsx.backup-20261015-023046
+?? apps/web/next.config.mjs.backup-20261014-211646
+?? apps/web/next.config.mjs.disabled-20261014-211646
+?? apps/web/skillbridge-completion-run.txt
+?? backups/
+?? package.json.before-node-engine-fix-20261015-053947.bak
+?? release-audit.txt
+?? release-reports/
+?? skillbridge-audit-20261015-030445/
+?? skillbridge-audit-report.txt
+?? skillbridge-build-diagnostics.txt
+?? skillbridge-completion-final.txt
+?? skillbridge-completion-pass-20261015-035731.txt
+?? skillbridge-completion-run.txt
+?? skillbridge-final-check-20261015-030739.txt
+?? skillbridge-final-fix-input.txt
+?? skillbridge-final-inspection.txt
+?? skillbridge-final-repair-details.txt
+?? skillbridge-final-verification.txt
+?? skillbridge-next-check-20261015-035908.txt
+?? skillbridge-next-pass-20261015-030828.txt
+?? skillbridge-payment-alignment.txt
+?? skillbridge-release-audit-20261015-030538.txt
+?? skillbridge-release-results.txt
+?? skillbridge-source-backup-20261015-030828/
+?? skillbridge-supabase-next-diagnostic.txt
+?? supabase/migrations/20261015050000_skillbridge_paystack_task_hardening.sql

@@ -1,0 +1,77 @@
+SKILLBRIDGE RELEASE AUDIT — 2026-10-15 03:48:49
+
+===== BUILD CONFIGURATION =====
+/** @type {import('next').NextConfig} */
+module.exports = {
+  reactStrictMode: false,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  output: "standalone"
+};
+/** @type {import("next").NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  images: { unoptimized: true }
+};
+export default nextConfig;
+
+===== SQL MIGRATION FILES =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_delivery_dispatch.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_dispatch_cron.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_dispatch_trigger.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_gps_schema.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_proximity_matcher.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase_wallet_logic.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\driver_locations_schema.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\marketplace_production_schema.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\RELEASE_PRODUCTION_PAYLOAD.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\schema.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\supabase_gps_schema.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\database\supabase_wallet_triggers.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\20261007_admin_gps_tracking.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_config_payload.sql
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\supabase\migrations\temp_master_config.sql
+
+===== PAYMENT ROUTE INVENTORY =====
+
+--- apps/web/app/api/paystack-init/route.ts ---
+8: export async function POST(req: NextRequest) {
+14: const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+15: const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+40: await authClient.auth.getUser(match[1]);
+66: .from("paystack_transactions")
+103: await admin.from("paystack_transactions")
+
+--- apps/web/app/api/paystack-webhook/route.ts ---
+8: export async function POST(request: Request) {
+9: const secret = process.env.PAYSTACK_SECRET_KEY;
+10: const signature = request.headers.get("x-paystack-signature");
+21: const supplied = Buffer.from(signature, "hex");
+34: if (event.event !== "charge.success") {
+44: const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+56: .from("paystack_transactions")
+106: "credit_paystack_wallet",
+
+--- apps/web/app/api/webhooks/paystack/route.ts ---
+7: export async function POST(request: Request) {
+11: export async function GET() {
+
+--- apps/web/app/api/webhooks/dodo/route.ts ---
+6: export async function POST() {
+8: { error: "Dodo Payments is disabled. SkillBridge uses Paystack." },
+
+--- apps/web/app/api/withdraw/route.ts ---
+6: export async function POST() {
+
+--- apps/web/app/api/cashout/route.ts ---
+6: export async function POST() {
+
+--- apps/web/app/api/wallet/balance/route.ts ---
+7: export async function GET(request: NextRequest) {
+44: await supabase.auth.getUser(token);
+54: .from("user_wallets")
+
+===== DODO REFERENCES IN ACTIVE SOURCE =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\webhooks\dodo\route.ts:8: { error: "Dodo Payments is disabled. SkillBridge uses Paystack." },

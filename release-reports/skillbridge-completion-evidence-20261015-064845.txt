@@ -1,0 +1,816 @@
+===== SKILLBRIDGE COMPLETION EVIDENCE =====
+Project: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix
+
+===== GIT CHANGES =====
+D  .env.production
+ M .gitignore
+D  apps/web/.env.production
+ M apps/web/app/admin/academy-records/page.tsx
+ M apps/web/app/admin/compliance/page.tsx
+ M apps/web/app/api/admin/compliance/route.ts
+ M apps/web/app/api/cashout/route.ts
+ M apps/web/app/api/checkout/route.ts
+ M apps/web/app/api/paystack-init/route.ts
+ M apps/web/app/api/paystack-webhook/route.ts
+ M apps/web/app/api/rider/payout/route.ts
+ M apps/web/app/api/vendor/settle/route.ts
+ M apps/web/app/api/wallet/balance/route.ts
+ M apps/web/app/api/webhooks/dodo/route.ts
+ M apps/web/app/api/webhooks/paystack/route.ts
+ M apps/web/app/api/withdraw/route.ts
+ M apps/web/app/dashboard/page.tsx
+ M apps/web/app/page.js
+ M apps/web/app/tasks/page.tsx
+ M apps/web/app/team/page.tsx
+ M apps/web/components/PaystackCheckoutButton.tsx
+ M apps/web/components/TaskWorkspace.tsx
+ M apps/web/components/WalletBalanceDisplay.tsx
+ M apps/web/components/WithdrawalForm.tsx
+ M apps/web/components/dashboard/VendorWalletCard.tsx
+ M apps/web/components/delivery/RiderWalletCard.tsx
+ M apps/web/data/siteContent.ts
+ M apps/web/package.json
+ M apps/web/tsconfig.json
+ M apps/web/utils/supabase/client.ts
+ M package-lock.json
+ M package.json
+?? .gitignore.backup-20261015-023244
+?? .turbo/
+?? apps/web/.turbo/
+?? apps/web/app/admin/academy-records/page.tsx.backup-20261014-201627
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021616
+?? apps/web/app/admin/compliance/page.tsx.backup-safe-readonly-20261015-021755
+?? apps/web/app/api/admin/compliance/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/cashout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/checkout/route.ts.backup-disabled-20261015-022517
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-init/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-013055
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-024947
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-025136
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-030141
+?? apps/web/app/api/paystack-webhook/route.ts.backup-20261015-035438
+?? apps/web/app/api/paystack-webhook/route.ts.backup-before-secure-webhook
+?? apps/web/app/api/paystack-webhook/route.ts.backup-transaction-id-check-20261015-022013
+?? apps/web/app/api/rider/payout/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/vendor/settle/route.ts.backup-safe-disabled-20261015-022409
+?? apps/web/app/api/wallet/balance/route.ts.backup-20261015-023046
+?? apps/web/app/api/wallet/balance/route.ts.backup-20261015-044155
+?? apps/web/app/api/wallet/balance/route.ts.backup-final-20261015-045020
+?? apps/web/app/api/wallet/balance/route.ts.backup-tsfix-20261015-044529
+?? apps/web/app/api/webhooks/dodo/route.ts.backup-disabled-20261015-022116
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013055
+?? apps/web/app/api/webhooks/paystack/route.ts.backup-20261015-013329
+?? apps/web/app/api/withdraw/route.ts.backup-safe-disabled-20261015-014022
+?? apps/web/app/dashboard/layout.tsx
+?? apps/web/app/page.js.backup-before-dashboard
+?? apps/web/app/tasks/page.tsx.backup-20261015-044155
+?? apps/web/components/PaystackCheckoutButton.tsx.backup-20261015-013329
+?? apps/web/components/TaskWorkspace.tsx.backup-20261015-044155
+?? apps/web/components/TaskWorkspace.tsx.backup-final-20261015-045020
+?? apps/web/components/TaskWorkspace.tsx.backup-tsfix-20261015-044529
+?? apps/web/components/WalletBalanceDisplay.tsx.backup-wallet-fix-20261015-020639
+?? apps/web/components/WithdrawalForm.tsx.backup-20261015-022735
+?? apps/web/components/WithdrawalForm.tsx.backup-before-withdrawal-ui-fix-20261015-022701
+?? apps/web/components/delivery/RiderWalletCard.tsx.backup-20261015-023046
+?? apps/web/next.config.mjs.backup-20261014-211646
+?? apps/web/next.config.mjs.disabled-20261014-211646
+?? apps/web/skillbridge-completion-run.txt
+?? backups/
+?? package.json.before-node-engine-fix-20261015-053947.bak
+?? release-audit.txt
+?? release-reports/
+?? skillbridge-audit-20261015-030445/
+?? skillbridge-audit-report.txt
+?? skillbridge-build-diagnostics.txt
+?? skillbridge-completion-final.txt
+?? skillbridge-completion-pass-20261015-035731.txt
+?? skillbridge-completion-run.txt
+?? skillbridge-final-check-20261015-030739.txt
+?? skillbridge-final-fix-input.txt
+?? skillbridge-final-inspection.txt
+?? skillbridge-final-repair-details.txt
+?? skillbridge-final-verification.txt
+?? skillbridge-next-check-20261015-035908.txt
+?? skillbridge-next-pass-20261015-030828.txt
+?? skillbridge-payment-alignment.txt
+?? skillbridge-release-audit-20261015-030538.txt
+?? skillbridge-release-results.txt
+?? skillbridge-source-backup-20261015-030828/
+?? skillbridge-supabase-next-diagnostic.txt
+?? supabase/migrations/20261015050000_skillbridge_paystack_task_hardening.sql
+
+===== FILE: apps\web\app\api\paystack-init\route.ts =====
+Lines: 120
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+
+    if (!url || !anonKey || !serviceKey) {
+      return NextResponse.json(
+        { error: "Supabase server configuration is incomplete." },
+        { status: 503 },
+      );
+    }
+    if (!paystackKey) {
+      return NextResponse.json(
+        { error: "Paystack is not configured." },
+        { status: 503 },
+      );
+    }
+
+    const authorization = req.headers.get("authorization") || "";
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+      return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+    }
+
+    const authClient = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: authData, error: authError } =
+      await authClient.auth.getUser(match[1]);
+
+    if (authError || !authData.user || !authData.user.email) {
+      return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const rawAmount = String(body?.amount ?? "").trim();
+
+    if (!/^\d{1,7}(\.\d{1,2})?$/.test(rawAmount)) {
+      return NextResponse.json({ error: "Enter a valid amount in GHS." }, { status: 400 });
+    }
+
+    const amount = Number(rawAmount);
+    const pesewas = Math.round(amount * 100);
+
+    if (!Number.isSafeInteger(pesewas) || pesewas < 100 || pesewas > 100000000) {
+      return NextResponse.json({ error: "Amount must be between GHS 1.00 and GHS 1,000,000.00." }, { status: 400 });
+    }
+
+    const admin = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const reference = `SB-${randomUUID()}`;
+    const { error: insertError } = await admin
+      .from("paystack_transactions")
+      .insert({
+        user_id: authData.user.id,
+        email: authData.user.email,
+        reference,
+        amount: (pesewas / 100).toFixed(2),
+        currency: "GHS",
+        status: "initialized",
+        metadata: { platform: "skillbridge" },
+      });
+
+    if (insertError) {
+      console.error("Unable to create payment record:", insertError.message);
+      return NextResponse.json({ error: "Could not create the payment record." }, { status: 500 });
+    }
+
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_URL || req.nextUrl.origin).replace(/\/+$/, "");
+    const gatewayResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${paystackKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: authData.user.email,
+        amount: pesewas,
+        currency: "GHS",
+        reference,
+        callback_url: `${siteUrl}/dashboard?payment=return&reference=${encodeURIComponent(reference)}`,
+        metadata: { user_id: authData.user.id, platform: "skillbridge" },
+      }),
+      cache: "no-store",
+    });
+
+    const gateway = await gatewayResponse.json();
+
+    if (!gatewayResponse.ok || !gateway.status || !gateway.data?.authorization_url) {
+      await admin.from("paystack_transactions")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("reference", reference)
+        .eq("status", "initialized");
+
+      console.error("Paystack initialization failed:", gateway.message || gateway.status);
+      return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+    }
+
+    return NextResponse.json({
+      authorization_url: gateway.data.authorization_url,
+      reference,
+    });
+  } catch (error) {
+    console.error("Payment initialization error:", error);
+    return NextResponse.json({ error: "Unable to start payment." }, { status: 500 });
+  }
+}
+
+===== FILE: apps\web\app\api\paystack-webhook\route.ts =====
+Lines: 142
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(request: Request) {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+  const signature = request.headers.get("x-paystack-signature");
+
+  if (!secret) {
+    return NextResponse.json({ error: "Payment service is not configured." }, { status: 503 });
+  }
+  if (!signature || !/^[a-f0-9]{128}$/i.test(signature)) {
+    return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+  }
+
+  const rawBody = await request.text();
+  const expected = createHmac("sha512", secret).update(rawBody).digest();
+  const supplied = Buffer.from(signature, "hex");
+
+  if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
+    return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+  }
+
+  let event: { event?: string; data?: { reference?: string } };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+  }
+
+  if (event.event !== "charge.success") {
+    return NextResponse.json({ received: true, ignored: true });
+  }
+
+  const reference = event.data?.reference;
+  if (!reference) {
+    return NextResponse.json({ error: "Payment reference is missing." }, { status: 400 });
+  }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    console.error("Missing server-side Supabase configuration for webhook.");
+    return NextResponse.json({ error: "Payment processing is not configured." }, { status: 503 });
+  }
+
+  const admin = createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  try {
+    const { data: payment, error: lookupError } = await admin
+      .from("paystack_transactions")
+      .select("user_id,reference,amount,currency,status")
+      .eq("reference", reference)
+      .maybeSingle();
+
+    if (lookupError) throw lookupError;
+    if (!payment || !payment.user_id) {
+      console.error("Unknown Paystack reference:", reference);
+      return NextResponse.json({ error: "Payment reference not found." }, { status: 404 });
+    }
+
+    if (payment.status === "success") {
+      return NextResponse.json({ received: true, processed: true, already_processed: true });
+    }
+
+    if (payment.status !== "initialized") {
+      return NextResponse.json({ received: true, ignored: true });
+    }
+
+    const verifyResponse = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: { Authorization: `Bearer ${secret}` },
+        cache: "no-store",
+      },
+    );
+
+    const verification = await verifyResponse.json();
+    const verified = verification?.data;
+
+    if (!verifyResponse.ok || !verification?.status || !verified) {
+      console.error("Paystack verification request failed for reference:", reference);
+      return NextResponse.json({ error: "Could not verify payment." }, { status: 502 });
+    }
+
+    const expectedPesewas = Math.round(Number(payment.amount) * 100);
+    if (
+      verified.status !== "success" ||
+      !Number.isSafeInteger(verified.id) ||
+      verified.id <= 0 ||
+      verified.reference !== reference ||
+      verified.currency !== "GHS" ||
+      !Number.isSafeInteger(expectedPesewas) ||
+      verified.amount !== expectedPesewas
+    ) {
+      console.error("Paystack verification mismatch for reference:", reference);
+      return NextResponse.json({ error: "Payment verification did not match the saved transaction." }, { status: 400 });
+    }
+
+    const { data: creditResult, error: creditError } = await admin.rpc(
+      "credit_paystack_wallet",
+      {
+        p_reference: reference,
+        p_paystack_transaction_id: verified.id,
+        p_amount: Number(payment.amount),
+        p_currency: verified.currency,
+        p_user_id: payment.user_id,
+      },
+    );
+
+    if (creditError) {
+      console.error("Wallet credit RPC failed:", creditError.message);
+      return NextResponse.json({ error: "Wallet credit failed; Paystack may retry this webhook." }, { status: 500 });
+    }
+
+    const creditPayload = Array.isArray(creditResult)
+      ? creditResult[0]
+      : creditResult;
+
+    if (
+      !creditPayload ||
+      typeof creditPayload !== "object" ||
+      creditPayload.success !== true
+    ) {
+      console.error("Paystack wallet credit RPC did not explicitly confirm success.");
+      return NextResponse.json(
+        { error: "Wallet credit was not confirmed. Paystack may retry this webhook." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ received: true, processed: true, result: creditResult });
+  } catch (error) {
+    console.error("Paystack webhook processing error:", error);
+    return NextResponse.json({ error: "Payment processing failed; retry is possible." }, { status: 500 });
+  }
+}
+
+===== FILE: apps\web\app\api\webhooks\paystack\route.ts =====
+Lines: 13
+import { POST as canonicalPaystackWebhook } from "../../paystack-webhook/route";
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(request: Request) {
+  return canonicalPaystackWebhook(request);
+}
+
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed." }, { status: 405 });
+}
+
+===== FILE: apps\web\app\api\webhooks\dodo\route.ts =====
+Lines: 11
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST() {
+  return NextResponse.json(
+    { error: "Dodo Payments is disabled. SkillBridge uses Paystack." },
+    { status: 410 }
+  );
+}
+
+===== FILE: apps\web\components\TaskWorkspace.tsx =====
+Lines: 565
+File is long; relevant references follow.
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:23:  const [taskError, setTaskError] = useState('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:24:
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:25:  const [uploads, setUploads] = useState<File[]>([]);
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:26:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:27:  const [activeTask, setActiveTask] = useState<Task | null>(null);
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:28:  const [submissionText, setSubmissionText] = useState('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:29:  const [isSubmitting, setIsSubmitting] = useState(false);
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:30:  const [successMessage, setSuccessMessage] = useState('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:31:  const [submissionError, setSubmissionError] = useState('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:68:  const handleStartTask = (task: Task) => {
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:69:    setActiveTask(task);
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:70:    setSubmissionText('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:71:    setSuccessMessage('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:72:    setSubmissionError('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:73:  };
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:98:      }
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:99:
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:100:      const cleanedText = submissionText.trim();
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:101:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:102:      if (!cleanedText) {
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:103:        throw new Error('Please enter your task work before submitting.');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:105:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:106:      const { error: submissionInsertError } = await supabase
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:107:        .from('task_submissions')
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:108:        .insert({
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:109:          task_id: activeTask.id,
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:110:          user_id: user.id,
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:111:          applicant_id: user.id,
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:112:          submission_text: cleanedText,
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:113:          status: 'submitted',
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:114:          submitted_at: new Date().toISOString(),
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:115:        });
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:116:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:122:        `Your submission for "${activeTask.title}" was sent successfully.`,
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:123:      );
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:124:      setSubmissionText('');
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:125:    } catch (error) {
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:126:      console.error('Task submission error:', error);
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:127:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:142:        {learnerBands.map((band) => (
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:143:          <article key={band.title} className="sb-card">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:144:            <span className="sb-status-pill">{band.range}</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:145:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:146:            <h3>{band.title}</h3>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:147:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:205:        {!isLoadingTasks && taskError && (
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:206:          <div className="sb-card">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:207:            <span className="sb-status-pill">Task loading error</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:208:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:209:            <h3>Tasks could not be loaded</h3>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:210:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:215:        {!isLoadingTasks && !taskError && filteredTasks.length === 0 && (
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:216:          <div className="sb-card">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:217:            <span className="sb-status-pill">No tasks yet</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:218:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:219:            <h3>No tasks match this filter</h3>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:220:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:239:              >
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:240:                <div>
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:241:                  <span className="sb-status-pill">
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:242:                    {task.level} · ?{Number(task.pay).toFixed(2)}
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:243:                  </span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:244:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:292:      </div>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:293:
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:294:      {/* Upload and resources */}
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:295:      <div className="sb-card-grid sb-card-grid-compact">
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:296:        <article className="sb-card">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:297:          <span className="sb-status-pill">Upload support</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:298:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:299:          <h3>Attach learning files</h3>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:300:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:304:          </p>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:305:
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:306:          <label className="sb-upload-box">
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:307:            <span>Select files</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:308:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:309:            <input
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:311:              multiple
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:312:              onChange={(event) =>
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:313:                setUploads(
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:314:                  Array.from(event.target.files ?? []),
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:315:                )
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:316:              }
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:319:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:320:          <ul className="sb-simple-list">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:321:            {uploads.length > 0 ? (
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:322:              uploads.map((file) => (
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:323:                <li key={`${file.name}-${file.size}`}>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:324:                  {file.name} ({Math.ceil(file.size / 1024)} KB)
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:325:                </li>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:332:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:333:        <article className="sb-card">
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:334:          <span className="sb-status-pill">Download support</span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:335:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:336:          <h3>Download starter resources</h3>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:337:
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:383:            }}
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:384:          >
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:385:            <span className="sb-status-pill">
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:386:              {activeTask.level} · ?
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:387:              {Number(activeTask.pay).toFixed(2)}
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:388:            </span>
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:465:                    id="task-submission-text"
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:466:                    required
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:467:                    value={submissionText}
+> C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:468:                    onChange={(e) => setSubmissionText(e.target.value)}
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:469:                    placeholder="Paste or type your completed task work here..."
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:470:                    style={{
+  C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\TaskWorkspace.tsx:471:                      width: '100%',
+
+===== FILE: apps\web\app\api\wallet\balance\route.ts =====
+Lines: 87
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!supabaseUrl || !anonKey) {
+      return NextResponse.json(
+        { error: "Wallet service is not configured." },
+        { status: 503 },
+      );
+    }
+
+    const authorization = request.headers.get("authorization");
+    const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Please sign in to view your wallet." },
+        { status: 401 },
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, anonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    const { data: authData, error: authError } =
+      await supabase.auth.getUser(token);
+
+    if (authError || !authData.user) {
+      return NextResponse.json(
+        { error: "Your session is invalid or expired." },
+        { status: 401 },
+      );
+    }
+
+    const { data: wallet, error: walletError } = await supabase
+      .from("platform_wallets")
+      .select("available_balance, total_earnings")
+      .eq("user_id", authData.user.id)
+      .maybeSingle();
+
+    if (walletError) {
+      console.error("Wallet balance lookup failed:", walletError.message);
+      return NextResponse.json(
+        { error: "Wallet balance is temporarily unavailable." },
+        { status: 503 },
+      );
+    }
+
+    const balance = wallet ? Number(wallet.available_balance) : 0;
+
+    if (!Number.isFinite(balance) || balance < 0) {
+      return NextResponse.json(
+        { error: "Wallet balance is invalid." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      balance,
+      currency: "GHS",
+    });
+  } catch (error) {
+    console.error("Wallet balance API failed:", error);
+    return NextResponse.json(
+      { error: "Wallet balance is temporarily unavailable." },
+      { status: 500 },
+    );
+  }
+}
+
+===== FILE: apps\web\app\api\withdraw\route.ts =====
+Lines: 13
+Withdrawal source intentionally not printed; route will be preserved.
+
+===== FILE: supabase\migrations\20261015050000_skillbridge_paystack_task_hardening.sql =====
+Lines: 191
+-- SkillBridge Paystack credits and task submission compatibility.
+-- Expected wallet schema: platform_wallets(user_id, available_balance, total_earnings).
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'user_id'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.user_id is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'available_balance'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.available_balance is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF to_regclass('public.task_submissions') IS NULL THEN
+    RAISE EXCEPTION 'public.task_submissions is missing.';
+  END IF;
+END;
+$$;
+
+CREATE TABLE IF NOT EXISTS public.paystack_transactions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  email text NOT NULL,
+  reference text NOT NULL UNIQUE,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL DEFAULT 'GHS' CHECK (currency = 'GHS'),
+  status text NOT NULL DEFAULT 'initialized',
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  paystack_transaction_id bigint,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.paystack_transactions
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS currency text DEFAULT 'GHS',
+  ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS paystack_transaction_id bigint,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+CREATE UNIQUE INDEX IF NOT EXISTS paystack_transactions_reference_uidx
+  ON public.paystack_transactions(reference);
+
+CREATE TABLE IF NOT EXISTS public.paystack_wallet_ledger (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference text NOT NULL UNIQUE,
+  paystack_transaction_id bigint NOT NULL UNIQUE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL CHECK (currency = 'GHS'),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.task_submissions
+  ADD COLUMN IF NOT EXISTS submission_text text;
+
+ALTER TABLE public.task_submissions
+  ALTER COLUMN file_storage_path DROP NOT NULL;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('task-deliverables', 'task-deliverables', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "SkillBridge task files owner insert" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner insert"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner read" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner read"
+ON storage.objects FOR SELECT TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner delete" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner delete"
+ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+CREATE OR REPLACE FUNCTION public.credit_paystack_wallet(
+  p_reference text,
+  p_paystack_transaction_id bigint,
+  p_amount numeric,
+  p_currency text,
+  p_user_id uuid
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  payment_row public.paystack_transactions%ROWTYPE;
+BEGIN
+  IF p_reference IS NULL OR p_reference = ''
+     OR p_paystack_transaction_id IS NULL OR p_paystack_transaction_id <= 0
+     OR p_amount IS NULL OR p_amount <= 0
+     OR p_currency <> 'GHS' OR p_user_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Invalid payment parameters.');
+  END IF;
+
+  SELECT * INTO payment_row
+  FROM public.paystack_transactions
+  WHERE reference = p_reference
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment reference not found.');
+  END IF;
+
+  IF payment_row.user_id <> p_user_id
+     OR payment_row.currency <> p_currency
+     OR payment_row.amount <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment details do not match.');
+  END IF;
+
+  IF payment_row.status = 'success' THEN
+    IF EXISTS (
+      SELECT 1 FROM public.paystack_wallet_ledger
+      WHERE reference = p_reference
+        AND user_id = p_user_id
+        AND amount = p_amount
+        AND paystack_transaction_id = p_paystack_transaction_id
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'already_processed', true);
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'error', 'Payment marked successful without matching ledger entry.');
+  END IF;
+
+  IF payment_row.status <> 'initialized' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment is not awaiting credit.');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.paystack_wallet_ledger
+    WHERE reference = p_reference
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Ledger reference already exists.');
+  END IF;
+
+  INSERT INTO public.paystack_wallet_ledger
+    (reference, paystack_transaction_id, user_id, amount, currency)
+  VALUES
+    (p_reference, p_paystack_transaction_id, p_user_id, p_amount, p_currency);
+
+  INSERT INTO public.platform_wallets
+    (user_id, available_balance, total_earnings, updated_at)
+  VALUES
+    (p_user_id, p_amount, p_amount, now())
+  ON CONFLICT (user_id) DO UPDATE
+  SET available_balance = public.platform_wallets.available_balance + EXCLUDED.available_balance,
+      total_earnings = public.platform_wallets.total_earnings + EXCLUDED.total_earnings,
+      updated_at = now();
+
+  UPDATE public.paystack_transactions
+  SET status = 'success',
+      paystack_transaction_id = p_paystack_transaction_id,
+      updated_at = now()
+  WHERE reference = p_reference;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) TO service_role;
+
+ALTER TABLE public.paystack_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paystack_wallet_ledger ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.paystack_wallet_ledger FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.paystack_transactions TO service_role;
+GRANT ALL ON public.paystack_wallet_ledger TO service_role;
+
+===== ENVIRONMENT VARIABLE NAMES ONLY =====
+Found .env.example
+  NEXT_PUBLIC_SUPABASE_URL
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  SUPABASE_SERVICE_ROLE_KEY
+  PAYSTACK_SECRET_KEY
+  NEXT_PUBLIC_URL
+  SKILLBRIDGE_DESKTOP_WEB_URL
+
+===== DATABASE CLI STATUS =====
+Supabase CLI unavailable; database migration status remains unverified.
+
+===== EVIDENCE REPORT =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\skillbridge-completion-evidence-20261015-064845.txt

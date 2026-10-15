@@ -1,0 +1,12 @@
+===== SKILLBRIDGE CONTINUATION CHECK =====
+Project: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix
+Started: 2026-10-15T06:37:31.9042266+01:00
+
+===== GIT WHITESPACE CHECK =====
+
+===== SUPABASE CLI CHECK =====
+BLOCKED: Supabase CLI is not installed in this project or PATH.
+Install it using the official Supabase CLI instructions, then rerun this block.
+STOPPED SAFELY: Supabase CLI unavailable; database migration was not applied.
+Fix the specific blocker shown above, then rerun the full block.
+Report: C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\release-reports\skillbridge-final-20261015-063731.txt

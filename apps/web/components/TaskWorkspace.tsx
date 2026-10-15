@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { learnerBands, learningResources } from '../data/siteContent';
 import { supabase } from '../utils/supabaseClient';
 
@@ -22,7 +22,8 @@ export default function TaskWorkspace() {
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [taskError, setTaskError] = useState('');
 
-  const [uploads, setUploads] = useState<string[]>([]);
+  const [uploads, setUploads] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [submissionText, setSubmissionText] = useState('');
@@ -31,27 +32,41 @@ export default function TaskWorkspace() {
   const [submissionError, setSubmissionError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadTasks() {
       setIsLoadingTasks(true);
       setTaskError('');
 
-      const { data, error } = await supabase
-        .from('task_catalog')
-        .select('id, title, description, level, pay, visibility')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('task_catalog')
+          .select('id, title, description, level, pay, visibility')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Task catalog error:', error);
-        setTaskError('We could not load the available tasks.');
-        setTasks([]);
-      } else {
-        setTasks((data ?? []) as Task[]);
+        if (error) {
+          console.error('Task catalog error:', error.message);
+          if (!cancelled) {
+            setTaskError('We could not load the available tasks. Please check your connection and try again.');
+            setTasks([]);
+          }
+          return;
+        }
+
+        if (!cancelled) setTasks((data ?? []) as Task[]);
+      } catch (error) {
+        console.error('Task catalog request failed:', error);
+        if (!cancelled) {
+          setTaskError('The task service could not be reached. Please try again.');
+          setTasks([]);
+        }
+      } finally {
+        if (!cancelled) setIsLoadingTasks(false);
       }
-
-      setIsLoadingTasks(false);
     }
 
-    loadTasks();
+    void loadTasks();
+    return () => { cancelled = true; };
   }, []);
 
   const filteredTasks = useMemo(() => {
@@ -68,6 +83,8 @@ export default function TaskWorkspace() {
   const handleStartTask = (task: Task) => {
     setActiveTask(task);
     setSubmissionText('');
+    setUploads([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setSuccessMessage('');
     setSubmissionError('');
   };
@@ -103,24 +120,62 @@ export default function TaskWorkspace() {
         throw new Error('Please enter your task work before submitting.');
       }
 
+      const uploadedPaths: string[] = [];
+      let totalFileSize = 0;
+
+      for (const file of uploads) {
+        if (file.size <= 0) {
+          throw new Error(`The selected file "${file.name}" is empty.`);
+        }
+
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storagePath = `${user.id}/${activeTask.id}/${crypto.randomUUID()}-${safeName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('task-submissions')
+          .upload(storagePath, file, {
+            upsert: false,
+            contentType: file.type || 'application/octet-stream',
+          });
+
+        if (uploadError) {
+          if (uploadedPaths.length) {
+            await supabase.storage.from('task-submissions').remove(uploadedPaths);
+          }
+          throw new Error(`Could not upload "${file.name}": ${uploadError.message}`);
+        }
+
+        uploadedPaths.push(storagePath);
+        totalFileSize += file.size;
+      }
+
       const { error: submissionInsertError } = await supabase
         .from('task_submissions')
         .insert({
           task_id: activeTask.id,
+          user_id: user.id,
           applicant_id: user.id,
           submission_text: cleanedText,
+          file_storage_path: uploadedPaths.length
+            ? JSON.stringify(uploadedPaths)
+            : null,
+          file_size_bytes: uploadedPaths.length ? totalFileSize : null,
           status: 'submitted',
           submitted_at: new Date().toISOString(),
         });
 
       if (submissionInsertError) {
+        if (uploadedPaths.length) {
+          await supabase.storage.from('task-submissions').remove(uploadedPaths);
+        }
         throw new Error(submissionInsertError.message);
       }
-
       setSuccessMessage(
         `Your submission for "${activeTask.title}" was sent successfully.`,
       );
       setSubmissionText('');
+      setUploads([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       console.error('Task submission error:', error);
 
@@ -238,7 +293,7 @@ export default function TaskWorkspace() {
               >
                 <div>
                   <span className="sb-status-pill">
-                    {task.level} · ₵{Number(task.pay).toFixed(2)}
+                    {task.level}{' \u00B7 GH\u20B5'}{Number(task.pay).toFixed(2)}
                   </span>
 
                   <h3>{task.title}</h3>
@@ -306,14 +361,12 @@ export default function TaskWorkspace() {
             <span>Select files</span>
 
             <input
+              ref={fileInputRef}
               type="file"
               multiple
               onChange={(event) =>
                 setUploads(
-                  Array.from(event.target.files ?? []).map(
-                    (file) =>
-                      `${file.name} (${Math.ceil(file.size / 1024)} KB)`,
-                  ),
+                  Array.from(event.target.files ?? []),
                 )
               }
             />
@@ -321,7 +374,11 @@ export default function TaskWorkspace() {
 
           <ul className="sb-simple-list">
             {uploads.length > 0 ? (
-              uploads.map((file) => <li key={file}>{file}</li>)
+              uploads.map((file) => (
+                <li key={`${file.name}-${file.size}`}>
+                  {file.name} ({Math.ceil(file.size / 1024)} KB)
+                </li>
+              ))
             ) : (
               <li>No files selected yet.</li>
             )}
@@ -381,8 +438,7 @@ export default function TaskWorkspace() {
             }}
           >
             <span className="sb-status-pill">
-              {activeTask.level} · ₵
-              {Number(activeTask.pay).toFixed(2)}
+              {activeTask.level}{' \u00B7 GH\u20B5'}{Number(activeTask.pay).toFixed(2)}
             </span>
 
             <h3

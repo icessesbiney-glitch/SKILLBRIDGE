@@ -1,0 +1,191 @@
+-- SkillBridge Paystack credits and task submission compatibility.
+-- Expected wallet schema: platform_wallets(user_id, available_balance, total_earnings).
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'user_id'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.user_id is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'platform_wallets'
+      AND column_name = 'available_balance'
+  ) THEN
+    RAISE EXCEPTION 'Expected public.platform_wallets.available_balance is missing. Resolve the deployed wallet schema before applying this migration.';
+  END IF;
+
+  IF to_regclass('public.task_submissions') IS NULL THEN
+    RAISE EXCEPTION 'public.task_submissions is missing.';
+  END IF;
+END;
+$$;
+
+CREATE TABLE IF NOT EXISTS public.paystack_transactions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  email text NOT NULL,
+  reference text NOT NULL UNIQUE,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL DEFAULT 'GHS' CHECK (currency = 'GHS'),
+  status text NOT NULL DEFAULT 'initialized',
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  paystack_transaction_id bigint,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.paystack_transactions
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS currency text DEFAULT 'GHS',
+  ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS paystack_transaction_id bigint,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+CREATE UNIQUE INDEX IF NOT EXISTS paystack_transactions_reference_uidx
+  ON public.paystack_transactions(reference);
+
+CREATE TABLE IF NOT EXISTS public.paystack_wallet_ledger (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference text NOT NULL UNIQUE,
+  paystack_transaction_id bigint NOT NULL UNIQUE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  amount numeric(10,2) NOT NULL CHECK (amount > 0),
+  currency text NOT NULL CHECK (currency = 'GHS'),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.task_submissions
+  ADD COLUMN IF NOT EXISTS submission_text text;
+
+ALTER TABLE public.task_submissions
+  ALTER COLUMN file_storage_path DROP NOT NULL;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('task-deliverables', 'task-deliverables', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "SkillBridge task files owner insert" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner insert"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner read" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner read"
+ON storage.objects FOR SELECT TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "SkillBridge task files owner delete" ON storage.objects;
+CREATE POLICY "SkillBridge task files owner delete"
+ON storage.objects FOR DELETE TO authenticated
+USING (
+  bucket_id = 'task-deliverables'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+CREATE OR REPLACE FUNCTION public.credit_paystack_wallet(
+  p_reference text,
+  p_paystack_transaction_id bigint,
+  p_amount numeric,
+  p_currency text,
+  p_user_id uuid
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  payment_row public.paystack_transactions%ROWTYPE;
+BEGIN
+  IF p_reference IS NULL OR p_reference = ''
+     OR p_paystack_transaction_id IS NULL OR p_paystack_transaction_id <= 0
+     OR p_amount IS NULL OR p_amount <= 0
+     OR p_currency <> 'GHS' OR p_user_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Invalid payment parameters.');
+  END IF;
+
+  SELECT * INTO payment_row
+  FROM public.paystack_transactions
+  WHERE reference = p_reference
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment reference not found.');
+  END IF;
+
+  IF payment_row.user_id <> p_user_id
+     OR payment_row.currency <> p_currency
+     OR payment_row.amount <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment details do not match.');
+  END IF;
+
+  IF payment_row.status = 'success' THEN
+    IF EXISTS (
+      SELECT 1 FROM public.paystack_wallet_ledger
+      WHERE reference = p_reference
+        AND user_id = p_user_id
+        AND amount = p_amount
+        AND paystack_transaction_id = p_paystack_transaction_id
+    ) THEN
+      RETURN jsonb_build_object('success', true, 'already_processed', true);
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'error', 'Payment marked successful without matching ledger entry.');
+  END IF;
+
+  IF payment_row.status <> 'initialized' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment is not awaiting credit.');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.paystack_wallet_ledger
+    WHERE reference = p_reference
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Ledger reference already exists.');
+  END IF;
+
+  INSERT INTO public.paystack_wallet_ledger
+    (reference, paystack_transaction_id, user_id, amount, currency)
+  VALUES
+    (p_reference, p_paystack_transaction_id, p_user_id, p_amount, p_currency);
+
+  INSERT INTO public.platform_wallets
+    (user_id, available_balance, total_earnings, updated_at)
+  VALUES
+    (p_user_id, p_amount, p_amount, now())
+  ON CONFLICT (user_id) DO UPDATE
+  SET available_balance = public.platform_wallets.available_balance + EXCLUDED.available_balance,
+      total_earnings = public.platform_wallets.total_earnings + EXCLUDED.total_earnings,
+      updated_at = now();
+
+  UPDATE public.paystack_transactions
+  SET status = 'success',
+      paystack_transaction_id = p_paystack_transaction_id,
+      updated_at = now()
+  WHERE reference = p_reference;
+
+  RETURN jsonb_build_object('success', true, 'already_processed', false);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.credit_paystack_wallet(text, bigint, numeric, text, uuid) TO service_role;
+
+ALTER TABLE public.paystack_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paystack_wallet_ledger ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.paystack_wallet_ledger FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.paystack_transactions TO service_role;
+GRANT ALL ON public.paystack_wallet_ledger TO service_role;

@@ -1,0 +1,271 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015124023
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 9708
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\skillbridge-final-audit-20261015-124023.txt
+
+===== 1. TYPESCRIPT CHECK =====
+
+TypeScript exit code: 0
+
+===== 2. PAYMENT PROVIDER REFERENCES =====
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\cashout\route.ts:9: error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\checkout\route.ts:9: error: "This legacy checkout endpoint is disabled. Use the authenticated Paystack initialization flow.",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:15: const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:23: if (!paystackKey) {
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:25: { error: "Paystack is not configured." },
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:66: .from("paystack_transactions")
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:83: const gatewayResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:86: Authorization: `Bearer ${paystackKey}`,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:103: await admin.from("paystack_transactions")
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:108: console.error("Paystack initialization failed:", gateway.message || gateway.status);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-init\route.ts:109: return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:9: const secret = process.env.PAYSTACK_SECRET_KEY;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:10: const signature = request.headers.get("x-paystack-signature");
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:16: return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:24: return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:56: .from("paystack_transactions")
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:63: console.error("Unknown Paystack reference:", reference);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:76: `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:87: console.error("Paystack verification request failed for reference:", reference);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:101: console.error("Paystack verification mismatch for reference:", reference);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:106: "credit_paystack_wallet",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:109: p_paystack_transaction_id: verified.id,
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:118: return NextResponse.json({ error: "Wallet credit failed; Paystack may retry this webhook." }, { status: 500 });
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:130: console.error("Paystack wallet credit RPC did not explicitly confirm success.");
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:132: { error: "Wallet credit was not confirmed. Paystack may retry this webhook." },
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\paystack-webhook\route.ts:139: console.error("Paystack webhook processing error:", error);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\rider\payout\route.ts:9: error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\vendor\settle\route.ts:9: error: "This payout operation is temporarily disabled until authenticated, balance-locked Paystack Transfers are implemented.",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\webhooks\dodo\route.ts:8: { error: "Dodo Payments is disabled. SkillBridge uses Paystack." },
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\webhooks\paystack\route.ts:1: import { POST as canonicalPaystackWebhook } from "../../paystack-webhook/route";
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\webhooks\paystack\route.ts:8: return canonicalPaystackWebhook(request);
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\app\api\withdraw\route.ts:9: error: "Withdrawals are temporarily unavailable while secure Paystack Transfers are being implemented.",
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\dashboard\VendorWalletCard.tsx:8: paystack_recipient_code: string | null;
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\dashboard\VendorWalletCard.tsx:21: .select("balance_cents, paystack_recipient_code")
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\dashboard\VendorWalletCard.tsx:43: <div style={{ display: "flex", gap: "10px", alignItems: "center", fontSize: "11px", color: wallet?.paystack_recipient_code ? "#00c389" : "#ff9900" }}>
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\dashboard\VendorWalletCard.tsx:44: <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: wallet?.paystack_recipient_code ? "#00c389" : "#ff9900" }}></div>
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\dashboard\VendorWalletCard.tsx:45: {wallet?.paystack_recipient_code ? `Paystack Gateway Recipient Synced: ${wallet.paystack_recipient_code}` : "Mobile Money Dispatch Recipient Off-line"}
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\delivery\RiderWalletCard.tsx:70: "Rider payouts are temporarily unavailable while secure Paystack Transfers are implemented. Your wallet has not been debited."
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:6: export default function PaystackCheckoutButton() {
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:26: const response = await fetch('/api/paystack-init', {
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:47: setMessage('Paystack did not return a payment link.');
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:57: <span className="sb-status-pill">Paystack</span>
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:60: Pay securely with a supported Paystack payment method. Your wallet
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\PaystackCheckoutButton.tsx:83: {loading ? 'Connecting to Paystack...' : `Pay GHS ${amount || '0'}`}
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\WithdrawalForm.tsx:16: Paystack withdrawals are temporarily unavailable while secure
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\components\WithdrawalForm.tsx:58: Paystack Transfers are enabled.
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\data\siteContent.ts:31: title: 'Paystack API Handbook',
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\data\siteContent.ts:33: label: 'Paystack API Handbook',
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\data\siteContent.ts:34: href: 'https://paystack.com/docs/'
+
+===== 3. REQUIRED SERVER ENVIRONMENT VARIABLE NAMES =====
+
+.\apps\web\.env.local
+VERCEL_OIDC_TOKEN
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+.\apps\web\.env.production
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+.\.env.production
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+===== 4. PAYMENT ROUTE FILES =====
+
+--- .\apps\web\app\api\paystack-init\route.ts ---
+5: export const runtime = "nodejs";
+6: export const dynamic = "force-dynamic";
+8: export async function POST(req: NextRequest) {
+14: const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+15: const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+20: { status: 503 },
+26: { status: 503 },
+30: const authorization = req.headers.get("authorization") || "";
+31: const match = authorization.match(/^Bearer\s+(.+)$/i);
+33: return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+40: await authClient.auth.getUser(match[1]);
+43: return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+50: return NextResponse.json({ error: "Enter a valid amount in GHS." }, { status: 400 });
+57: return NextResponse.json({ error: "Amount must be between GHS 1.00 and GHS 1,000,000.00." }, { status: 400 });
+73: status: "initialized",
+79: return NextResponse.json({ error: "Could not create the payment record." }, { status: 500 });
+86: Authorization: `Bearer ${paystackKey}`,
+102: if (!gatewayResponse.ok || !gateway.status || !gateway.data?.authorization_url) {
+104: .update({ status: "failed", updated_at: new Date().toISOString() })
+106: .eq("status", "initialized");
+108: console.error("Paystack initialization failed:", gateway.message || gateway.status);
+109: return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+113: authorization_url: gateway.data.authorization_url,
+118: return NextResponse.json({ error: "Unable to start payment." }, { status: 500 });
+
+--- .\apps\web\app\api\paystack-webhook\route.ts ---
+1: import { createHmac, timingSafeEqual } from "node:crypto";
+5: export const runtime = "nodejs";
+6: export const dynamic = "force-dynamic";
+8: export async function POST(request: Request) {
+9: const secret = process.env.PAYSTACK_SECRET_KEY;
+10: const signature = request.headers.get("x-paystack-signature");
+13: return NextResponse.json({ error: "Payment service is not configured." }, { status: 503 });
+16: return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+20: const expected = createHmac("sha512", secret).update(rawBody).digest();
+24: return NextResponse.json({ error: "Invalid Paystack signature." }, { status: 401 });
+31: return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+34: if (event.event !== "charge.success") {
+40: return NextResponse.json({ error: "Payment reference is missing." }, { status: 400 });
+44: const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+47: return NextResponse.json({ error: "Payment processing is not configured." }, { status: 503 });
+57: .select("user_id,reference,amount,currency,status")
+64: return NextResponse.json({ error: "Payment reference not found." }, { status: 404 });
+67: if (payment.status === "success") {
+71: if (payment.status !== "initialized") {
+78: headers: { Authorization: `Bearer ${secret}` },
+86: if (!verifyResponse.ok || !verification?.status || !verified) {
+88: return NextResponse.json({ error: "Could not verify payment." }, { status: 502 });
+93: verified.status !== "success" ||
+102: return NextResponse.json({ error: "Payment verification did not match the saved transaction." }, { status: 400 });
+105: const { data: creditResult, error: creditError } = await admin.rpc(
+106: "credit_paystack_wallet",
+118: return NextResponse.json({ error: "Wallet credit failed; Paystack may retry this webhook." }, { status: 500 });
+133: { status: 500 },
+140: return NextResponse.json({ error: "Payment processing failed; retry is possible." }, { status: 500 });
+
+--- .\apps\web\app\api\webhooks\paystack\route.ts ---
+4: export const runtime = "nodejs";
+5: export const dynamic = "force-dynamic";
+7: export async function POST(request: Request) {
+11: export async function GET() {
+12: return NextResponse.json({ error: "Method not allowed." }, { status: 405 });
+
+--- .\apps\web\app\api\webhooks\dodo\route.ts ---
+3: export const runtime = "nodejs";
+4: export const dynamic = "force-dynamic";
+6: export async function POST() {
+8: { error: "Dodo Payments is disabled. SkillBridge uses Paystack." },
+9: { status: 410 }
+
+--- .\apps\web\app\api\withdraw\route.ts ---
+3: export const runtime = "nodejs";
+4: export const dynamic = "force-dynamic";
+6: export async function POST() {
+11: { status: 501 },
+
+--- .\apps\web\app\api\wallet\balance\route.ts ---
+4: export const runtime = "nodejs";
+5: export const dynamic = "force-dynamic";
+7: export async function GET(request: NextRequest) {
+17: { status: 503 },
+21: const authorization = request.headers.get("authorization");
+22: const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+27: { status: 401 },
+38: Authorization: `Bearer ${token}`,
+44: await supabase.auth.getUser(token);
+49: { status: 401 },
+63: { status: 503 },
+72: { status: 500 },
+84: { status: 500 },
+
+===== 5. TASK SUBMISSION IMPLEMENTATION =====
+
+  apps\web\components\TaskWorkspace.tsx:28:  const [activeTask, setActiveTask] = useState<Task | null>(null);
+> apps\web\components\TaskWorkspace.tsx:29:  const [submissionText, setSubmissionText] = useState('');
+  apps\web\components\TaskWorkspace.tsx:30:  const [isSubmitting, setIsSubmitting] = useState(false);
+  apps\web\components\TaskWorkspace.tsx:31:  const [successMessage, setSuccessMessage] = useState('');
+  apps\web\components\TaskWorkspace.tsx:42:        const { data, error } = await supabase
+> apps\web\components\TaskWorkspace.tsx:43:          .from('task_catalog')
+  apps\web\components\TaskWorkspace.tsx:44:          .select('id, title, description, level, pay, visibility')
+  apps\web\components\TaskWorkspace.tsx:45:          .order('created_at', { ascending: false });
+  apps\web\components\TaskWorkspace.tsx:84:    setActiveTask(task);
+> apps\web\components\TaskWorkspace.tsx:85:    setSubmissionText('');
+  apps\web\components\TaskWorkspace.tsx:86:    setUploads([]);
+  apps\web\components\TaskWorkspace.tsx:87:    if (fileInputRef.current) fileInputRef.current.value = '';
+  apps\web\components\TaskWorkspace.tsx:116:
+> apps\web\components\TaskWorkspace.tsx:117:      const cleanedText = submissionText.trim();
+  apps\web\components\TaskWorkspace.tsx:118:
+  apps\web\components\TaskWorkspace.tsx:119:      if (!cleanedText) {
+  apps\web\components\TaskWorkspace.tsx:142:          if (uploadedPaths.length) {
+> apps\web\components\TaskWorkspace.tsx:143:            await
+supabase.storage.from('task-submissions').remove(uploadedPaths);
+  apps\web\components\TaskWorkspace.tsx:144:          }
+  apps\web\components\TaskWorkspace.tsx:145:          throw new Error(`Could not upload "${file.name}":
+${uploadError.message}`);
+  apps\web\components\TaskWorkspace.tsx:152:      const { error: submissionInsertError } = await supabase
+> apps\web\components\TaskWorkspace.tsx:153:        .from('task_submissions')
+  apps\web\components\TaskWorkspace.tsx:154:        .insert({
+  apps\web\components\TaskWorkspace.tsx:155:          task_id: activeTask.id,
+  apps\web\components\TaskWorkspace.tsx:168:        if (uploadedPaths.length) {
+> apps\web\components\TaskWorkspace.tsx:169:          await
+supabase.storage.from('task-submissions').remove(uploadedPaths);
+  apps\web\components\TaskWorkspace.tsx:170:        }
+  apps\web\components\TaskWorkspace.tsx:171:        throw new Error(submissionInsertError.message);
+  apps\web\components\TaskWorkspace.tsx:175:      );
+> apps\web\components\TaskWorkspace.tsx:176:      setSubmissionText('');
+  apps\web\components\TaskWorkspace.tsx:177:      setUploads([]);
+  apps\web\components\TaskWorkspace.tsx:178:      if (fileInputRef.current) fileInputRef.current.value = '';
+  apps\web\components\TaskWorkspace.tsx:295:                  <span className="sb-status-pill">
+> apps\web\components\TaskWorkspace.tsx:296:                    {task.level}{' \u00B7
+GH\u20B5'}{Number(task.pay).toFixed(2)}
+  apps\web\components\TaskWorkspace.tsx:297:                  </span>
+  apps\web\components\TaskWorkspace.tsx:298:
+  apps\web\components\TaskWorkspace.tsx:440:            <span className="sb-status-pill">
+> apps\web\components\TaskWorkspace.tsx:441:              {activeTask.level}{' \u00B7
+GH\u20B5'}{Number(activeTask.pay).toFixed(2)}
+  apps\web\components\TaskWorkspace.tsx:442:            </span>
+  apps\web\components\TaskWorkspace.tsx:443:
+  apps\web\components\TaskWorkspace.tsx:496:              <form
+> apps\web\components\TaskWorkspace.tsx:497:                onSubmit={handleFormSubmit}
+  apps\web\components\TaskWorkspace.tsx:498:                style={{
+  apps\web\components\TaskWorkspace.tsx:499:                  display: 'flex',
+  apps\web\components\TaskWorkspace.tsx:520:                    required
+> apps\web\components\TaskWorkspace.tsx:521:                    value={submissionText}
+> apps\web\components\TaskWorkspace.tsx:522:                    onChange={(e) => setSubmissionText(e.target.value)}
+  apps\web\components\TaskWorkspace.tsx:523:                    placeholder="Paste or type your completed task work
+here..."
+  apps\web\components\TaskWorkspace.tsx:524:                    style={{
+  apps\web\components\TaskWorkspace.tsx:563:                  <button
+> apps\web\components\TaskWorkspace.tsx:564:                    type="submit"
+  apps\web\components\TaskWorkspace.tsx:565:                    disabled={isSubmitting}
+  apps\web\components\TaskWorkspace.tsx:566:                    style={{
+  apps\web\components\TaskWorkspace.tsx:579:                      ? 'Submitting...'
+> apps\web\components\TaskWorkspace.tsx:580:                      : 'Submit Task for Review'}
+  apps\web\components\TaskWorkspace.tsx:581:                  </button>
+  apps\web\components\TaskWorkspace.tsx:582:                </div>
+
+===== 6. NEXT CONFIGURATION THAT MAY HIDE CHECKS =====
+apps\web\next.config.js:3:  reactStrictMode: false,
+apps\web\next.config.js:4:  eslint: { ignoreDuringBuilds: true },
+apps\web\next.config.js:5:  typescript: { ignoreBuildErrors: true },
+apps\web\next.config.mjs:3:  reactStrictMode: true,
+apps\web\next.config.mjs:4:  eslint: { ignoreDuringBuilds: true },
+apps\web\next.config.mjs:5:  typescript: { ignoreBuildErrors: true },
+apps\web\next.config.mjs.backup-20261014-211646:3:  reactStrictMode: true,
+apps\web\next.config.mjs.backup-20261014-211646:4:  eslint: { ignoreDuringBuilds: true },
+apps\web\next.config.mjs.backup-20261014-211646:5:  typescript: { ignoreBuildErrors: true },
+apps\web\next.config.mjs.disabled-20261014-211646:3:  reactStrictMode: true,
+apps\web\next.config.mjs.disabled-20261014-211646:4:  eslint: { ignoreDuringBuilds: true },
+apps\web\next.config.mjs.disabled-20261014-211646:5:  typescript: { ignoreBuildErrors: true },
+apps\web\tsconfig.json:11:                            "strict":  true,
+apps\web\tsconfig.json:12:                            "noEmit":  true,
+**********************
+Windows PowerShell transcript end
+End time: 20261015124040
+**********************

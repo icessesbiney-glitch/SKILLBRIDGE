@@ -1,0 +1,16 @@
+diff --git a/.env.production b/.env.production
+deleted file mode 100644
+index bbcee85..0000000
+--- a/.env.production
++++ /dev/null
+@@ -1,2 +0,0 @@
+-NEXT_PUBLIC_SUPABASE_URL=https://aolfuonsuaeoitumuvqc.supabase.co
+-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo
+diff --git a/apps/web/.env.production b/apps/web/.env.production
+deleted file mode 100644
+index bbcee85..0000000
+--- a/apps/web/.env.production
++++ /dev/null
+@@ -1,2 +0,0 @@
+-NEXT_PUBLIC_SUPABASE_URL=https://aolfuonsuaeoitumuvqc.supabase.co
+-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_f21PTSo3zKr1oayFCTTyxA_yn6C7QKo

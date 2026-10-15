@@ -1,0 +1,414 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261015031534
+Username: ICESSES\ICESSES
+RunAs User: ICESSES\ICESSES
+Configuration Name: 
+Machine: ICESSES (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 9008
+PSVersion: 5.1.22621.6133
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22621.6133
+BuildVersion: 10.0.22621.6133
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+===== 1. PREVIOUS RELEASE FAILURE =====
+
+  release-reports\release-20261015-031001.txt:1:
+> release-reports\release-20261015-031001.txt:2:===== npm run build : FAIL =====
+  release-reports\release-20261015-031001.txt:3:
+  release-reports\release-20261015-031001.txt:4:> @skillbridge/web@1.0.0 build
+  release-reports\release-20261015-031001.txt:5:> next build
+  release-reports\release-20261015-031001.txt:15:   Generating static pages (0/18) ...
+> release-reports\release-20261015-031001.txt:16:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:17:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:18:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:19:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:28:}
+> release-reports\release-20261015-031001.txt:29:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:30:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:31:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:32:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:43:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:44:Error occurred prerendering page "/dashboard". Read more:
+https://nextjs.org/docs/messages/prerender-error
+  release-reports\release-20261015-031001.txt:45:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:46:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:47:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:48:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:49:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:57:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:58:Error occurred prerendering page "/admin/compliance". Read more:
+https://nextjs.org/docs/messages/prerender-error
+  release-reports\release-20261015-031001.txt:59:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:60:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:61:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:62:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:63:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:71:   Generating static pages (8/18)
+> release-reports\release-20261015-031001.txt:72:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:73:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:74:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:75:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:84:}
+> release-reports\release-20261015-031001.txt:85:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:86:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:87:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:88:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:98:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:99:Error occurred prerendering page "/auth". Read more:
+https://nextjs.org/docs/messages/prerender-error
+  release-reports\release-20261015-031001.txt:100:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:101:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:102:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:103:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:104:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:111:    at 8931
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:2332)
+> release-reports\release-20261015-031001.txt:112:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:113:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+  release-reports\release-20261015-031001.txt:114:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+  release-reports\release-20261015-031001.txt:115:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+  release-reports\release-20261015-031001.txt:124:}
+> release-reports\release-20261015-031001.txt:125:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:126:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+  release-reports\release-20261015-031001.txt:127:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+  release-reports\release-20261015-031001.txt:128:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+  release-reports\release-20261015-031001.txt:137:}
+> release-reports\release-20261015-031001.txt:138:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:139:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+  release-reports\release-20261015-031001.txt:140:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+  release-reports\release-20261015-031001.txt:141:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+  release-reports\release-20261015-031001.txt:151:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:152:Error occurred prerendering page "/team". Read more:
+https://nextjs.org/docs/messages/prerender-error
+  release-reports\release-20261015-031001.txt:153:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:154:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:155:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+  release-reports\release-20261015-031001.txt:156:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+  release-reports\release-20261015-031001.txt:157:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+  release-reports\release-20261015-031001.txt:166:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:167:Error occurred prerendering page "/rider/dashboard". Read more:
+https://nextjs.org/docs/messages/prerender-error
+  release-reports\release-20261015-031001.txt:168:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:169:Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+  release-reports\release-20261015-031001.txt:170:    at
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+  release-reports\release-20261015-031001.txt:171:    at new sg
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+  release-reports\release-20261015-031001.txt:172:    at sy
+(C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+  release-reports\release-20261015-031001.txt:181:System.Management.Automation.RemoteException
+> release-reports\release-20261015-031001.txt:182:> Export encountered errors on following paths:
+  release-reports\release-20261015-031001.txt:183:	/admin/compliance/page: /admin/compliance
+  release-reports\release-20261015-031001.txt:184:	/auth/page: /auth
+  release-reports\release-20261015-031001.txt:185:	/dashboard/page: /dashboard
+  release-reports\release-20261015-031001.txt:187:	/team/page: /team
+> release-reports\release-20261015-031001.txt:188:npm error Lifecycle script `build` failed with error:
+> release-reports\release-20261015-031001.txt:189:npm error code 1
+> release-reports\release-20261015-031001.txt:190:npm error path
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+> release-reports\release-20261015-031001.txt:191:npm error workspace @skillbridge/web@1.0.0
+> release-reports\release-20261015-031001.txt:192:npm error location
+C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+> release-reports\release-20261015-031001.txt:193:npm error command failed
+> release-reports\release-20261015-031001.txt:194:npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
+  release-reports\release-20261015-031001.txt:195:
+> release-reports\release-20261015-031001.txt:196:===== git diff --check : FAIL =====
+  release-reports\release-20261015-031001.txt:197:warning: in the working copy of
+'apps/web/app/admin/academy-records/page.tsx', LF will be replaced by CRLF the next time Git touches it
+  release-reports\release-20261015-031001.txt:198:warning: in the working copy of
+'apps/web/app/admin/compliance/page.tsx', LF will be replaced by CRLF the next time Git touches it
+  release-reports\release-20261015-031001.txt:199:warning: in the working copy of
+'apps/web/app/api/admin/compliance/route.ts', LF will be replaced by CRLF the next time Git touches it
+  release-reports\release-20261015-031001.txt:233:-----                                    ------ --------
+> release-reports\release-20261015-031001.txt:234:npm run build                            FAIL          1
+> release-reports\release-20261015-031001.txt:235:git diff --check                         FAIL          2
+  release-reports\release-20261015-031001.txt:236:Legacy Dodo API references in API source PASS          0
+  release-reports\release-20261015-031001.txt:237:
+  release-reports\release-20261015-031001.txt:238:
+
+===== 2. WEB PACKAGE SCRIPTS =====
+
+
+
+
+dev   : next dev
+build : next build
+start : next start
+
+
+
+SKIPPED: npm run lint is not defined.
+
+===== RUNNING TYPESCRIPT FALLBACK =====
+
+EXIT CODE: 0
+SKIPPED: npm run test:ci is not defined.
+
+===== RUNNING npm run build =====
+
+> @skillbridge/web@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.production
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+ ✓ Collecting page data
+   Generating static pages (4/18)  [=   ]Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\compliance\page.js:1:6996)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1944 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\compliance\page.js:1:2400)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811)
+    at s (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:88330)
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.prod
+.js:12:98875 {
+  digest: '2250888736'
+}
+
+Error occurred prerendering page "/admin/compliance". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\compliance\page.js:1:6996)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1944 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\admin\compliance\page.js:1:2400)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811)
+    at s (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:88330)
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.prod
+.js:12:98875
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:12243)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:11761)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1375 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:2480)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811) {
+  digest: '4060606673'
+}
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:7747)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:7265)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:3944)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811) {
+  digest: '3044899945'
+}
+
+Error occurred prerendering page "/team". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:7747)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:7265)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\team\page.js:1:3944)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811)
+   Generating static pages (10/18)  [==  ]
+Error occurred prerendering page "/dashboard". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:12243)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:11761)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1375 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\dashboard\page.js:1:2480)
+    at Object.t [as require] (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1
+:127)
+    at require (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.run
+time.prod.js:17:18811)
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+    at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashboard\page.js:1:10495)
+    at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:134808)
+    at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:137693)
+    at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:138168)
+    at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-pag
+e.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:142242) {
+  digest: '2657596145'
+}
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+    at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashboard\page.js:1:10495)
+    at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:134808)
+    at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:137693)
+    at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:138168)
+    at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-pag
+e.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:142242) {
+  digest: '2657596145'
+}
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+    at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashboard\page.js:1:10495)
+    at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:134808)
+    at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:137693)
+    at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:138168)
+    at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-pag
+e.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:142242) {
+  digest: '2657596145'
+}
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:11947)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:11465)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:8144)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 8931 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:2332) {
+  digest: '2890071710'
+}
+
+Error occurred prerendering page "/rider/dashboard". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\402.js:24:67506)
+    at o (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\rider\dashboard\page.js:1:10495)
+    at em (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:134808)
+    at e (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.p
+rod.js:12:137693)
+    at e_ (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:138168)
+    at Array.toJSON (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-pag
+e.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\node_modules\next\dist\compiled\next-server\app-page.runtime.
+prod.js:12:142242)
+
+Error occurred prerendering page "/auth". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.
+    at C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62418
+    at new sg (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:62600)
+    at sy (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\chunks\762.js:24:67506)
+    at 3832 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:11947)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 9339 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:11465)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 1667 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:8144)
+    at t (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\webpack-runtime.js:1:127)
+    at 8931 (C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web\.next\server\app\auth\page.js:1:2332)
+ ✓ Generating static pages (18/18)
+
+> Export encountered errors on following paths:
+        /admin/compliance/page: /admin/compliance
+        /auth/page: /auth
+        /dashboard/page: /dashboard
+        /rider/dashboard/page: /rider/dashboard
+        /team/page: /team
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+npm error workspace @skillbridge/web@1.0.0
+npm error location C:\Users\ICESSES\Downloads\SKILLBRIDGE-live-fix\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next build
+EXIT CODE: 1
+
+===== 3. PATCH VALIDATION =====
