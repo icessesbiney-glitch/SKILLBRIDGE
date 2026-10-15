@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
@@ -28,7 +28,7 @@ export default function AdminGPSDashboard() {
 
   useEffect(() => {
     const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-    addLog('📡 Initializing GPS global surveillance matrix stream...');
+    addLog('?? Initializing GPS global surveillance matrix stream...');
 
     // 1. Initial baseline fetch of latest active coordinates locations
     const fetchLiveLocations = async () => {
@@ -41,7 +41,7 @@ export default function AdminGPSDashboard() {
         .order('recorded_at', { ascending: false });
 
       if (error) {
-        addLog(`❌ Base query error: ${error.message}`);
+        addLog(`? Base query error: ${error.message}`);
         return;
       }
 
@@ -55,7 +55,7 @@ export default function AdminGPSDashboard() {
       });
 
       setActiveSignals(Object.values(uniqueSignals));
-      addLog(`✨ Synchronized ${Object.keys(uniqueSignals).length} active tracking targets.`);
+      addLog(`? Synchronized ${Object.keys(uniqueSignals).length} active tracking targets.`);
     };
 
     fetchLiveLocations();
@@ -67,7 +67,7 @@ export default function AdminGPSDashboard() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'gps_telemetry' },
         async (payload) => {
-          addLog(`⚡ Incoming telemetry packet intercepted from Profile ID: ${payload.new.profile_id}`);
+          addLog(`? Incoming telemetry packet intercepted from Profile ID: ${payload.new.profile_id}`);
           
           // Re-fetch mapping properties data matrix for the new point parameters
           const { data: updatedPoint } = await supabase
@@ -86,7 +86,7 @@ export default function AdminGPSDashboard() {
               );
               return [updatedPoint as any, ...filtered];
             });
-            addLog(`🎯 Target ${(updatedPoint as any).gps_profiles?.user_id.substring(0, 8)} updated coordinates.`);
+            addLog(`?? Target ${(updatedPoint as any).gps_profiles?.user_id.substring(0, 8)} updated coordinates.`);
           }
         }
       )

@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import RiderMapSurface from '@/components/delivery/RiderMapSurface';
 import { redirect } from 'next/navigation';
 

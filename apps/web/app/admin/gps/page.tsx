@@ -1,4 +1,4 @@
-﻿import AdminGPSDashboard from '@/components/admin/AdminGPSDashboard';
+import AdminGPSDashboard from '@/components/admin/AdminGPSDashboard';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

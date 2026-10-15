@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import GPSTracker from '../tracking/GPSTracker';
@@ -30,7 +30,7 @@ export default function RiderMapSurface({ riderUserId, riderProfileId }: RiderMa
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
           
           <div className="z-10 space-y-4">
-            <div className="text-4xl animate-pulse text-emerald-500">🗺️</div>
+            <div className="text-4xl animate-pulse text-emerald-500">???</div>
             <div className="font-bold text-slate-300 uppercase tracking-wider text-xs">Navigation System Active</div>
             <p className="text-slate-500 max-w-xs mx-auto text-[11px]">
               Watching your live tracking coordinate matrices. Turn on the GPS tracking engine on the left to receive active customer delivery assignments inside your cell boundary.

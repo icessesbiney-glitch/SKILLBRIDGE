@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing critical order location matrices fields' }, { status: 400 });
     }
 
-    addConsoleLog(`📡 Dispatch request received for Order ID: ${orderId}. Matching closest fleet unit...`);
+    addConsoleLog(`?? Dispatch request received for Order ID: ${orderId}. Matching closest fleet unit...`);
 
     // 1. Invoke the RPC PostGIS matching query function compiled inside the database instance
     const { data: matchedRider, error: matchingError } = await supabase
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const targetRider = matchedRider[0];
-    addConsoleLog(`🎯 Closest match isolated: Rider Profile ID ${targetRider.matched_rider_profile_id} at a distance of ${targetRider.calculated_distance_meters.toFixed(2)} meters.`);
+    addConsoleLog(`?? Closest match isolated: Rider Profile ID ${targetRider.matched_rider_profile_id} at a distance of ${targetRider.calculated_distance_meters.toFixed(2)} meters.`);
 
     // 2. Insert the entry record payload into the real-time order assignment matrix table
     const { data: assignment, error: assignmentError } = await supabase

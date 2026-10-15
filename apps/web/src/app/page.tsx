@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import DashboardMap from '../components/DashboardMap';
 
 export default function Page() {

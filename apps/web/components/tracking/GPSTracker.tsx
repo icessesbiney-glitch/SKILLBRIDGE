@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -17,7 +17,7 @@ export default function GPSTracker({ userId, profileType }: GPSTrackerProps) {
     let watchId: number | null = null;
 
     if (isTracking && typeof window !== 'undefined' && navigator.geolocation) {
-      setSystemMessage('📡 Querying satellite telemetry streams...');
+      setSystemMessage('?? Querying satellite telemetry streams...');
       
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
@@ -38,13 +38,13 @@ export default function GPSTracker({ userId, profileType }: GPSTrackerProps) {
             });
 
             if (!response.ok) throw new Error('API routing synchronization failed');
-            setSystemMessage(`✅ [SYNC]: Telemetry verified at ${new Date().toLocaleTimeString()}`);
+            setSystemMessage(`? [SYNC]: Telemetry verified at ${new Date().toLocaleTimeString()}`);
           } catch (err: any) {
-            setSystemMessage(`❌ [SYNC ERROR]: ${err.message}`);
+            setSystemMessage(`? [SYNC ERROR]: ${err.message}`);
           }
         },
         (error) => {
-          setSystemMessage(`❌ [PERMISSIONS ERROR]: ${error.message}`);
+          setSystemMessage(`? [PERMISSIONS ERROR]: ${error.message}`);
           setIsTracking(false);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }

@@ -1,0 +1,13 @@
+.env
+.env.*
+**/.env
+**/.env.*
+*.bak
+*.backup-*
+*.disabled-*
+*.before-recovery-*
+.turbo
+**/.turbo
+.env*
+**/.env*
+*env.local*
