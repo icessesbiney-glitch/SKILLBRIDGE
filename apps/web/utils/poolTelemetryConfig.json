@@ -1,0 +1,13 @@
+﻿{
+  "telemetryProfile": {
+    "moduleName": "Prisma-Supabase-Client-Pool-Audit",
+    "metricsIntervalMs": 5000,
+    "longTermThresholds": {
+      "maxConnectionsAllocated": 45,
+      "connectionTimeoutMs": 3000,
+      "idleTimeoutMs": 10000,
+      "zombieLeaseAlertLimit": 5
+    },
+    "loggingChannel": "production-alerts-stream"
+  }
+}
