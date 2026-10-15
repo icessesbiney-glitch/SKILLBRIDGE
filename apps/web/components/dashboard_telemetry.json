@@ -1,0 +1,27 @@
+﻿{
+  "widget": "custom_dashboard",
+  "config": {
+    "title": "Hyperlocal Logistics & Financial Telemetry Hub",
+    "theme": "slate-dark",
+    "refresh_rate": "1s"
+  },
+  "state": {
+    "actors": {
+      "customer": { "id": "7f69d102", "balance": 145.00, "status": "Stable" },
+      "global_platform": { "id": "system_margin", "balance": 95.00 },
+      "merchant_platform": { "id": "user_managed", "balance": 845.50 },
+      "rider": { "id": "04124615", "balance": 150.00, "status": "Active_Available", "lat": 5.6037, "lng": -0.1870 },
+      "vendor": { "id": "7f69d102_shop", "accumulated_earnings": 0.00, "status": "Initialized" }
+    },
+    "active_orders": [
+      {
+        "order_id": "ORD-2026-X99",
+        "vendor_id": "7f69d102_shop",
+        "rider_id": "04124615",
+        "value": 500.00,
+        "fee_split": { "platform": 45.00, "vendor": 455.00 },
+        "delivery_status": "Routing_To_Merchant"
+      }
+    ]
+  }
+}
