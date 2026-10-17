@@ -24,6 +24,7 @@ export default function TaskWorkspace() {
 
   const [uploads, setUploads] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const submissionFileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [submissionText, setSubmissionText] = useState('');
@@ -85,6 +86,7 @@ export default function TaskWorkspace() {
     setSubmissionText('');
     setUploads([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  if (submissionFileInputRef.current) submissionFileInputRef.current.value = '';
     setSuccessMessage('');
     setSubmissionError('');
   };
@@ -153,14 +155,14 @@ export default function TaskWorkspace() {
         .from('task_submissions')
         .insert({
           task_id: activeTask.id,
+        applicant_id: user.id,
           user_id: user.id,
-          applicant_id: user.id,
           submission_text: cleanedText,
           file_storage_path: uploadedPaths.length
             ? JSON.stringify(uploadedPaths)
             : null,
           file_size_bytes: uploadedPaths.length ? totalFileSize : null,
-          status: 'submitted',
+          status: 'Pending Review',
           submitted_at: new Date().toISOString(),
         });
 
@@ -176,6 +178,7 @@ export default function TaskWorkspace() {
       setSubmissionText('');
       setUploads([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
+  if (submissionFileInputRef.current) submissionFileInputRef.current.value = '';
     } catch (error) {
       console.error('Task submission error:', error);
 
@@ -514,6 +517,28 @@ export default function TaskWorkspace() {
                   >
                     Your task work
                   </label>
+          <div className="sb-submission-attachments">
+            <label className="sb-upload-box">
+              <span>Attach files to this submission</span>
+              <input
+                ref={submissionFileInputRef}
+                type="file"
+                multiple
+                onChange={(event) =>
+                  setUploads(Array.from(event.target.files ?? []))
+                }
+              />
+            </label>
+            {uploads.length > 0 && (
+              <ul className="sb-simple-list">
+                {uploads.map((file, index) => (
+                  <li key={`${file.name}-${index}`}>
+                    {file.name} ({Math.ceil(file.size / 1024)} KB)
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
                   <textarea
                     id="task-submission-text"

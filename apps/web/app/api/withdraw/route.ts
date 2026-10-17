@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function POST() {
   return NextResponse.json(
-    {
-      error: "Withdrawals are temporarily unavailable while secure Paystack Transfers are being implemented.",
-    },
-    { status: 501 },
+    { error: "Withdrawal is unavailable until a verified Paystack recipient and an atomic, server-side balance debit are connected." },
+    { status: 501 }
   );
 }

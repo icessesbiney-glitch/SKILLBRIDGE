@@ -1,4 +1,4 @@
-﻿{
+{
   "telemetryProfile": {
     "moduleName": "Prisma-Supabase-Client-Pool-Audit",
     "metricsIntervalMs": 5000,

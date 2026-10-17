@@ -1,7 +1,14 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import("next").NextConfig} */
 module.exports = {
-  reactStrictMode: false,
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: false
+  },
+  typescript: {
+    ignoreBuildErrors: false
+  },
+  images: {
+    unoptimized: true
+  },
   output: "standalone"
 };

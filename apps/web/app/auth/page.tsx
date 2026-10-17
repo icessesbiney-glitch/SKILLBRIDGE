@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import SiteChrome from '../../components/SiteChrome';
 import { useAuthSession } from '../../hooks/useAuthSession';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
 import { getAuthFeedbackMessage } from './authFeedback';
 import { getSafeNextPath } from './nextPath';
 
@@ -36,7 +36,9 @@ export default function AuthPage() {
   const [message, setMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState<'error' | 'success' | null>(null);
   const [nextPath, setNextPath] = useState('/dashboard');
-  const isSupabaseConfigured = Boolean(supabase);
+  const [isRecoveryRequest, setIsRecoveryRequest] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(false);
+
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -44,13 +46,19 @@ export default function AuthPage() {
     }
 
     setNextPath(getSafeNextPath(window.location.search));
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    setIsRecovery(searchParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery');
   }, []);
 
   useEffect(() => {
-    if (session?.user) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const recoveryUrl = searchParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+    if (session?.user && !recoveryUrl && !isRecovery) {
       router.replace(nextPath);
     }
-  }, [nextPath, router, session]);
+  }, [isRecovery, nextPath, router, session]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +73,35 @@ export default function AuthPage() {
         return;
       }
 
+      if (isRecoveryRequest) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth?type=recovery`,
+        });
+        if (error) throw error;
+        setFeedbackType('success');
+        setMessage('If an account exists for that email, a password reset link has been sent. Check your inbox.');
+        return;
+      }
+
+      if (isRecovery) {
+        if (password.length < 8) {
+          throw new Error('Choose a password with at least 8 characters.');
+        }
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw error;
+        try {
+          await supabase.auth.signOut();
+        } catch (signOutError) {
+          console.warn('Password changed, but signing out failed.', signOutError);
+        }
+        window.history.replaceState({}, document.title, '/auth');
+        setIsRecovery(false);
+        setIsRecoveryRequest(false);
+        setPassword('');
+        setFeedbackType('success');
+        setMessage('Password updated. You can now sign in with your new password.');
+        return;
+      }
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
@@ -110,7 +147,7 @@ export default function AuthPage() {
         <div className="sb-container sb-auth-layout">
           <div className="sb-panel">
             <span className="sb-eyebrow">Access and onboarding</span>
-            <h1>{isSignUp ? 'Create a SkillBridge account' : 'Sign in to continue the rebuild'}</h1>
+            <h1>{isRecoveryRequest ? 'Reset your password' : isRecovery ? 'Choose a new password' : isSignUp ? 'Create a SkillBridge account' : 'Sign in to continue the rebuild'}</h1>
             <p>
               This page now uses the configured Supabase client instead of placeholder success messages, and it clearly reports when the deployment environment is still incomplete.
             </p>
@@ -198,6 +235,7 @@ export default function AuthPage() {
                 </>
               )}
 
+              {!isRecovery && (
               <label className="sb-field">
                 <span>Email address</span>
                 <input
@@ -208,7 +246,9 @@ export default function AuthPage() {
                   placeholder="you@example.com"
                 />
               </label>
+              )}
 
+              {!isRecoveryRequest && (
               <label className="sb-field">
                 <span>Password</span>
                 <input
@@ -219,6 +259,7 @@ export default function AuthPage() {
                   placeholder="••••••••"
                 />
               </label>
+              )}
 
               {message && (
                 <div className={`sb-feedback ${feedbackType === 'error' ? 'is-error' : 'is-success'}`}>
@@ -232,14 +273,34 @@ export default function AuthPage() {
                 className="sb-button"
                 aria-busy={loading}
               >
-                {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
+                {loading ? 'Processing...' : isRecoveryRequest ? 'Send reset link' : isRecovery ? 'Update password' : isSignUp ? 'Sign up' : 'Sign in'}
               </button>
             </form>
 
             <div className="sb-auth-foot">
-              <button onClick={() => { setIsSignUp(!isSignUp); setMessage(''); }} className="sb-link-btn">
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-              </button>
+              {(!isSignUp || isRecoveryRequest || isRecovery) && (
+                <button type="button" onClick={() => {
+                  if (isRecoveryRequest || isRecovery) {
+                    setIsRecoveryRequest(false);
+                    setIsRecovery(false);
+                    setIsSignUp(false);
+                    setPassword('');
+                    setMessage('');
+                    setFeedbackType(null);
+                  } else {
+                    setIsRecoveryRequest(true);
+                    setMessage('');
+                    setFeedbackType(null);
+                  }
+                }} className="sb-link-btn">
+                  {isRecoveryRequest || isRecovery ? 'Back to sign in' : 'Forgot password?'}
+                </button>
+              )}
+              {!isRecoveryRequest && !isRecovery && (
+                <button onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setFeedbackType(null); }} className="sb-link-btn">
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                </button>
+              )}
             </div>
           </div>
         </div>

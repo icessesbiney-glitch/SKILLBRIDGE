@@ -123,7 +123,7 @@ export default function RiderWalletCard({ riderProfileId }: RiderWalletCardProps
           disabled={true}
           className="w-full py-2.5 bg-cyan-950/40 border border-cyan-500 text-cyan-400 uppercase font-bold rounded-lg hover:bg-cyan-900 transition-colors disabled:opacity-40"
         >
-          'Payouts Temporarily Unavailable'
+          &apos;Payouts Temporarily Unavailable&apos;
         </button>
       </form>
 

@@ -1,50 +1,42 @@
-import { createClient } from '@supabase/supabase-js';
-import RiderMapSurface from '@/components/delivery/RiderMapSurface';
-import { redirect } from 'next/navigation';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+﻿import RiderMapSurface from "@/components/delivery/RiderMapSurface";
+import { createClient as createSupabaseServerClient } from "../../../utils/supabase/server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: 'Rider Operational Console | SkillBridge Workspace',
-  description: 'Real-time telemetry and dispatch matching portal context.',
+  title: "Rider Operational Console | SkillBridge Workspace",
+  description: "Real-time telemetry and dispatch matching portal context.",
 };
 
 export default async function RiderDashboardPage() {
-  const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+  const cookieStore = await cookies();
+  const supabase = createSupabaseServerClient(cookieStore);
 
-  // 1. Resolve current active authentication user identity parameters
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
   if (authError || !user) {
-    redirect('/login');
+    redirect("/auth");
   }
 
-  // 2. Fetch the corresponding relational database profile reference ID
   const { data: profile, error: profileError } = await supabase
-    .from('gps_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('profile_type', 'rider')
-    .single();
+    .from("gps_profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("profile_type", "rider")
+    .maybeSingle();
 
-  if (profileError || !profile) {
-    // If no rider database identity matrix exists yet, pass a fallback temporary UUID context
-    return (
-      <main className="min-h-screen bg-slate-900 p-8 flex flex-col justify-start items-stretch">
-        <RiderMapSurface 
-          riderUserId={user.id} 
-          riderProfileId={user.id} 
-        />
-      </main>
-    );
+  if (profileError) {
+    console.error("Unable to load rider profile:", profileError);
   }
 
   return (
     <main className="min-h-screen bg-slate-900 p-8 flex flex-col justify-start items-stretch">
-      <RiderMapSurface 
-        riderUserId={user.id} 
-        riderProfileId={profile.id} 
+      <RiderMapSurface
+        riderUserId={user.id}
+        riderProfileId={profile?.id ?? user.id}
       />
     </main>
   );

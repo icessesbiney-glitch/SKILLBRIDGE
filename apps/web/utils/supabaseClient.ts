@@ -6,6 +6,8 @@ const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
 // 1. Structural Fallback Guard: Prevents compilation null pointer crashes during Vercel build checks
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(

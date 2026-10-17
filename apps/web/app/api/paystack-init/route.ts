@@ -1,120 +1,129 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey =
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+    const key =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const secret = process.env.PAYSTACK_SECRET_KEY;
 
-    if (!url || !anonKey || !serviceKey) {
+    if (!url || !key || !secret) {
       return NextResponse.json(
-        { error: "Supabase server configuration is incomplete." },
-        { status: 503 },
-      );
-    }
-    if (!paystackKey) {
-      return NextResponse.json(
-        { error: "Paystack is not configured." },
-        { status: 503 },
+        { error: "Required Supabase or Paystack environment variables are missing." },
+        { status: 500 }
       );
     }
 
-    const authorization = req.headers.get("authorization") || "";
-    const match = authorization.match(/^Bearer\s+(.+)$/i);
-    if (!match) {
-      return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+    const authorization = req.headers.get("authorization");
+    if (!authorization?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
-    const authClient = createClient(url, anonKey, {
+    const supabase = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: authorization } },
     });
-    const { data: authData, error: authError } =
-      await authClient.auth.getUser(match[1]);
 
-    if (authError || !authData.user || !authData.user.email) {
-      return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Invalid or expired session." }, { status: 401 });
     }
 
     const body = await req.json();
-    const rawAmount = String(body?.amount ?? "").trim();
+    const amountValue = body?.amount;
+    const amountText =
+      typeof amountValue === "number"
+        ? String(amountValue)
+        : typeof amountValue === "string"
+          ? amountValue.trim()
+          : "";
+    const email = user.email;
 
-    if (!/^\d{1,7}(\.\d{1,2})?$/.test(rawAmount)) {
-      return NextResponse.json({ error: "Enter a valid amount in GHS." }, { status: 400 });
+    if (!/^\d{1,7}(?:\.\d{1,2})?$/.test(amountText)) {
+      return NextResponse.json(
+        { error: "Enter a valid amount with no more than two decimal places." },
+        { status: 400 }
+      );
     }
 
-    const amount = Number(rawAmount);
-    const pesewas = Math.round(amount * 100);
+    const amount = Number(amountText);
 
-    if (!Number.isSafeInteger(pesewas) || pesewas < 100 || pesewas > 100000000) {
-      return NextResponse.json({ error: "Amount must be between GHS 1.00 and GHS 1,000,000.00." }, { status: 400 });
+    if (!email || !Number.isFinite(amount) || amount < 1 || amount > 1000000) {
+      return NextResponse.json(
+        { error: "A valid account email and payment amount from GHS 1.00 to GHS 1,000,000.00 are required." },
+        { status: 400 }
+      );
     }
-
-    const admin = createClient(url, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
 
     const reference = `SB-${randomUUID()}`;
-    const { error: insertError } = await admin
+    const amountInPesewas = Math.round(amount * 100);
+
+    const { error: insertError } = await supabase
       .from("paystack_transactions")
       .insert({
-        user_id: authData.user.id,
-        email: authData.user.email,
+        user_id: user.id,
+        email,
         reference,
-        amount: (pesewas / 100).toFixed(2),
+        amount: amountInPesewas / 100,
         currency: "GHS",
         status: "initialized",
-        metadata: { platform: "skillbridge" },
+        metadata: { user_id: user.id, platform: "skillbridge" },
       });
 
     if (insertError) {
-      console.error("Unable to create payment record:", insertError.message);
-      return NextResponse.json({ error: "Could not create the payment record." }, { status: 500 });
+      console.error("Could not create payment record:", insertError);
+      return NextResponse.json(
+        { error: "Could not create the payment record." },
+        { status: 500 }
+      );
     }
 
-    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_URL || req.nextUrl.origin).replace(/\/+$/, "");
-    const gatewayResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+    const siteUrl = (
+      process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin
+    ).replace(/\/+$/, "");
+
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${paystackKey}`,
+        Authorization: `Bearer ${secret}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: authData.user.email,
-        amount: pesewas,
+        email,
+        amount: String(amountInPesewas),
         currency: "GHS",
         reference,
-        callback_url: `${siteUrl}/dashboard?payment=return&reference=${encodeURIComponent(reference)}`,
-        metadata: { user_id: authData.user.id, platform: "skillbridge" },
+        callback_url: `${siteUrl}/checkout/success`,
+        metadata: { user_id: user.id, platform: "skillbridge" },
       }),
       cache: "no-store",
     });
 
-    const gateway = await gatewayResponse.json();
+    const result = await response.json();
 
-    if (!gatewayResponse.ok || !gateway.status || !gateway.data?.authorization_url) {
-      await admin.from("paystack_transactions")
-        .update({ status: "failed", updated_at: new Date().toISOString() })
-        .eq("reference", reference)
-        .eq("status", "initialized");
+    if (!response.ok || result.status !== true || !result.data?.authorization_url) {
+      await supabase
+        .from("paystack_transactions")
+        .update({ status: "failed" })
+        .eq("reference", reference);
 
-      console.error("Paystack initialization failed:", gateway.message || gateway.status);
-      return NextResponse.json({ error: "Paystack could not initialize this payment." }, { status: 502 });
+      return NextResponse.json(
+        { error: result.message || "Paystack initialization failed." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({
-      authorization_url: gateway.data.authorization_url,
+      success: true,
+      authorization_url: result.data.authorization_url,
+      access_code: result.data.access_code,
       reference,
     });
   } catch (error) {
-    console.error("Payment initialization error:", error);
-    return NextResponse.json({ error: "Unable to start payment." }, { status: 500 });
+    console.error("Paystack initialization error:", error);
+    return NextResponse.json({ error: "Unable to initialize payment." }, { status: 500 });
   }
 }

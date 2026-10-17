@@ -1,14 +1,12 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import * as path from 'path';
 
-// Fixes the CommonJS interoperability compilation loop for electron-is-dev
-import isDev = require('electron-is-dev');
+const isDev = !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
-  const packagedRendererUrl = `file://${path.join(__dirname, '../renderer/index.html')}`;
-  const productionUrl = "https://vercel.app";
+  const productionUrl = process.env.SKILLBRIDGE_DESKTOP_WEB_URL || "https://skillbridge.vercel.app";
 
   mainWindow = new BrowserWindow({
     width: 1200,
