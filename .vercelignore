@@ -1,0 +1,7 @@
+apps/desktop/release/
+**/node_modules/
+**/.next/
+**/.turbo/
+**/.vercel/
+apps/desktop/dist/
+apps/desktop/out/

@@ -109,4 +109,3 @@ export default function SkillBridgeAuthAndPathPortal() {
     </div>
   );
 }
-  const [p, setP] = useState({ path: null, modules: [] });
