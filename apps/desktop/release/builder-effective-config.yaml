@@ -1,0 +1,31 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.skillbridge.desktop
+productName: SkillBridge
+files:
+  - filter:
+      - dist/**/*
+      - renderer/**/*
+      - assets/**/*
+      - package.json
+extraMetadata:
+  main: dist/main.js
+win:
+  target:
+    - nsis
+    - portable
+  artifactName: SkillBridge-${version}-${arch}.${ext}
+mac:
+  target:
+    - dmg
+    - zip
+linux:
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+electronVersion: 35.7.5
