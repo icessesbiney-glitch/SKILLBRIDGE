@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { supabase } from '@/utils/supabaseClient';
 
 export default function GhanaCardOnboardingForm() {
   const [formData, setFormData] = useState({
@@ -31,16 +32,28 @@ export default function GhanaCardOnboardingForm() {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/migration', {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        throw new Error('Sign in before submitting identity verification.');
+      }
+
+      const response = await fetch('/api/migration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, id: userData.user.id })
       });
 
-      if (!response.ok) throw new Error('Compliance validation failed.');
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.error || 'Compliance validation failed.');
+      }
       setStatus({ loading: false, success: true, error: '' });
-    } catch (err: any) {
-      setStatus({ loading: false, success: false, error: err.message || 'Server error.' });
+    } catch (err: unknown) {
+      setStatus({
+        loading: false,
+        success: false,
+        error: err instanceof Error ? err.message : 'Server error.'
+      });
     }
   };
 

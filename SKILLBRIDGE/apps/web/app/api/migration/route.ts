@@ -23,27 +23,31 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { id, fullName, phoneNumber, ghanaCardPin, roleTier } = body;
 
-    if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
+    if (
+      typeof id !== 'string' ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) ||
+      typeof fullName !== 'string' ||
+      typeof phoneNumber !== 'string' ||
+      typeof ghanaCardPin !== 'string' ||
+      typeof roleTier !== 'string'
+    ) {
       return NextResponse.json({ error: 'Incomplete payload attributes.' }, { status: 400 });
     }
 
     const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
     console.log(`[COMPLIANCE] Generated secure ID verification hash for user: ${fullName}`);
 
-    if (!supabase || supabaseServiceKey.includes('your_live')) {
-      return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, {
-        status: 200,
+    if (!supabase) {
+      return NextResponse.json({ error: 'Identity verification service is not configured.' }, {
+        status: 503,
         headers: { 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    const profileId = id || '00000000-0000-0000-0000-000000000137';
-
-    // Using .upsert() handles updating matching records without causing key errors
     const { error: dbError } = await supabase
       .from('profiles')
       .upsert({
-        id: profileId,
+        id,
         legal_name: fullName,
         phone_number: phoneNumber,
         role_tier: roleTier,
@@ -59,7 +63,8 @@ export async function POST(req: Request) {
       status: 200,
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Identity verification failed.';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
