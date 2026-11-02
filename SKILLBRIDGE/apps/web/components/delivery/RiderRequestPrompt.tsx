@@ -1,10 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { supabase } from '@/utils/supabaseClient';
 
 interface RiderRequestProps {
   riderProfileId: string;
@@ -24,13 +21,55 @@ interface ActiveOrderAssignment {
   };
 }
 
+type AssignmentRow = {
+  id: string;
+  order_id: string;
+  assignment_status: 'pending' | 'accepted' | 'declined' | 'expired';
+};
+
+type OrderRow = ActiveOrderAssignment['delivery_orders'];
+
 export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolved }: RiderRequestProps) {
   const [activeRequest, setActiveRequest] = useState<ActiveOrderAssignment | null>(null);
   const [countdown, setCountdown] = useState<number>(30);
   const [processing, setProcessing] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+    let cancelled = false;
+
+    const loadRequest = async (assignment: AssignmentRow) => {
+      const { data: orderData, error } = await supabase
+        .from('delivery_orders')
+        .select('order_reference, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, order_total')
+        .eq('id', assignment.order_id)
+        .single();
+
+      if (error) throw error;
+      if (!cancelled) {
+        setActiveRequest({
+          id: assignment.id,
+          order_id: assignment.order_id,
+          delivery_orders: orderData as OrderRow
+        });
+        setCountdown(30);
+        setErrorMessage(null);
+      }
+    };
+
+    const loadPendingRequest = async () => {
+      const { data, error } = await supabase
+        .from('delivery_assignments')
+        .select('id, order_id, assignment_status')
+        .eq('rider_profile_id', riderProfileId)
+        .eq('assignment_status', 'pending')
+        .order('assigned_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) await loadRequest(data as AssignmentRow);
+    };
 
     const dispatchChannel = supabase
       .channel(`rider-dispatch-${riderProfileId}`)
@@ -42,38 +81,42 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
           table: 'delivery_assignments',
           filter: `rider_profile_id=eq.${riderProfileId}`
         },
-        async (payload: any) => {
-          if (payload.new.assignment_status === 'pending') {
-            const { data: orderData } = await supabase
-              .from('delivery_orders')
-              .select('order_reference, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, order_total')
-              .eq('id', payload.new.order_id)
-              .single();
-
-            if (orderData) {
-              setActiveRequest({
-                id: payload.new.id,
-                order_id: payload.new.order_id,
-                delivery_orders: orderData as any
-              });
-              setCountdown(30);
+        },
+        async (payload) => {
+          const assignment = payload.new as Partial<AssignmentRow>;
+          if (
+            assignment.assignment_status === 'pending' &&
+            typeof assignment.id === 'string' &&
+            typeof assignment.order_id === 'string'
+          ) {
+            try {
+              await loadRequest(assignment as AssignmentRow);
+            } catch (error) {
+              console.error('Unable to load incoming rider assignment', error);
+              if (!cancelled) setErrorMessage('Unable to load this delivery request. Please refresh and try again.');
             }
           }
         }
       )
       .subscribe();
 
+    void loadPendingRequest().catch((error: unknown) => {
+      console.error('Unable to load pending rider assignment', error);
+      if (!cancelled) setErrorMessage('Unable to check for pending delivery requests.');
+    });
+
     return () => {
+      cancelled = true;
       supabase.removeChannel(dispatchChannel);
     };
   }, [riderProfileId]);
 
   useEffect(() => {
     if (activeRequest && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        const timer = setTimeout(() => setCountdown((current) => current - 1), 1000);
       return () => clearTimeout(timer);
     } else if (activeRequest && countdown === 0) {
-      handleResolution('expired');
+        void handleResolution('expired');
     }
   }, [activeRequest, countdown]);
 
@@ -81,22 +124,24 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
     if (!activeRequest || processing) return;
     setProcessing(true);
 
-    const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-
     try {
-      const { error: updateError } = await supabase
+      const { data: resolvedAssignment, error: updateError } = await supabase
         .from('delivery_assignments')
         .update({
           assignment_status: status,
           decline_reason: reason || null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', activeRequest.id);
+        .eq('id', activeRequest.id)
+        .eq('assignment_status', 'pending')
+        .select('id')
+        .maybeSingle();
 
       if (updateError) throw updateError;
+      if (!resolvedAssignment) throw new Error('This delivery request was already resolved.');
 
       if (status === 'declined' || status === 'expired') {
-        await supabase.from('rider_compliance_logs').insert([
+        const { error: complianceError } = await supabase.from('rider_compliance_logs').insert([
           {
             rider_profile_id: riderProfileId,
             order_id: activeRequest.order_id,
@@ -104,12 +149,16 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
             penalty_fee: 2.50
           }
         ]);
+        if (complianceError) throw complianceError;
       }
 
       setActiveRequest(null);
+      setErrorMessage(null);
       onAssignmentResolved();
-    } catch (err: any) {
-      console.error(err.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unable to resolve this delivery request.';
+      console.error('Unable to resolve rider assignment', error);
+      setErrorMessage(message);
     } finally {
       setProcessing(false);
     }
@@ -156,6 +205,11 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
             Accept
           </button>
         </div>
+        {errorMessage && (
+          <p role="alert" className="rounded-lg border border-rose-500/60 bg-rose-950/40 p-3 text-rose-300">
+            {errorMessage}
+          </p>
+        )}
       </div>
     </div>
   );
