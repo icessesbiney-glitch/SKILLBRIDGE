@@ -48,10 +48,7 @@ jobs:
       - name: Ensure electron-builder archive binaries
         run: |
           npm install --no-save --force 7zip-bin@5.2.0
-          if [ ! -x node_modules/7zip-bin/linux/x64/7za ]; then
-            echo "7zip-bin did not provide the Linux archive binary" >&2
-            exit 1
-          fi
+          node -e "const fs=require('fs'); const path=require('path'); const binary=path.join('node_modules','7zip-bin',process.platform === 'win32' ? 'win' : process.platform === 'darwin' ? 'mac' : 'linux','x64',process.platform === 'win32' ? '7za.exe' : '7za'); if (!fs.existsSync(binary)) { console.error('7zip-bin did not provide '+binary); process.exit(1); }"
         working-directory: SKILLBRIDGE
 
       - name: Type check desktop app
