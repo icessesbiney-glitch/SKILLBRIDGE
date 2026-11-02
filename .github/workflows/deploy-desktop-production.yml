@@ -13,6 +13,9 @@ on:
       - '.github/workflows/deploy-desktop-production.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-desktop-production:
     strategy:
