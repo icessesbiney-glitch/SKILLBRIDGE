@@ -39,9 +39,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
-    "dmg-license": "^1.0.11",
     "electron": "^27.0.0",
     "electron-builder": "^24.13.3",
     "electron-is-dev": "^3.0.1"
+  },
+  "optionalDependencies": {
+    "dmg-license": "^1.0.11"
   }
 }
