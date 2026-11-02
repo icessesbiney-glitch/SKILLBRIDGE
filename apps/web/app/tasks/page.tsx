@@ -47,7 +47,7 @@ export default function TasksPage() {
   return (
     <div className="p-8 max-w-xl mx-auto space-y-4">
       <h2 className="text-xl font-bold">SkillBridge Task Submission Portal</h2>
-      <input type="file" onChange={e => setFile(e.target.files ? e.target.files : null)} className="border p-2 w-full" />
+      <input type="file" onChange={e => setFile(e.target.files?.[0] ?? null)} className="border p-2 w-full" />
       <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add transaction task notes..." className="border p-2 w-full" />
       <button onClick={handleUpload} className="bg-blue-600 text-white p-2 w-full">Upload File Deliverable</button>
       <p className="text-sm font-semibold">{msg}</p>

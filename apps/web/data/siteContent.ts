@@ -4,7 +4,7 @@ export const siteConfig = {
 };
 
 export const teamMembers = [
-  { name: "Joshua Biney", role: "Founder & Lead Architect", bio: "Building live hyperlocal market hubs." }
+  { name: "Joshua Biney", role: "Founder & Lead Architect", focus: "Building live hyperlocal market hubs." }
 ];
 
 export const platforms = [
@@ -18,11 +18,19 @@ export const deploymentSteps = [
 ];
 
 export const learnerBands = [
-  { band: "Advanced Development Tier", rate: "Paid Access" }
+  {
+    title: "Advanced Development Tier",
+    range: "Paid Access",
+    summary: "Complete verified marketplace tasks and unlock paid opportunities.",
+    points: ["Task-based learning", "Verified submissions", "Marketplace access"]
+  }
 ];
 
 export const learningResources = [
-  { title: "Dodo Payments API Handbook", type: "Documentation" }
+  {
+    href: "/templates/dodo-payments-api-handbook.pdf",
+    label: "Dodo Payments API Handbook"
+  }
 ];
 
 export const mentorGuidance = [
