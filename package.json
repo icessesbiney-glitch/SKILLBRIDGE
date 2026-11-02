@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "cd apps/web && npx next dev",
     "build": "turbo run build --filter=@skillbridge/web",
+    "build:shared": "npm run build --workspace=@skillbridge/shared",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build:web": "npm run build --workspace=apps/web"

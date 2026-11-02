@@ -15,6 +15,9 @@
     "build:main": "tsc",
     "build": "npm run build:main",
     "dist": "npm run build && electron-builder --linux",
+    "dist:desktop:linux": "npm run build && electron-builder --linux",
+    "dist:desktop:mac": "npm run build && electron-builder --mac",
+    "dist:desktop:win": "npm run build && electron-builder --win",
     "dist:linux": "npm run dist -- --linux"
   },
   "build": {

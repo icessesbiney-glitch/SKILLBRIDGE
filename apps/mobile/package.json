@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "ts:check": "tsc",
+    "type-check": "npm run ts:check",
     "lint": "echo \"Pass mobile linting checks\"",
     "test": "echo \"Pass mobile unit tests\""
   },

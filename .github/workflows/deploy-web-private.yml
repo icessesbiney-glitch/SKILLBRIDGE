@@ -5,6 +5,10 @@ on:
     branches: [main, develop]
     paths:
       - 'apps/web/**'
+      - 'packages/shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'netlify.toml'
       - '.github/workflows/deploy-web-private.yml'
   pull_request:
     branches: [main, develop]

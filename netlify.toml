@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "npm ci && npm run build:web"
+  command = "npm ci --legacy-peer-deps && npm run build:web"
 
 [build.environment]
   NODE_VERSION = "20"
