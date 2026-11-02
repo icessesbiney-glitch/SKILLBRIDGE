@@ -1,0 +1,79 @@
+name: Deploy Mobile - Private Distribution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/shared/**'
+      - '.github/workflows/deploy-mobile-private.yml'
+  workflow_dispatch:
+  schedule:
+    # Build daily at 2 AM UTC for internal distribution
+    - cron: '0 2 * * *'
+
+jobs:
+  deploy-mobile-private:
+    runs-on: macos-latest
+    environment: mobile-private
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared package
+        run: npm run build:shared
+
+      - name: Type check mobile app
+        run: npm run type-check --workspace=@skillbridge/mobile
+
+      - name: Build iOS for private distribution
+        working-directory: apps/mobile
+        run: eas build --platform ios --profile preview
+
+      - name: Build Android for private distribution
+        working-directory: apps/mobile
+        run: eas build --platform android --profile preview
+
+      - name: Create release notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const date = new Date().toISOString().split('T')[0];
+            const notes = `# Mobile Build - Private Distribution\n\nBuilt on: ${date}\n\nThis is a private internal build for testing only.\n\nPlatforms:\n- iOS (via TestFlight)\n- Android (via internal distribution)\n\n[Download from EAS Dashboard](https://expo.dev)`;
+            fs.writeFileSync('RELEASE_NOTES.md', notes);
+
+      - name: Upload artifacts to private storage
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobile-builds-${{ github.run_number }}
+          path: RELEASE_NOTES.md
+          retention-days: 7
+
+      - name: Notify team
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '✅ Mobile app built for private distribution\n\n📱 Platforms:\n- iOS (TestFlight preview)\n- Android (internal preview)\n\n🔒 Access: EAS Dashboard only (private)\n\nBuilds expire in 7 days'
+            })

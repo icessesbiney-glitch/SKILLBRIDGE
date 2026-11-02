@@ -1,0 +1,18 @@
+Subject: Congratulations! You Passed Your Assessment and Earned a Cash Payout!
+
+Dear Student,
+
+Fantastic news! Our system tracking engine logs show that you scored a passing mark on the SkillBridge Academy evaluation module.
+
+CERTIFICATION METRICS:
+------------------------------------------------------------------------------
+Course Reference Ref:      [COURSE_ID_PLACEHOLDER]
+Quiz Assessment Score:     [QUIZ_SCORE]%
+Instant Cash Prize:        [REWARD_AMOUNT_GHS] GHS
+------------------------------------------------------------------------------
+
+Your earned reward has been deposited directly into your platform wallet vault balance sheet row automatically. If your accumulated available vault balance meets or exceeds the strict minimum protection barrier of 50.00 GHS, you can request an instant cashout disbursement straight onto MTN MoMo, Telecel Cash, or AirtelTigo Money carriers.
+
+Keep learning, keep earning!
+
+The SkillBridge Academy Team

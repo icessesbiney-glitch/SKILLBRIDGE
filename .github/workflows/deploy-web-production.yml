@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/web/**'
+      - 'SKILLBRIDGE/apps/web/**'
+      - 'SKILLBRIDGE/package.json'
+      - 'SKILLBRIDGE/package-lock.json'
       - '.github/workflows/deploy-web-production.yml'
   workflow_dispatch:
 
@@ -17,7 +19,7 @@ permissions:
 
 jobs:
   deploy-web-production:
-    if: ${{ secrets.VERCEL_TOKEN  }} != '' && ${{ secrets.VERCEL_ORG_ID  }} != '' && ${{ secrets.VERCEL_PROJECT_ID  }} != '' }}
+    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
     environment: web-public-vercel
 
@@ -30,28 +32,34 @@ jobs:
         with:
           node-version: '20.x'
           cache: npm
+          cache-dependency-path: SKILLBRIDGE/package-lock.json
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+        working-directory: SKILLBRIDGE
 
       - name: Lint SkillBridge Web App
         run: npm run lint --workspace=@skillbridge/web
+        working-directory: SKILLBRIDGE
 
       - name: Type Check SkillBridge Web App
         run: npm run type-check --workspace=@skillbridge/web
+        working-directory: SKILLBRIDGE
 
       - name: Build SkillBridge Main Workspace
         run: npx turbo run build --filter=@skillbridge/web
+        working-directory: SKILLBRIDGE
 
       - name: Test SkillBridge Web App
         run: npm run test --workspace=@skillbridge/web
+        working-directory: SKILLBRIDGE
 
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN  }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID  }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID  }}
-          scope: ${{ secrets.VERCEL_ORG_ID  }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          scope: ${{ secrets.VERCEL_ORG_ID }}
           vercel-args: '--prod'
-          working-directory: apps/web
+          working-directory: SKILLBRIDGE/apps/web
