@@ -13,6 +13,7 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
+    "es-abstract": "^1.24.2",
     "turbo": "^2.1.7"
   },
   "dependencies": {
