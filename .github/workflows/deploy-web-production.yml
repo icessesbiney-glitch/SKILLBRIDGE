@@ -19,7 +19,6 @@ permissions:
 
 jobs:
   deploy-web-production:
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     environment: web-public-vercel
 

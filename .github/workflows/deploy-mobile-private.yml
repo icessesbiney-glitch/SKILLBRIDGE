@@ -14,7 +14,7 @@ on:
 
 jobs:
   deploy-mobile-private:
-    if: ${{ secrets.EXPO_TOKEN != '' }}
+    if: ${{ vars.ENABLE_MOBILE_DEPLOY == 'true' }}
     runs-on: macos-latest
     environment: mobile-private
     

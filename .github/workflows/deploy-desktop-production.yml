@@ -65,7 +65,7 @@ jobs:
           NODE_ENV: production
 
       - name: Sign macOS app (if certificate available)
-        if: matrix.os == 'macos-latest' && secrets.APPLE_CERTIFICATE_P12 != ''
+        if: matrix.os == 'macos-latest' && vars.ENABLE_APPLE_SIGNING == 'true'
         working-directory: SKILLBRIDGE/apps/desktop
         run: |
           echo "Code signing would occur here with certificate"
@@ -73,7 +73,7 @@ jobs:
           # codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/*.app
 
       - name: Notarize macOS app (if credentials available)
-        if: matrix.os == 'macos-latest' && secrets.APPLE_ID != ''
+        if: matrix.os == 'macos-latest' && vars.ENABLE_APPLE_NOTARIZATION == 'true'
         run: |
           echo "Notarization would occur here"
           # In production: xcrun altool --notarize-app -f dist/*.dmg ...
