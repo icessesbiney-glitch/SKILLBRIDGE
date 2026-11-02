@@ -40,7 +40,7 @@ The following credential arrays are strictly required to be mapped inside your h
 ### Required Infrastructure Tokens
 ```text
 # Supabase Core Access Layers
-NEXT_PUBLIC_SUPABASE_URL=https://supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://aolfuonsuaeoitumuvqc.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-secure-public-anon-key-string
 
 # Financial Gateway Connection Ledger
@@ -82,7 +82,7 @@ git push origin main
 *(GitHub Actions will instantly intercept this commit and trigger `deploy-web-production.yml` to push the build to production)*.
 
 ### 2. Verify Your Live Deployment
-Open your production URL panel (`https://skillbridge-nine-mu.vercel.app`) and confirm that the navigation chrome layer fetches the live ledger wallet values accurately.
+Open the production site at `https://skillbridge-vercel-web.vercel.app` and confirm that the navigation chrome layer fetches the live ledger wallet values accurately.
 
 ---
 

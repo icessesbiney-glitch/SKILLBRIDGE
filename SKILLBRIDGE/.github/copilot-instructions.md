@@ -12,12 +12,12 @@
   - `/apps/mobile`: Expo-driven client layout optimized for Android packages (.apk) and iOS Expo Go testing streams.
 
 ## Target Operational Configurations
-- **Live Database Node:** Supabase Cluster (`https://supabase.co`)
+- **Live Database Node:** Supabase Cluster (`https://aolfuonsuaeoitumuvqc.supabase.co`)
   - DB User Anchor: `customer@skillbridge.club`
   - Table: `profiles` (contains columns `wallet_balance` and `current_status`)
   - PL/pgSQL Engines: `increment_wallet_balance` and `decrement_wallet_balance`
 - **Live Payments Processor:** Dodo Payments API Gateway Framework (integrated directly over `/api/paystack-init` paths)
-- **Live Hosting Domain Address:** `https://vercel.app`
+- **Live Hosting Domain Address:** `https://skillbridge-vercel-web.vercel.app`
 
 ## Strict Command Execution Guidelines
 1. Always compile using sub-workspace isolation commands: `cd /workspaces/SKILLBRIDGE/apps/web && ...`

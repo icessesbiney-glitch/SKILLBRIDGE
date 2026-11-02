@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // 2. Base Configuration Object Engine
-const clientUrl = supabaseUrl || 'https://supabase.co';
+const clientUrl = supabaseUrl || 'https://aolfuonsuaeoitumuvqc.supabase.co';
 const clientKey = supabaseAnonKey || 'placeholder-anon-key';
 
 // 3. Platform Agnostic Initialization Engine

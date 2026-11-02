@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://skillbridge-vercel-web.vercel.app'),
   openGraph: {
     title: 'SkillBridge',
     description: 'Build momentum together',
