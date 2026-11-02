@@ -1,10 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://aolfuonsuaeoitumuvqc.supabase.co';
-const supabaseAnonKey = 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE';
-const clientSupabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/utils/supabaseClient';
 
 export default function TasksPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -13,7 +9,7 @@ export default function TasksPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    clientSupabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
+    supabase.from('task_submissions').select('*').order('submitted_at', { ascending: false }).then(({ data }) => {
       if (data) setSubmissions(data);
     });
   }, []);
@@ -23,14 +19,14 @@ export default function TasksPage() {
     if (!file) return setMsg('Please select a file');
     setMsg('Uploading asset file...');
     try {
-      const { data: { user } } = await clientSupabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Unauthenticated user instance');
       const path = `${user.id}/${Date.now()}_${file.name}`;
       
-      const { error: uploadErr } = await clientSupabase.storage.from('task-deliverables').upload(path, file);
+      const { error: uploadErr } = await supabase.storage.from('task-deliverables').upload(path, file);
       if (uploadErr) throw uploadErr;
 
-      await clientSupabase.from('task_submissions').insert({
+      await supabase.from('task_submissions').insert({
         task_id: '00000000-0000-0000-0000-000000000000',
         user_id: user.id,
         notes_text: notes,
