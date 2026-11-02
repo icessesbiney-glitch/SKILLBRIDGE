@@ -53,6 +53,10 @@ jobs:
         run: npm ci --legacy-peer-deps
         working-directory: SKILLBRIDGE
 
+      - name: Ensure electron-builder archive binaries
+        run: npm install --no-save --ignore-scripts --force 7zip-bin@5.2.0
+        working-directory: SKILLBRIDGE
+
       - name: Type check desktop app
         run: npm run type-check
         working-directory: SKILLBRIDGE/apps/desktop
