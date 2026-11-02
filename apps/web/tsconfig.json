@@ -50,7 +50,8 @@
     "**/*.tsx",
     ".next-dev/types/**/*.ts",
     ".next-build/types/**/*.ts",
-    ".next-live/types/**/*.ts"
+    ".next-live/types/**/*.ts",
+    ".next-verification/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
