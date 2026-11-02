@@ -4,7 +4,7 @@
 SkillBridge is architected as an automated, global multi-vendor marketplace hub. To preserve security, strict data isolation, and transactional integrity, all deploying applications must align with this infrastructure. This guide ensures that our shared workspaces deploy only clean, isolated SkillBridge application modules.
 
 ## Automated Branch Strategy
-* **`main` Branch:** Deploys automatically to **Vercel** for public production use.
+* **`main` Branch:** Validates and verifies the public **Vercel** deployment. A new Vercel deployment runs only when the `ENABLE_VERCEL_DEPLOY` repository variable is `true` and `VERCEL_TOKEN` is valid.
 * **`develop` Branch:** Deploys automatically to **Netlify** for private preview testing.
 
 All code exports (including those from Bolt.new) must land in this repository first so that our customized workspace validation pipelines can execute checks before passing bundles to production.
@@ -79,7 +79,7 @@ git add .
 git commit -m "chore: optimize skillbridge deployment pipelines"
 git push origin main
 ```
-*(GitHub Actions will instantly intercept this commit and trigger `deploy-web-production.yml` to push the build to production)*.
+*(GitHub Actions validates the commit and checks the live endpoint. It pushes a new Vercel deployment only when `ENABLE_VERCEL_DEPLOY=true` and a valid `VERCEL_TOKEN` is configured.)*
 
 ### 2. Verify Your Live Deployment
 Open the production site at `https://skillbridge-vercel-web.vercel.app` and confirm that the navigation chrome layer fetches the live ledger wallet values accurately.
