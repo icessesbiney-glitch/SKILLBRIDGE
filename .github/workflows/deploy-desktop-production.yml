@@ -54,7 +54,12 @@ jobs:
         working-directory: SKILLBRIDGE
 
       - name: Ensure electron-builder archive binaries
-        run: npm install --no-save --ignore-scripts --force 7zip-bin@5.2.0
+        run: |
+          npm install --no-save --force 7zip-bin@5.2.0
+          if [ ! -x node_modules/7zip-bin/linux/x64/7za ]; then
+            echo "7zip-bin did not provide the Linux archive binary" >&2
+            exit 1
+          fi
         working-directory: SKILLBRIDGE
 
       - name: Type check desktop app
