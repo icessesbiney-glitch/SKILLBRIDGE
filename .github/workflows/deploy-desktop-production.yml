@@ -72,6 +72,7 @@ jobs:
         env:
           # Production environment variables
           NODE_ENV: production
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign macOS app (if certificate available)
         if: matrix.os == 'macos-latest' && vars.ENABLE_APPLE_SIGNING == 'true'
