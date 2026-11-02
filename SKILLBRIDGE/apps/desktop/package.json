@@ -23,6 +23,7 @@
   },
   "build": {
     "electronVersion": "27.0.0",
+    "npmRebuild": false,
     "publish": [],
     "linux": {
       "target": [
@@ -38,12 +39,12 @@
     ]
   },
   "dependencies": {
-    "electron-builder": "^24.13.3",
     "7zip-bin": "^5.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
     "electron": "^27.0.0",
+    "electron-builder": "^24.13.3",
     "electron-is-dev": "^3.0.1"
   },
   "optionalDependencies": {
