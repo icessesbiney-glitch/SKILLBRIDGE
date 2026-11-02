@@ -13,6 +13,8 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
     "es-abstract": "^1.24.2",
     "turbo": "^2.1.7"
   },
