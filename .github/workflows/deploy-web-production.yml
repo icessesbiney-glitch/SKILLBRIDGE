@@ -21,6 +21,10 @@ jobs:
   deploy-web-production:
     runs-on: ubuntu-latest
     environment: web-public-vercel
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: build-only-placeholder
 
     steps:
       - name: Checkout Repository
@@ -55,6 +59,9 @@ jobs:
 
       - name: Deploy to Vercel (Production)
         working-directory: SKILLBRIDGE/apps/web
-        run: npx vercel@latest --prod --yes --token "$VERCEL_TOKEN"
+        run: npx vercel@latest --prod --yes --token "$VERCEL_TOKEN" \
+          --build-env NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+          --build-env NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+          --build-env SUPABASE_SERVICE_ROLE_KEY=build-only-placeholder
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

@@ -23,6 +23,10 @@ permissions:
 jobs:
   validate-web-preview:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: build-only-placeholder
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
