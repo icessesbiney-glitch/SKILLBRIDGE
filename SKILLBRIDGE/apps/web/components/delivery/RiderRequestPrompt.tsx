@@ -27,7 +27,11 @@ type AssignmentRow = {
   assignment_status: 'pending' | 'accepted' | 'declined' | 'expired';
 };
 
-type OrderRow = ActiveOrderAssignment['delivery_orders'];
+const toNumber = (value: unknown, field: string) => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed)) throw new Error(`Invalid delivery order ${field}.`);
+  return parsed;
+};
 
 export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolved }: RiderRequestProps) {
   const [activeRequest, setActiveRequest] = useState<ActiveOrderAssignment | null>(null);
@@ -46,11 +50,19 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
         .single();
 
       if (error) throw error;
+      if (!orderData) throw new Error('Delivery order details are unavailable.');
       if (!cancelled) {
         setActiveRequest({
           id: assignment.id,
           order_id: assignment.order_id,
-          delivery_orders: orderData as OrderRow
+          delivery_orders: {
+            order_reference: orderData.order_reference,
+            pickup_latitude: toNumber(orderData.pickup_latitude, 'pickup latitude'),
+            pickup_longitude: toNumber(orderData.pickup_longitude, 'pickup longitude'),
+            delivery_latitude: toNumber(orderData.delivery_latitude, 'delivery latitude'),
+            delivery_longitude: toNumber(orderData.delivery_longitude, 'delivery longitude'),
+            order_total: toNumber(orderData.order_total, 'total')
+          }
         });
         setCountdown(30);
         setErrorMessage(null);
@@ -163,7 +175,14 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
     }
   };
 
-  if (!activeRequest) return null;
+  if (!activeRequest && !errorMessage) return null;
+  if (!activeRequest) {
+    return (
+      <p role="alert" className="fixed bottom-4 right-4 z-50 rounded-lg border border-rose-500/60 bg-rose-950/90 p-3 font-mono text-xs text-rose-300 shadow-xl">
+        {errorMessage}
+      </p>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex justify-center items-center p-4 z-50 font-mono text-xs text-white">
