@@ -2,48 +2,49 @@
 > @skillbridge/web@1.0.0 build
 > next build
 
-  [1m[38;2;173;127;168m▲ Next.js 14.2.3[39m[22m
+  ▲ Next.js 14.2.3
   - Environments: .env.local
 
- [37m[1m [22m[39m Creating an optimized production build ...
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (267kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
- [32m[1m✓[22m[39m Compiled successfully
- [37m[1m [22m[39m Skipping validation of types
- [37m[1m [22m[39m Skipping linting
-[?25l [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m...[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data     [32m[1m✓[22m[39m Collecting page data 
-[?25l [37m[1m [22m[39m Generating static pages (0/20)  [36m[    ][39m[2K[1G [37m[1m [22m[39m Generating static pages (1/20)  [36m[=   ][39m[2K[1G [37m[1m [22m[39m Generating static pages (9/20)  [36m[==  ][39m[2K[1G [37m[1m [22m[39m Generating static pages (11/20)  [36m[=== ][39m[2K[1G [37m[1m [22m[39m Generating static pages (14/20)  [36m[ ===][39m[2K[1G [37m[1m [22m[39m Generating static pages (18/20)  [36m[  ==][39m[2K[1G[?25h [32m[1m✓[22m[39m Generating static pages (20/20)
-[?25l [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[?25l [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m...[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m...[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m.[39m[2K[1G [37m[1m [22m[39m Finalizing page optimization  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting build traces  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting build traces     [32m[1m✓[22m[39m Collecting build traces 
-[2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization     [32m[1m✓[22m[39m Finalizing page optimization 
-
-[4mRoute (app)[24m                              [4mSize[24m     [4mFirst Load JS[24m
-┌ ○ /                                    1.25 kB        [37m[1m88.3 kB[22m[39m
-├ ○ /_not-found                          872 B          [37m[1m87.9 kB[22m[39m
-├ ƒ /admin/academy-records               140 B          [37m[1m87.2 kB[22m[39m
-├ ○ /admin/compliance                    1.62 kB         [37m[1m153 kB[22m[39m
-├ ƒ /api/cashout                         0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/checkout                        0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/migration                       0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/paystack-init                   0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/paystack-webhook                0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/rider/telemetry                 0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/webhook                         0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/webhooks/dodo                   0 B                [37m[1m0 B[22m[39m
-├ ƒ /api/withdraw                        0 B                [37m[1m0 B[22m[39m
-├ ○ /auth                                4.22 kB         [37m[1m163 kB[22m[39m
-├ ○ /dashboard                           1.6 kB          [37m[1m163 kB[22m[39m
-├ ○ /roadmap                             140 B          [37m[1m87.2 kB[22m[39m
-├ ○ /tasks                               1.05 kB         [37m[1m153 kB[22m[39m
-└ ○ /team                                184 B           [37m[1m161 kB[22m[39m
-+ First Load JS shared by all            [37m[1m87 kB[22m[39m
-  ├ chunks/23-cdf892f9103dc873.js        31.5 kB
-  ├ chunks/fd9d1056-14e083ac9b0544be.js  53.6 kB
-  └ other shared chunks (total)          1.95 kB
-
-
-ƒ Middleware                             [37m[1m87.5 kB[22m[39m
-
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
-
-[?25h⠙[1G[0K
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+unhandledRejection Error: Cannot find module './682.js'
+Require stack:
+- /workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js
+- /workspaces/SKILLBRIDGE/apps/web/.next/server/pages/_document.js
+- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require.js
+- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/load-components.js
+- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/utils.js
+- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/worker.js
+- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1456:15)
+    at /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1556:12)
+    at mod.require (/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js:203:28) {
+  type: 'Error',
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js',
+    '/workspaces/SKILLBRIDGE/apps/web/.next/server/pages/_document.js',
+    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require.js',
+    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/load-components.js',
+    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/utils.js',
+    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/worker.js',
+    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/compiled/jest-worker/processChild.js'
+  ]
+}
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /workspaces/SKILLBRIDGE/apps/web
+npm error workspace @skillbridge/web@1.0.0
+npm error location /workspaces/SKILLBRIDGE/apps/web
+npm error command failed
+npm error command sh -c next build
