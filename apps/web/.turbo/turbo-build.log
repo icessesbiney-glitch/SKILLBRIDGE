@@ -6,6 +6,8 @@
   - Environments: .env.local
 
    Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (267kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
  ✓ Compiled successfully
    Skipping validation of types
    Skipping linting
@@ -37,7 +39,7 @@ Route (app)                              Size     First Load JS
 ├ ○ /auth                                4.22 kB         163 kB
 ├ ○ /dashboard                           1.6 kB          163 kB
 ├ ○ /roadmap                             140 B          87.2 kB
-├ ○ /tasks                               1.05 kB         153 kB
+├ ○ /tasks                               1.09 kB         153 kB
 └ ○ /team                                184 B           161 kB
 + First Load JS shared by all            87 kB
   ├ chunks/23-cdf892f9103dc873.js        31.5 kB
@@ -45,7 +47,7 @@ Route (app)                              Size     First Load JS
   └ other shared chunks (total)          1.95 kB
 
 
-ƒ Middleware                             87.5 kB
+ƒ Middleware                             87.6 kB
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
