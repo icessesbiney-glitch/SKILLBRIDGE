@@ -15,15 +15,15 @@
   "dependencies": {
     "expo": "~57.0.26",
     "expo-location": "~57.0.22",
-    "expo-status-bar": "~1.11.1",
+    "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-native": "0.74.5",
+    "react-native": "0.86.3",
     "react-native-maps": "1.27.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/react": "~18.2.45",
-    "typescript": "^5.3.3"
+    "@types/react": "~19.2.4",
+    "typescript": "~6.0.3"
   }
 }
