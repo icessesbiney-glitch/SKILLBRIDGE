@@ -6,8 +6,8 @@ on:
     tags:
       - 'v*.*.*'
     paths:
-      - 'apps/desktop/**'
-      - 'packages/shared/**'
+      - 'SKILLBRIDGE/apps/desktop/**'
+      - 'SKILLBRIDGE/packages/shared/**'
       - '.github/workflows/deploy-desktop-production.yml'
   workflow_dispatch:
 
@@ -45,44 +45,44 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: npm
+          cache-dependency-path: SKILLBRIDGE/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Build shared package
-        run: npm run build:shared
+        run: npm ci --legacy-peer-deps
+        working-directory: SKILLBRIDGE
 
       - name: Type check desktop app
         run: npm run type-check --workspace=@skillbridge/desktop
+        working-directory: SKILLBRIDGE
 
       - name: Build desktop app for production (${{ matrix.os }})
-        working-directory: apps/desktop
+        working-directory: SKILLBRIDGE/apps/desktop
         run: ${{ matrix.build-cmd }}
         env:
           # Production environment variables
           NODE_ENV: production
 
       - name: Sign macOS app (if certificate available)
-        if: matrix.os == 'macos-latest' && secrets.APPLE_CERTIFICATE_P12 != ''
-        working-directory: apps/desktop
+        if: matrix.os == 'macos-latest' && vars.ENABLE_APPLE_SIGNING == 'true'
+        working-directory: SKILLBRIDGE/apps/desktop
         run: |
           echo "Code signing would occur here with certificate"
           # In production: import certificate and sign
           # codesign --deep --force --verify --verbose --sign "Developer ID Application" dist/*.app
 
       - name: Notarize macOS app (if credentials available)
-        if: matrix.os == 'macos-latest' && secrets.APPLE_ID != ''
+        if: matrix.os == 'macos-latest' && vars.ENABLE_APPLE_NOTARIZATION == 'true'
         run: |
           echo "Notarization would occur here"
           # In production: xcrun altool --notarize-app -f dist/*.dmg ...
 
       - name: Upload production builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: desktop-builds-production-${{ matrix.output-name }}
-          path: apps/desktop/dist/
+          path: SKILLBRIDGE/apps/desktop/dist/
           retention-days: 30
 
   create-github-release:
@@ -94,7 +94,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download all production artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./builds
 
