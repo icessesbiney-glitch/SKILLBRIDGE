@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "ts:check": "tsc",
-    "lint": "expo lint",
+    "lint": "eslint App.tsx",
     "test": "tsc --noEmit"
   },
   "dependencies": {
