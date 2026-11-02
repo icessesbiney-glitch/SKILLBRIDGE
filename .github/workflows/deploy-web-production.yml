@@ -58,6 +58,7 @@ jobs:
         working-directory: SKILLBRIDGE
 
       - name: Deploy to Vercel (Production)
+        if: vars.ENABLE_VERCEL_DEPLOY == 'true'
         run: |
           deploy_dir="$RUNNER_TEMP/skillbridge-web"
           rm -rf "$deploy_dir"
@@ -67,3 +68,6 @@ jobs:
           npx vercel@latest . --prod --yes --token "$VERCEL_TOKEN" --build-env "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" --build-env "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Verify live production endpoint
+        run: curl --fail --silent --show-error --max-time 30 --retry 3 https://skillbridge-vercel-web.vercel.app/
