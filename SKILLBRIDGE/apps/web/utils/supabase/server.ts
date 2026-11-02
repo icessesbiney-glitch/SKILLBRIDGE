@@ -7,7 +7,7 @@ const supabaseKey =
 
 export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
   // Defensive fallbacks to insulate the Next.js prerender layer from crashing in CI containers
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
+  const clientUrl = supabaseUrl || "https://aolfuonsuaeoitumuvqc.supabase.co";
   const clientKey = supabaseKey || "placeholder-anon-key";
 
   return createServerClient(

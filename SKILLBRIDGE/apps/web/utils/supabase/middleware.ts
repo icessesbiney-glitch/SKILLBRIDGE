@@ -7,7 +7,7 @@ const supabaseKey =
 
 export const updateSession = async (request: NextRequest) => {
   // 1. Build defensive baseline fallbacks for your deployment server compilation pass
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
+  const clientUrl = supabaseUrl || "https://aolfuonsuaeoitumuvqc.supabase.co";
   const clientKey = supabaseKey || "placeholder-anon-key";
 
   // Create the baseline response stream
