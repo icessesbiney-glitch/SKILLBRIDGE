@@ -10,41 +10,43 @@
    Skipping validation of types
    Skipping linting
    Collecting page data ...
-unhandledRejection Error: Cannot find module './682.js'
-Require stack:
-- /workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js
-- /workspaces/SKILLBRIDGE/apps/web/.next/server/pages/_document.js
-- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require.js
-- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/load-components.js
-- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/utils.js
-- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/worker.js
-- /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/compiled/jest-worker/processChild.js
-    at Module.<anonymous> (node:internal/modules/cjs/loader:1456:15)
-    at /workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require-hook.js:55:36
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
-    at Module._load (node:internal/modules/cjs/loader:1242:25)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
-    at Module.<anonymous> (node:internal/modules/cjs/loader:1556:12)
-    at mod.require (/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require-hook.js:65:28)
-    at require (node:internal/modules/helpers:152:16)
-    at __webpack_require__.f.require (/workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js:203:28) {
-  type: 'Error',
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    '/workspaces/SKILLBRIDGE/apps/web/.next/server/webpack-runtime.js',
-    '/workspaces/SKILLBRIDGE/apps/web/.next/server/pages/_document.js',
-    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/require.js',
-    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/server/load-components.js',
-    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/utils.js',
-    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/build/worker.js',
-    '/workspaces/SKILLBRIDGE/apps/web/node_modules/next/dist/compiled/jest-worker/processChild.js'
-  ]
-}
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path /workspaces/SKILLBRIDGE/apps/web
-npm error workspace @skillbridge/web@1.0.0
-npm error location /workspaces/SKILLBRIDGE/apps/web
-npm error command failed
-npm error command sh -c next build
+   Generating static pages (0/22) ...
+   Generating static pages (5/22) 
+   Generating static pages (10/22) 
+   Generating static pages (16/22) 
+ ✓ Generating static pages (22/22)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.24 kB        88.3 kB
+├ ○ /_not-found                          872 B          87.9 kB
+├ ƒ /admin/academy-records               140 B          87.2 kB
+├ ○ /admin/compliance                    1.62 kB         153 kB
+├ ƒ /api/cashout                         0 B                0 B
+├ ƒ /api/checkout                        0 B                0 B
+├ ƒ /api/delivery/dispatch               0 B                0 B
+├ ƒ /api/migration                       0 B                0 B
+├ ƒ /api/paystack-init                   0 B                0 B
+├ ƒ /api/paystack-webhook                0 B                0 B
+├ ƒ /api/rider/telemetry                 0 B                0 B
+├ ƒ /api/wallet/balance                  0 B                0 B
+├ ƒ /api/webhook                         0 B                0 B
+├ ƒ /api/webhooks/dodo                   0 B                0 B
+├ ƒ /api/withdraw                        0 B                0 B
+├ ○ /auth                                4.22 kB         163 kB
+├ ○ /dashboard                           1.6 kB          163 kB
+├ ○ /roadmap                             140 B          87.2 kB
+├ ○ /tasks                               1.05 kB         153 kB
+└ ○ /team                                184 B           161 kB
++ First Load JS shared by all            87 kB
+  ├ chunks/23-cdf892f9103dc873.js        31.5 kB
+  ├ chunks/fd9d1056-14e083ac9b0544be.js  53.6 kB
+  └ other shared chunks (total)          1.95 kB
+
+
+ƒ Middleware                             87.5 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
