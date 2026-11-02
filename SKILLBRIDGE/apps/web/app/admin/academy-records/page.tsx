@@ -1,14 +1,26 @@
 import React from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export const revalidate = 0;
 
 export default async function AcademyRecordsPage() {
+  if (!supabase) {
+    return (
+      <main style={{ padding: "40px", background: "#050505", minHeight: "100vh", color: "#fff", fontFamily: "system-ui" }}>
+        <h2 style={{ fontSize: "24px", color: "#00c389", marginBottom: "4px" }}>SkillBridge Academy</h2>
+        <p style={{ color: "#f59e0b", fontSize: "14px" }}>
+          Certification records are unavailable until the server database configuration is provided.
+        </p>
+      </main>
+    );
+  }
+
   const { data: progressRows } = await supabase
     .from("user_course_progress")
     .select("quiz_score, is_completed, completed_at, course_id")
