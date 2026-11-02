@@ -4,7 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function OPTIONS() {
   return NextResponse.json({}, {
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
     const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
     console.log(`[COMPLIANCE] Generated secure ID verification hash for user: ${fullName}`);
 
-    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_live')) {
+    if (!supabase || supabaseServiceKey.includes('your_live')) {
       return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, {
         status: 200,
         headers: { 'Access-Control-Allow-Origin': '*' }
