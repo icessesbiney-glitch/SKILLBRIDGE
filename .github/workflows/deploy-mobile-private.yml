@@ -49,7 +49,7 @@ jobs:
         run: npm run build:shared
 
       - name: Type check mobile app
-        run: npm run type-check --workspace=@skillbridge/mobile
+        run: npm run type-check --workspace=skillbridge-mobile
 
       - name: Build iOS for private distribution
         working-directory: apps/mobile

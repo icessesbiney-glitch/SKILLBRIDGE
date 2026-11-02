@@ -57,7 +57,7 @@ jobs:
         run: npm run build:shared
 
       - name: Type check desktop app
-        run: npm run type-check --workspace=@skillbridge/desktop
+        run: npm run type-check --workspace=skillbridge
 
       - name: Build desktop app for production (${{ matrix.os }})
         working-directory: apps/desktop
