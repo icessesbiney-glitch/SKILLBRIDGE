@@ -1,0 +1,22 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/compliance/page": "app/admin/compliance/page.js",
+  "/api/delivery/dispatch/route": "app/api/delivery/dispatch/route.js",
+  "/api/migration/route": "app/api/migration/route.js",
+  "/api/paystack-init/route": "app/api/paystack-init/route.js",
+  "/api/paystack-webhook/route": "app/api/paystack-webhook/route.js",
+  "/api/rider/telemetry/route": "app/api/rider/telemetry/route.js",
+  "/api/wallet/balance/route": "app/api/wallet/balance/route.js",
+  "/api/webhook/route": "app/api/webhook/route.js",
+  "/api/webhooks/dodo/route": "app/api/webhooks/dodo/route.js",
+  "/api/withdraw/route": "app/api/withdraw/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/page": "app/page.js",
+  "/roadmap/page": "app/roadmap/page.js",
+  "/team/page": "app/team/page.js",
+  "/api/checkout/route": "app/api/checkout/route.js",
+  "/api/cashout/route": "app/api/cashout/route.js",
+  "/admin/academy-records/page": "app/admin/academy-records/page.js",
+  "/tasks/page": "app/tasks/page.js",
+  "/auth/page": "app/auth/page.js"
+}
