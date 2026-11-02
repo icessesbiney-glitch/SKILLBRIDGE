@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   deploy-web-production:
-    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     environment: web-public-vercel
 
@@ -55,11 +55,7 @@ jobs:
         working-directory: SKILLBRIDGE
 
       - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          scope: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-args: '--prod'
-          working-directory: SKILLBRIDGE/apps/web
+        working-directory: SKILLBRIDGE/apps/web
+        run: npx vercel@latest --prod --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

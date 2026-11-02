@@ -14,8 +14,12 @@
   "scripts": {
     "build:main": "tsc",
     "build": "npm run build:main",
+    "type-check": "tsc --noEmit",
     "dist": "npm run build && electron-builder --linux",
-    "dist:linux": "npm run dist -- --linux"
+    "dist:linux": "npm run dist -- --linux",
+    "dist:desktop:linux": "npm run build && electron-builder --linux",
+    "dist:desktop:mac": "npm run build && electron-builder --mac",
+    "dist:desktop:win": "npm run build && electron-builder --win"
   },
   "build": {
     "electronVersion": "27.0.0",
