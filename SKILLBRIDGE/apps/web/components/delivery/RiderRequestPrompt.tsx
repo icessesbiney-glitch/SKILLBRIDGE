@@ -81,7 +81,6 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
           table: 'delivery_assignments',
           filter: `rider_profile_id=eq.${riderProfileId}`
         },
-        },
         async (payload) => {
           const assignment = payload.new as Partial<AssignmentRow>;
           if (
@@ -113,10 +112,10 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
 
   useEffect(() => {
     if (activeRequest && countdown > 0) {
-        const timer = setTimeout(() => setCountdown((current) => current - 1), 1000);
+      const timer = setTimeout(() => setCountdown((current) => current - 1), 1000);
       return () => clearTimeout(timer);
     } else if (activeRequest && countdown === 0) {
-        void handleResolution('expired');
+      void handleResolution('expired');
     }
   }, [activeRequest, countdown]);
 
