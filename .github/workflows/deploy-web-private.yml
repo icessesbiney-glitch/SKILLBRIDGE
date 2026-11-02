@@ -54,7 +54,7 @@ jobs:
 
   deploy-web-private:
     needs: validate-web-preview
-    if: ${{ github.event_name != 'pull_request' && secrets.NETLIFY_AUTH_TOKEN != '' && secrets.NETLIFY_SITE_ID != '' }}
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     environment: web-private-netlify
     permissions:
@@ -73,9 +73,19 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Deploy SkillBridge to Netlify preview
+        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
         uses: netlify/actions/cli@master
         with:
           args: deploy --build --alias=${{ github.ref_name }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Report missing Netlify secrets
+        if: ${{ env.NETLIFY_AUTH_TOKEN == '' || env.NETLIFY_SITE_ID == '' }}
+        run: |
+          echo "::error::NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID must be configured for preview publishing."
+          exit 1
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

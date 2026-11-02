@@ -6,6 +6,8 @@ on:
     paths:
       - 'apps/desktop/**'
       - 'packages/shared/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/deploy-desktop-dev.yml'
   workflow_dispatch:
 
@@ -54,7 +56,7 @@ jobs:
         run: ${{ matrix.build-cmd }}
 
       - name: Upload development builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: desktop-builds-dev-${{ matrix.os }}
           path: apps/desktop/${{ matrix.output-pattern }}
@@ -69,7 +71,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./builds
 
