@@ -1,18 +1,19 @@
 import { getTelecomBankCode } from "../../../utils/telecomMapper";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+import { adminClient, authenticate } from "../_lib/auth";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { profileId, requestedAmountCents, payoutMethod } = body;
+    const auth = await authenticate(req);
+    if ("error" in auth) return auth.error;
+    const supabase = adminClient();
+    if (!supabase) return NextResponse.json({ error: "Server is not configured." }, { status: 500 });
 
-    if (!profileId || !requestedAmountCents || !payoutMethod) {
+    const body = await req.json();
+    const { requestedAmountCents, payoutMethod } = body;
+    const profileId = auth.user.id;
+
+    if (!Number.isInteger(requestedAmountCents) || !payoutMethod) {
       return NextResponse.json({ error: "Incomplete withdrawal transaction parameters." }, { status: 400 });
     }
 
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     const { data, error: rpcError } = await supabase.rpc("execute_wallet_withdrawal", {
       target_profile_id: profileId,
       requested_amount_cents: requestedAmountCents,
-      payment_reference: "WITHDRAW_TXN_" + Date.now()
+      payment_reference: "WITHDRAW_" + crypto.randomUUID()
     });
 
     if (rpcError || !data?.success) {

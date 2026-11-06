@@ -1,19 +1,13 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { adminClient, authenticate } from '../../_lib/auth';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { userId } = body;
-
-    // 1. Structural Integrity Check
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing required userId profile context attribute.' }, { status: 400 });
-    }
+    const auth = await authenticate(req);
+    if ('error' in auth) return auth.error;
+    const supabase = adminClient();
+    if (!supabase) return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
+    const userId = auth.user.id;
 
     // 2. Fetch active wallet record matching the profile
     const { data: walletData, error: walletError } = await supabase

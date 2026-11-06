@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { adminClient, authenticate } from '../../_lib/auth';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { dispatchId, riderId, nextStatus } = body;
+    const auth = await authenticate(req);
+    if ('error' in auth) return auth.error;
+    const supabase = adminClient();
+    if (!supabase) return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
 
-    if (!dispatchId || !riderId || !nextStatus) {
+    const body = await req.json();
+    const { dispatchId, nextStatus } = body;
+    const riderId = auth.user.id;
+
+    if (!dispatchId || typeof nextStatus !== 'string') {
       return NextResponse.json(
         { error: 'Missing required dispatch operation attributes.' },
         { status: 400 }

@@ -1,63 +1,57 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+import { adminClient, authenticate } from '../_lib/auth';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-export async function OPTIONS() {
-  return NextResponse.json({}, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
-}
+// Roles a user may pick for themselves; admin roles are never self-assignable.
+const SELF_SERVICE_ROLES = ['customer', 'vendor_micro', 'vendor_elite', 'driver_rider'];
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { id, fullName, phoneNumber, ghanaCardPin, roleTier } = body;
+    const auth = await authenticate(req);
+    if ('error' in auth) return auth.error;
+    const supabase = adminClient();
+    const idSecret = process.env.NATIONAL_ID_HASH_SECRET;
+    if (!supabase || !idSecret) {
+      return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
+    }
 
+    const { fullName, phoneNumber, ghanaCardPin, roleTier } = await req.json();
     if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
       return NextResponse.json({ error: 'Incomplete payload attributes.' }, { status: 400 });
     }
-
-    const nationalIdHash = crypto.createHash('sha256').update(ghanaCardPin).digest('hex');
-    console.log(`[COMPLIANCE] Generated secure ID verification hash for user: ${fullName}`);
-
-    if (!supabaseUrl || !supabaseServiceKey || supabaseServiceKey.includes('your_live')) {
-      return NextResponse.json({ success: true, message: 'Sandbox processing complete.' }, {
-        status: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' }
-      });
+    if (!SELF_SERVICE_ROLES.includes(roleTier)) {
+      return NextResponse.json({ error: 'Invalid role selection.' }, { status: 400 });
     }
 
-    const profileId = id || '00000000-0000-0000-0000-000000000137';
+    const profileId = auth.user.id;
+    const { data: existing } = await supabase.from('profiles').select('role_tier').eq('id', profileId).maybeSingle();
+    if (existing?.role_tier === 'admin_central') {
+      return NextResponse.json({ error: 'Admin profiles cannot be modified here.' }, { status: 403 });
+    }
 
-    // Using .upsert() handles updating matching records without causing key errors
+    // Keyed hash: a plain SHA-256 of a short ID number is trivially brute-forced.
+    const nationalIdHash = crypto.createHmac('sha256', idSecret).update(String(ghanaCardPin)).digest('hex');
+
+    // Verification stays 'pending' until an admin approves the record.
     const { error: dbError } = await supabase
       .from('profiles')
-      .upsert({
-        id: profileId,
-        legal_name: fullName,
-        phone_number: phoneNumber,
-        role_tier: roleTier,
-        national_id_hash: nationalIdHash,
-        verification: 'verified'
-      }, { onConflict: 'id' });
+      .upsert(
+        {
+          id: profileId,
+          legal_name: String(fullName).slice(0, 200),
+          phone_number: String(phoneNumber).slice(0, 30),
+          role_tier: roleTier,
+          national_id_hash: nationalIdHash,
+        },
+        { onConflict: 'id' }
+      );
 
     if (dbError) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Processed successfully.' }, {
-      status: 200,
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, message: 'Submitted for verification.' }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: 'Onboarding failed.' }, { status: 500 });
   }
 }

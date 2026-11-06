@@ -1,35 +1,37 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+import { adminClient } from '../../_lib/auth';
+
+function validSignature(payload: string, signature: string): boolean {
+  const secret = process.env.DODO_WEBHOOK_SECRET;
+  if (!secret || !signature) return false;
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 export async function POST(request: Request) {
   try {
     const payload = await request.text();
-    const signature = request.headers.get('x-dodo-signature') || '';
-    const computedSignature = crypto
-      .createHmac('sha256', process.env.DODO_WEBHOOK_SECRET || '')
-      .update(payload)
-      .digest('hex');
-
-    if (computedSignature !== signature) {
+    if (!validSignature(payload, request.headers.get('x-dodo-signature') || '')) {
       return NextResponse.json({ error: 'Signature Verification Failed' }, { status: 401 });
     }
+    const adminClientInstance = adminClient();
+    if (!adminClientInstance) return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
 
     const event = JSON.parse(payload);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://aolfuonsuaeoitumuvqc.supabase.co';
-    const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE', { auth: { persistSession: false } });
-
     if (event.type === 'checkout.succeeded') {
-      const { userId } = event.data.metadata || {};
+      const { userId } = event.data?.metadata || {};
       if (userId) {
-        await adminClient.rpc('increment_wallet_balance', {
+        await adminClientInstance.rpc('increment_wallet_balance', {
           target_user_id: userId,
-          amount_to_add: (event.data.amount || 0) / 100
+          amount_to_add: (event.data.amount || 0) / 100,
         });
       }
     }
     return NextResponse.json({ received: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Webhook processing failed.' }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
 
 export default function GhanaCardOnboardingForm() {
   const [formData, setFormData] = useState({
@@ -31,9 +32,13 @@ export default function GhanaCardOnboardingForm() {
     }
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Please sign in before submitting verification.');
+
       const response = await fetch('/api/migration', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData)
       });
 
