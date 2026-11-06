@@ -1,5 +1,9 @@
 -- Wallet and Paystack hardening. Run once in the Supabase SQL editor.
 
+alter table public.ledger_entries drop constraint if exists check_entry_type;
+alter table public.ledger_entries add constraint check_entry_type
+  check (entry_type in ('payout', 'withdrawal', 'commission', 'deposit'));
+
 create table if not exists public.paystack_transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -73,6 +77,7 @@ set search_path = public
 as $$
 declare
   tx public.paystack_transactions;
+  wallet uuid;
 begin
   select * into tx from public.paystack_transactions where reference = payment_reference for update;
   if not found then
@@ -86,7 +91,15 @@ begin
     return jsonb_build_object('success', false, 'error', 'Amount or currency mismatch.');
   end if;
   update public.paystack_transactions set status = 'success', paid_at = now() where id = tx.id;
-  return jsonb_build_object('success', true, 'user_id', tx.user_id, 'amount', tx.amount);
+
+  -- Credit the payer's wallet in the same transaction; the unique ledger reference makes this idempotent.
+  select id into wallet from public.platform_wallets where profile_id = tx.user_id for update;
+  if wallet is not null then
+    insert into public.ledger_entries (wallet_id, amount_cents, entry_type, reference_id)
+      values (wallet, paid_pesewas, 'deposit', 'deposit_' || payment_reference);
+    update public.platform_wallets set balance_cents = balance_cents + paid_pesewas, updated_at = now() where id = wallet;
+  end if;
+  return jsonb_build_object('success', true, 'user_id', tx.user_id, 'amount', tx.amount, 'credited', wallet is not null);
 end;
 $$;
 
