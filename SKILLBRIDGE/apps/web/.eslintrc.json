@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": "off",
+    "no-unused-vars": "warn"
+  }
+}

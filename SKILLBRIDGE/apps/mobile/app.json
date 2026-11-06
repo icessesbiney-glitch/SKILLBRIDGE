@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "SkillBridge",
+    "slug": "skillbridge-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.linktoink.skillbridgemobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6d7bf1e5-a3a1-4172-b5cc-40e3d0aced48"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
+  }
+}

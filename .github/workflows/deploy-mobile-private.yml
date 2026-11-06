@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   deploy-mobile-private:
+    if: ${{ vars.ENABLE_MOBILE_DEPLOY == 'true' }}
     runs-on: macos-latest
     environment: mobile-private
     
@@ -28,8 +29,9 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: npm
+          cache-dependency-path: SKILLBRIDGE/package-lock.json
 
       - name: Validate Expo publishing token
         if: ${{ env.EXPO_TOKEN == '' }}
@@ -55,11 +57,11 @@ jobs:
         run: npm run type-check --workspace=skillbridge-mobile
 
       - name: Build iOS for private distribution
-        working-directory: apps/mobile
+        working-directory: SKILLBRIDGE/apps/mobile
         run: eas build --platform ios --profile preview
 
       - name: Build Android for private distribution
-        working-directory: apps/mobile
+        working-directory: SKILLBRIDGE/apps/mobile
         run: eas build --platform android --profile preview
 
       - name: Create release notes

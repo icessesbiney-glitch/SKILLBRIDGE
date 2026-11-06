@@ -1,70 +1,8 @@
--- =========================================================================
--- SKILLBRIDGE PRODUCTION SYSTEM WALLET LEDGER ROUTINES
--- =========================================================================
-
-CREATE TABLE IF NOT EXISTS public.platform_wallets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id UUID REFERENCES public.profiles(id) ON DELETE RESTRICT NOT NULL UNIQUE,
-    balance_cents BIGINT DEFAULT 0 NOT NULL CONSTRAINT check_positive_balance CHECK (balance_cents >= 0),
-    currency TEXT DEFAULT 'GHS' NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS public.ledger_entries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    wallet_id UUID REFERENCES public.platform_wallets(id) ON DELETE RESTRICT NOT NULL,
-    amount_cents BIGINT NOT NULL,
-    entry_type TEXT NOT NULL CONSTRAINT check_entry_type CHECK (entry_type IN ('payout', 'withdrawal', 'commission')),
-    reference_id TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
-ALTER TABLE public.platform_wallets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ledger_entries ENABLE ROW LEVEL SECURITY;
-
-CREATE OR REPLACE FUNCTION public.execute_wallet_withdrawal(
-    target_profile_id UUID,
-    requested_amount_cents BIGINT,
-    payment_reference TEXT
-)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-    current_wallet_id UUID;
-    available_cents BIGINT;
-BEGIN
-    SELECT id, balance_cents INTO current_wallet_id, available_cents
-    FROM public.platform_wallets
-    WHERE profile_id = target_profile_id
-    FOR UPDATE;
-
-    IF current_wallet_id IS NULL THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Wallet not initialized.');
-    END IF;
-
-    IF requested_amount_cents < 5000 THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Withdrawal must meet 50 GHS minimum.');
-    END IF;
-
-    IF available_cents < requested_amount_cents THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Insufficient funds available.');
-    END IF;
-
-    UPDATE public.platform_wallets
-    SET balance_cents = balance_cents - requested_amount_cents,
-        updated_at = NOW()
-    WHERE id = current_wallet_id;
-
-    INSERT INTO public.ledger_entries (wallet_id, amount_cents, entry_type, reference_id)
-    VALUES (current_wallet_id, -requested_amount_cents, 'withdrawal', payment_reference);
-
-    RETURN jsonb_build_object(
-        'success', true,
-        'reference', payment_reference,
-        'withdrawn_cents', requested_amount_cents,
-        'remaining_balance_cents', (available_cents - requested_amount_cents)
-    );
-END;
-$$;
+﻿CREATE TABLE IF NOT EXISTS public.rider_wallets(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),rider_profile_id UUID REFERENCES public.gps_profiles(id) ON DELETE CASCADE UNIQUE,current_balance NUMERIC(10,2) DEFAULT 0.00 NOT NULL CHECK(current_balance >= -50.00),updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text,now()) NOT NULL);
+CREATE TABLE IF NOT EXISTS public.wallet_transactions(id BIGSERIAL PRIMARY KEY,wallet_id UUID REFERENCES public.rider_wallets(id) ON DELETE CASCADE NOT NULL,amount NUMERIC(10,2) NOT NULL,transaction_type TEXT NOT NULL,reference_id TEXT NOT NULL,created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text,now()) NOT NULL);
+CREATE TABLE IF NOT EXISTS public.vendor_wallets(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),vendor_id UUID NOT NULL UNIQUE,accumulated_earnings NUMERIC(10,2) DEFAULT 0.00 NOT NULL CHECK(accumulated_earnings >= 0.00),updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text,now()) NOT NULL);
+CREATE TABLE IF NOT EXISTS public.vendor_ledger_transactions(id BIGSERIAL PRIMARY KEY,vendor_wallet_id UUID REFERENCES public.vendor_wallets(id) ON DELETE CASCADE NOT NULL,gross_amount NUMERIC(10,2) NOT NULL,platform_commission_deducted NUMERIC(10,2) NOT NULL,net_payout_settled NUMERIC(10,2) NOT NULL,order_reference TEXT NOT NULL UNIQUE,created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text,now()) NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_rw_p ON public.rider_wallets(rider_profile_id);
+CREATE INDEX IF NOT EXISTS idx_wt_w ON public.wallet_transactions(wallet_id);
+CREATE INDEX IF NOT EXISTS idx_vw_v ON public.vendor_wallets(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_vlt_w ON public.vendor_ledger_transactions(vendor_wallet_id);

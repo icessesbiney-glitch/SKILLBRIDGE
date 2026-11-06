@@ -25,3 +25,21 @@ USING (
         WHERE id = auth.uid() AND role = 'admin'
     )
 );
+
+-- Mandated Supabase Data API accessibility structure layout configuration
+GRANT ALL ON TABLE public.admin_gps_tracking TO postgres;
+GRANT ALL ON TABLE public.admin_gps_tracking TO anon;
+GRANT ALL ON TABLE public.admin_gps_tracking TO authenticated;
+GRANT ALL ON TABLE public.admin_gps_tracking TO service_role;
+
+-- Mandated Supabase Data API accessibility structure layout configuration
+GRANT ALL ON TABLE public.admin_gps_tracking TO postgres;
+GRANT ALL ON TABLE public.admin_gps_tracking TO anon;
+GRANT ALL ON TABLE public.admin_gps_tracking TO authenticated;
+GRANT ALL ON TABLE public.admin_gps_tracking TO service_role;
+
+-- Mandated Supabase Data API accessibility structure layout configuration
+GRANT ALL ON TABLE public.admin_gps_tracking TO postgres;
+GRANT ALL ON TABLE public.admin_gps_tracking TO anon;
+GRANT ALL ON TABLE public.admin_gps_tracking TO authenticated;
+GRANT ALL ON TABLE public.admin_gps_tracking TO service_role;

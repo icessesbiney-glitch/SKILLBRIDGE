@@ -50,8 +50,9 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: npm
+          cache-dependency-path: SKILLBRIDGE/package-lock.json
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
@@ -63,11 +64,12 @@ jobs:
         run: npm run type-check --workspace=skillbridge
 
       - name: Build desktop app for production (${{ matrix.os }})
-        working-directory: apps/desktop
+        working-directory: SKILLBRIDGE/apps/desktop
         run: ${{ matrix.build-cmd }}
         env:
           # Production environment variables
           NODE_ENV: production
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign macOS app (if certificate available)
         if: matrix.os == 'macos-latest' && env.APPLE_CERTIFICATE_P12 != ''
@@ -91,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: desktop-builds-production-${{ matrix.output-name }}
-          path: apps/desktop/dist/
+          path: SKILLBRIDGE/apps/desktop/dist/
           retention-days: 30
 
   create-github-release:

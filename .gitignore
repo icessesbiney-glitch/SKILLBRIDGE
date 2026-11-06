@@ -72,7 +72,5 @@ build-output.txt
 .vercel
 .env*
 supabase/.temp/
-apps/web/app/api/paystack-webhook/route.ts
-apps/web/app/api/paystack-webhook/route.ts
 .next-build/
 apps/web/.next-build/

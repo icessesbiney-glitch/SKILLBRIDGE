@@ -8,7 +8,7 @@ const supabase = createClient(
 );
 
 export default function WalletBalanceDisplay() {
-  const [balance, setBalance] = useState(null);
+  const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

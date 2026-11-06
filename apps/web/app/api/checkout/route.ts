@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { authenticate } from "../_lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,10 +22,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const { amount, currency, email, userId, metadata } = body;
+    const auth = await authenticate(req);
+    if ("error" in auth) return auth.error;
 
-    if (!amount || !email || !userId) {
+    const body = await req.json();
+    const { amount, currency, email, metadata } = body;
+    const userId = auth.user.id;
+
+    if (!amount || !email) {
       return NextResponse.json(
         { error: "Missing required checkout parameters: amount, email, and userId are mandatory." },
         { status: 400 }

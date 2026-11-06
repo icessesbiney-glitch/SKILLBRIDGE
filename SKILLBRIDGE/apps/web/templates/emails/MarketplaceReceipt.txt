@@ -1,0 +1,19 @@
+Subject: SkillBridge Order Confirmation - Transaction Settled Successfully!
+
+Dear Customer,
+
+Thank you for shopping on SkillBridge! Your marketplace purchase has been processed securely.
+
+TRANSACTION DETAILS:
+------------------------------------------------------------------------------
+Order Identification Ref:  [ORDER_ID_PLACEHOLDER]
+Settlement Timestamp:      [TIMESTAMP_PLACEHOLDER]
+Gross Amount Vol:         [GROSS_AMOUNT_GHS] GHS
+------------------------------------------------------------------------------
+
+Our atomic routing engine has automatically balanced the ledger, disbursed the vendor payout share, and signaled a nearby Logistics Rider to coordinate immediate fulfillment. You can track your motorcycle carrier's live coordinate location and speed directly through your application profile dashboard page.
+
+Thank you for building momentum with us!
+
+The SkillBridge Operations Team
+Accra, Ghana
