@@ -53,9 +53,9 @@ export const updateSession = async (request: NextRequest) => {
     } = await supabase.auth.getUser();
 
     // 4. Return both the verified user payload and the synchronized header response stream
-    return { response: supabaseResponse, user };
+    return { response: supabaseResponse, user, supabase };
   } catch (error) {
     console.error("Supabase middleware token resolution error:", error);
-    return { response: supabaseResponse, user: null };
+    return { response: supabaseResponse, user: null, supabase };
   }
 };

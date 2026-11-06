@@ -5,6 +5,7 @@ echo "=== SPINNING UP LOCAL CASHOUT DISBURSEMENT SIMULATION ==="
 echo "[TEST 1] Testing rejection threshold limits (Sending 20.00 GHS)..."
 curl -X POST http://localhost:3000/api/withdraw \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${TEST_ACCESS_TOKEN:?Set TEST_ACCESS_TOKEN to a signed-in user access token}" \
   -d '{"profileId":"00000000-0000-0000-0000-000000000137","requestedAmountCents":2000,"payoutMethod":"mobile_money"}' \
   -w "\nHTTP CODE: %{http_code}\n\n"
 
@@ -12,6 +13,7 @@ curl -X POST http://localhost:3000/api/withdraw \
 echo "[TEST 2] Testing validation path rules (Sending 75.00 GHS)..."
 curl -X POST http://localhost:3000/api/withdraw \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${TEST_ACCESS_TOKEN:?Set TEST_ACCESS_TOKEN to a signed-in user access token}" \
   -d '{"profileId":"00000000-0000-0000-0000-000000000137","requestedAmountCents":7500,"payoutMethod":"mobile_money"}' \
   -w "\nHTTP CODE: %{http_code}\n"
 

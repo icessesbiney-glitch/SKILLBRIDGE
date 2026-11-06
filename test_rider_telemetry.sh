@@ -16,6 +16,7 @@ PAYLOAD='{
 echo "[TEST] Posting real-time coordinate data to local serverless route..."
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$TELEMETRY_URL" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${TEST_ACCESS_TOKEN:?Set TEST_ACCESS_TOKEN to a signed-in user access token}" \
   -d "$PAYLOAD")
 
 echo "[RESULT] Telemetry payload transmission complete. Response Code: $HTTP_CODE"

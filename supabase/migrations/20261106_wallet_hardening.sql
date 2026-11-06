@@ -106,3 +106,13 @@ begin
     execute format('grant execute on function %s to service_role', f.sig);
   end loop;
 end $$;
+
+-- Profiles: users may read their own row (used by the admin check) but never change role or verification.
+alter table public.profiles enable row level security;
+
+drop policy if exists "Users read own profile" on public.profiles;
+create policy "Users read own profile" on public.profiles
+  for select using (auth.uid() = id);
+
+revoke update on public.profiles from anon, authenticated;
+grant update (legal_name, phone_number) on public.profiles to authenticated;

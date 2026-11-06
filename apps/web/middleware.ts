@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(authUrl);
   }
 
-  const { response, user } = await updateSession(request);
+  const { response, user, supabase } = await updateSession(request);
 
   if (isAdminRoute) {
     if (!user) {
@@ -29,8 +29,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(authUrl);
     }
 
-    const userRole = user.user_metadata?.role_tier;
-    if (userRole !== "admin_central") {
+    // user_metadata is user-editable; the role must come from the profiles table.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role_tier")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile?.role_tier !== "admin_central") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
