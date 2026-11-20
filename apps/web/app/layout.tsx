@@ -3,8 +3,8 @@ import './globals.css';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'SkillBridge | Build momentum together',
-  description: 'A repaired multi-platform workspace for learning, delivery, and deployment.',
+  title: 'SkillBridge | Marketplace accounts and wallets',
+  description: 'Manage your SkillBridge account, wallet, and marketplace activity.',
   icons: {
     icon: [
       { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
