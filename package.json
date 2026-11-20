@@ -21,13 +21,5 @@
     "turbo": "^2.11.7",
     "typescript": "^5.0.0"
   },
-  "overrides": {
-    "@expo/fingerprint": {
-      "minimatch": "^11.0.9"
-    },
-    "test-exclude": {
-      "minimatch": "^11.0.9"
-    }
-  },
   "packageManager": "npm@10.8.2"
 }
