@@ -32,6 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -45,6 +47,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Validate preview web configuration
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" && test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" && test -n "$NEXT_PUBLIC_URL" || {
+            echo "::error::Configure the Supabase public settings and NEXT_PUBLIC_URL for web preview validation."
+            exit 1
+          }
 
       - name: Lint SkillBridge Web App
         run: npm run lint --workspace=@skillbridge/web

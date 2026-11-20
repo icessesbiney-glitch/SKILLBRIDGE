@@ -25,6 +25,8 @@ jobs:
     environment: web-public-vercel
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
 
     steps:
       - name: Checkout Repository
@@ -39,6 +41,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+
+      - name: Validate production web configuration
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" && test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" && test -n "$NEXT_PUBLIC_URL" || {
+            echo "::error::Configure NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, and NEXT_PUBLIC_URL in the web-public-vercel environment."
+            exit 1
+          }
 
       - name: Lint SkillBridge Web App
         run: npm run lint --workspace=@skillbridge/web
