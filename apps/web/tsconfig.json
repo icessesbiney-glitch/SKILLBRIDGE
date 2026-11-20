@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -27,7 +27,8 @@
         "name": "next"
       }
     ],
-    "target": "ES2017"
+    "target": "ES2017",
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -36,7 +37,8 @@
     ".next-dev/types/**/*.ts",
     ".next-build/types/**/*.ts",
     ".next-live/types/**/*.ts",
-    ".next-verification/types/**/*.ts"
+    ".next-verification/types/**/*.ts",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
