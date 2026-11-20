@@ -148,6 +148,10 @@ export default function DashboardScreen() {
   // Memoized fetch tasks using the exact schema definitions we created
   const fetchAcademicProgression = useCallback(async () => {
     try {
+      if (!supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw authError || new Error('No valid user token context');
 

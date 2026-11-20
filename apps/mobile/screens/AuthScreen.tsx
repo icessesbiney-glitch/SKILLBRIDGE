@@ -114,6 +114,11 @@ export default function AuthScreen() {
 
     if (!validateInputs()) return;
 
+    if (!supabase) {
+      setError('Authentication is not configured. Please try again later.');
+      return;
+    }
+
     setLoading(true);
 
     try {

@@ -134,6 +134,10 @@ export default function ProfileScreen() {
     const fetchUserAndProfile = async () => {
       try {
         setLoading(true);
+        if (!supabase) {
+          throw new Error('Supabase is not configured.');
+        }
+
         // 1. Fetch user authentication boundaries
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) throw authError || new Error('No active session user context found');
@@ -165,6 +169,10 @@ export default function ProfileScreen() {
   }, []);
 
   const handleLogout = async () => {
+    if (!supabase) {
+      return;
+    }
+
     try {
       await supabase.auth.signOut();
     } catch (error) {

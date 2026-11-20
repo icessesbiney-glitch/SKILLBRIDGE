@@ -114,6 +114,9 @@ export default function HomeScreen() {
   const fetchTodos = useCallback(async () => {
     try {
       setLoading(true);
+      if (!supabase) {
+        throw new Error('Supabase is not configured.');
+      }
       
       // Safety gate check for valid user contextual session parameters
       const { data: { user }, error: authError } = await supabase.auth.getUser();
