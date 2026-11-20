@@ -39,20 +39,21 @@ export default function TaskWorkspace() {
       setIsLoadingTasks(true);
       setTaskError('');
 
-      const { data, error } = await supabase
-        .from('task_catalog')
-        .select('id, title, description, level, pay, visibility')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('task_catalog')
+          .select('id, title, description, level, pay, visibility')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Task catalog error:', error);
+        if (error) throw error;
+        setTasks((data ?? []) as Task[]);
+      } catch (error) {
+        console.error('Task catalog request failed:', error);
         setTaskError('We could not load the available tasks.');
         setTasks([]);
-      } else {
-        setTasks((data ?? []) as Task[]);
+      } finally {
+        setIsLoadingTasks(false);
       }
-
-      setIsLoadingTasks(false);
     }
 
     loadTasks();
@@ -110,6 +111,9 @@ export default function TaskWorkspace() {
 
       if (!cleanedText) {
         throw new Error('Please enter your task work before submitting.');
+      }
+      if (cleanedText.length > 10000) {
+        throw new Error('Please keep your submission under 10,000 characters.');
       }
 
       const { error: submissionInsertError } = await supabase
@@ -436,6 +440,7 @@ export default function TaskWorkspace() {
                     id="task-submission-text"
                     required
                     value={submissionText}
+                    maxLength={10000}
                     onChange={(e) => setSubmissionText(e.target.value)}
                     placeholder="Paste or type your completed task work here..."
                     style={{

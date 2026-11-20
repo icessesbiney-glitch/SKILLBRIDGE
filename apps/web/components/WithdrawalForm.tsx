@@ -30,12 +30,12 @@ export default function WithdrawalForm() {
   const [historyError, setHistoryError] = useState("");
 
   const refresh = useCallback(async () => {
-    const headers = await authHeaders();
-    if (!headers) {
-      setHistoryError("Sign in to load wallet activity.");
-      return;
-    }
     try {
+      const headers = await authHeaders();
+      if (!headers) {
+        setHistoryError("Sign in to load wallet activity.");
+        return;
+      }
       setHistoryError("");
       const res = await fetch("/api/wallet/balance", { headers });
       const result = await res.json();
