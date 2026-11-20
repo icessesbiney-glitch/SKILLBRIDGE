@@ -62,6 +62,12 @@ The migration directory does not contain a complete baseline schema. Confirm the
 
 Configure the Paystack webhook to call `/api/paystack-webhook` on the production origin and keep the provider secret in `PAYSTACK_SECRET_KEY`. Confirm the configured webhook behavior and database schema with the service owner before enabling live money movement.
 
+## Dependency audit status
+
+The production-only audit reports three moderate findings for `minimatch` 10.2.6, reached through Expo 58.0.26 and `@expo/fingerprint` 0.21.10. The advisory describes denial of service through glob-pattern amplification. The available automatic Expo fix downgrades the SDK to 52, which is not compatible with the current migration; keep Expo CLI use in trusted builds and do not accept user-controlled fingerprint ignore patterns. Revisit when Expo updates this dependency.
+
+The full monorepo audit additionally reports eight high and one critical finding in the legacy desktop toolchain, including `electron` 27.3.11, `electron-builder` 24.13.3, and `tar` 6.2.1. Fixes require major desktop-toolchain upgrades. Desktop builds are outside the currently validated web/mobile launch scope; do not create a desktop production tag or dispatch its workflows until the dependencies and workflow paths are corrected and cross-platform builds are verified. See [DEPLOY_DESKTOP.md](./DEPLOY_DESKTOP.md).
+
 ## Mobile companion
 
 Set `EXPO_PUBLIC_WEB_URL` to the HTTPS production web origin when preparing a mobile companion build. The current mobile validation command checks Expo package alignment and exports an Android bundle:
