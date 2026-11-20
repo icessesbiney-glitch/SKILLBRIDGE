@@ -21,7 +21,7 @@ export default function GPSTracker({ userId, profileType }: GPSTrackerProps) {
     if (isTracking && !client) {
       setSystemMessage('GPS services are not configured.');
       setIsTracking(false);
-    } else if (isTracking && typeof window !== 'undefined' && navigator.geolocation) {
+    } else if (isTracking && client && typeof window !== 'undefined' && navigator.geolocation) {
       setSystemMessage('📡 Querying satellite telemetry streams...');
       
       watchId = navigator.geolocation.watchPosition(
