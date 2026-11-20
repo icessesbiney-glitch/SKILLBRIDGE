@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -38,7 +38,8 @@
     ".next-build/types/**/*.ts",
     ".next-live/types/**/*.ts",
     ".next-verification/types/**/*.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
