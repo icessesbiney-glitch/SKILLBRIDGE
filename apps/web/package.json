@@ -8,7 +8,7 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
-    "test": "echo \"Pass web application module unit tests\""
+    "test": "jest --config jest.config.cjs --runInBand"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -26,8 +26,8 @@
     "@types/react": "^18.3.31",
     "@typescript-eslint/eslint-plugin": "^8.71.1",
     "@typescript-eslint/parser": "^8.71.1",
-    "eslint": "^10.12.0",
-    "eslint-config-next": "^16.3.8",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.3",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
     "typescript": "^5.9.3"

@@ -12,7 +12,8 @@
     "build:shared": "npm run build --workspace=@skillbridge/shared",
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "build:web": "npm run build --workspace=apps/web"
+    "build:web": "npm run build --workspace=apps/web",
+    "test": "npm run test --workspace=@skillbridge/web"
   },
   "devDependencies": {
     "turbo": "^2.11.7",
