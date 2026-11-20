@@ -72,7 +72,12 @@ export async function POST(req: Request) {
     }
 
     if (eventData.event === "transfer.success") {
-      if (typeof data.reference !== "string") {
+      if (
+        typeof data.reference !== "string" ||
+        !Number.isSafeInteger(data.amount) ||
+        (data.amount as number) <= 0 ||
+        data.currency !== "GHS"
+      ) {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
       if (!data.reference.startsWith("cashout_")) {
@@ -84,6 +89,8 @@ export async function POST(req: Request) {
         .from("paystack_transfers")
         .update({ status: "success", updated_at: now, completed_at: now })
         .eq("reference", data.reference)
+        .eq("amount_cents", data.amount)
+        .eq("currency", data.currency)
         .in("status", ["initialized", "pending"])
         .select("reference")
         .maybeSingle();
@@ -97,7 +104,12 @@ export async function POST(req: Request) {
           .select("status")
           .eq("reference", data.reference)
           .maybeSingle();
-        if (existingError || existing?.status !== "success") {
+        if (
+          existingError ||
+          existing?.status !== "success" ||
+          existing?.amount_cents !== data.amount ||
+          existing?.currency !== data.currency
+        ) {
           console.error("Unable to find a pending cashout for the success event.", existingError);
           return NextResponse.json({ error: "Cashout status update is pending review." }, { status: 500 });
         }
@@ -105,14 +117,16 @@ export async function POST(req: Request) {
     }
 
     if (eventData.event === "transfer.failed" || eventData.event === "transfer.reversed") {
-      if (typeof data.reference !== "string") {
+      if (
+        typeof data.reference !== "string" ||
+        !Number.isSafeInteger(data.amount) ||
+        (data.amount as number) <= 0 ||
+        data.currency !== "GHS"
+      ) {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
       if (!data.reference.startsWith("cashout_")) {
         return NextResponse.json({ processed: true }, { status: 200 });
-      }
-      if (!Number.isSafeInteger(data.amount) || (data.amount as number) <= 0) {
-        return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
 
       const { data: entry, error: entryError } = await supabase

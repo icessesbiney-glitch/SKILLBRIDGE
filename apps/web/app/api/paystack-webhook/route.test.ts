@@ -77,7 +77,7 @@ describe('POST /api/paystack-webhook', () => {
     const reference = 'cashout_12345678-1234-1234-1234-123456789abc';
     const response = await POST(request({
       event: 'transfer.failed',
-      data: { reference, amount: 5000 },
+      data: { reference, amount: 5000, currency: 'GHS' },
     }));
 
     expect(response.status).toBe(200);
@@ -93,7 +93,7 @@ describe('POST /api/paystack-webhook', () => {
   it('allows provider reversals to reverse a previously successful transfer', async () => {
     const response = await POST(request({
       event: 'transfer.reversed',
-      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000, currency: 'GHS' },
     }));
 
     expect(response.status).toBe(200);
@@ -107,7 +107,7 @@ describe('POST /api/paystack-webhook', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const response = await POST(request({
       event: 'transfer.failed',
-      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000, currency: 'GHS' },
     }));
 
     expect(response.status).toBe(500);
@@ -120,7 +120,7 @@ describe('POST /api/paystack-webhook', () => {
     const reference = 'cashout_12345678-1234-1234-1234-123456789abc';
     const response = await POST(request({
       event: 'transfer.success',
-      data: { reference, amount: 5000 },
+      data: { reference, amount: 5000, currency: 'GHS' },
     }));
 
     expect(response.status).toBe(200);
@@ -129,7 +129,40 @@ describe('POST /api/paystack-webhook', () => {
       status: 'success',
       completed_at: expect.any(String),
     }));
+    expect(query.eq).toHaveBeenCalledWith('amount_cents', 5000);
+    expect(query.eq).toHaveBeenCalledWith('currency', 'GHS');
     expect(query.in).toHaveBeenCalledWith('status', ['initialized', 'pending']);
+  });
+
+  it('rejects a cashout success event with an unexpected currency', async () => {
+    const response = await POST(request({
+      event: 'transfer.success',
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000, currency: 'USD' },
+    }));
+
+    expect(response.status).toBe(400);
+    expect(database.from).not.toHaveBeenCalled();
+  });
+
+  it('does not acknowledge a success event whose amount differs from the recorded cashout', async () => {
+    query.maybeSingle
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: { status: 'pending', amount_cents: 6000, currency: 'GHS' },
+        error: null,
+      });
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const response = await POST(request({
+      event: 'transfer.success',
+      data: {
+        reference: 'cashout_12345678-1234-1234-1234-123456789abc',
+        amount: 5000,
+        currency: 'GHS',
+      },
+    }));
+
+    expect(response.status).toBe(500);
   });
 
   it('does not acknowledge a failed cashout without its ledger entry', async () => {
@@ -153,7 +186,7 @@ describe('POST /api/paystack-webhook', () => {
 
     const response = await POST(request({
       event: 'transfer.success',
-      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000, currency: 'GHS' },
     }));
 
     expect(response.status).toBe(500);

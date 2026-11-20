@@ -73,7 +73,7 @@ begin
   if transfer_status not in ('initialized', 'pending', 'success') then
     return jsonb_build_object('success', false, 'error', 'Cashout is not reversible.');
   end if;
-  if transfer_status = 'success' and not allow_success_reversal then
+  if transfer_status = 'success' and allow_success_reversal is distinct from true then
     return jsonb_build_object('success', false, 'error', 'A failed event cannot reverse a completed cashout.');
   end if;
 

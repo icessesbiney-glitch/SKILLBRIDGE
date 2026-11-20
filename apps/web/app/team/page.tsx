@@ -17,7 +17,7 @@ export default function TeamPage() {
                 <h1>Finish the project with clear ownership.</h1>
               </div>
               <p>
-                The repository now has a dedicated protected page for delivery roles, responsibilities, and the parts of the product that still need follow-through.
+                Review protected team responsibilities and operational ownership for the current marketplace.
               </p>
             </div>
 

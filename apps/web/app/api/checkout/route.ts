@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminClient, authenticate } from "../_lib/auth";
+import { readRequestBody, RequestBodyTooLargeError } from "../_lib/request-body";
 
 type CheckoutPayload = {
   amount?: unknown;
@@ -26,8 +27,11 @@ export async function POST(request: Request) {
 
   let payload: CheckoutPayload;
   try {
-    payload = await request.json();
-  } catch {
+    payload = JSON.parse(new TextDecoder().decode(await readRequestBody(request, 16_384)));
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+    }
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 

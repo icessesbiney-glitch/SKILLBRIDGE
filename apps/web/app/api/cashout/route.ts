@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { adminClient, authenticate } from '../_lib/auth';
+import { readRequestBody, RequestBodyTooLargeError } from '../_lib/request-body';
 
 const PAYSTACK_URL = 'https://api.paystack.co';
 const MOBILE_MONEY_NETWORKS = ['MTN', 'VOD', 'ATL'] as const;
@@ -29,8 +30,11 @@ export async function POST(request: Request) {
 
   let payload: unknown;
   try {
-    payload = await request.json();
-  } catch {
+    payload = JSON.parse(new TextDecoder().decode(await readRequestBody(request, 16_384)));
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return NextResponse.json({ error: 'Request body is too large.' }, { status: 413 });
+    }
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {

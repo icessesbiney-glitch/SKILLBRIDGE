@@ -98,6 +98,18 @@ describe('POST /api/checkout', () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
+  it('rejects oversized requests before contacting Paystack', async () => {
+    const response = await POST(new Request('https://skillbridge.example/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Length': '16385' },
+      body: '{}',
+    }));
+
+    expect(response.status).toBe(413);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+  });
+
   it('does not expose a checkout link when the transaction cannot be recorded', async () => {
     insert.mockResolvedValue({ error: new Error('database unavailable') });
 

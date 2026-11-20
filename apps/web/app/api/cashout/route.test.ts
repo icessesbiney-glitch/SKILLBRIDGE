@@ -92,6 +92,18 @@ describe('POST /api/cashout', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('rejects oversized requests before checking or debiting the wallet', async () => {
+    const response = await POST(new Request('https://skillbridge.example/api/cashout', {
+      method: 'POST',
+      headers: { 'Content-Length': '16385' },
+      body: '{}',
+    }));
+
+    expect(response.status).toBe(413);
+    expect(database.from).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it('prevents another cashout while a prior transfer is unresolved', async () => {
     activeCashoutQuery.maybeSingle.mockResolvedValue({
       data: { reference: 'cashout_existing' },
