@@ -25,8 +25,6 @@ jobs:
     environment: web-public-vercel
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_nLN657ZMe6wupW9HNdm6DQ_44_bZOjE' }}
-      SUPABASE_SERVICE_ROLE_KEY: build-only-placeholder
 
     steps:
       - name: Checkout Repository
@@ -37,23 +35,19 @@ jobs:
         with:
           node-version: '22.x'
           cache: npm
-          cache-dependency-path: SKILLBRIDGE/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-        working-directory: SKILLBRIDGE
 
       - name: Lint SkillBridge Web App
         run: npm run lint --workspace=@skillbridge/web
-        working-directory: SKILLBRIDGE
 
       - name: Build SkillBridge Main Workspace
-        run: npx turbo run build --filter=@skillbridge/web
-        working-directory: SKILLBRIDGE
+        run: npm run build:web
 
       - name: Test SkillBridge Web App
         run: npm run test --workspace=@skillbridge/web
-        working-directory: SKILLBRIDGE
 
       - name: Deploy to Vercel (Production)
         if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != '' }}

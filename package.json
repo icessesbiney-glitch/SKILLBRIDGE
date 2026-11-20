@@ -13,7 +13,8 @@
     "type-check": "npm run type-check --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build:web": "npm run build --workspace=apps/web",
-    "test": "npm run test --workspace=@skillbridge/web"
+    "test": "npm run test --workspace=@skillbridge/web",
+    "validate:mobile": "npm run validate:mobile --workspace=skillbridge-mobile"
   },
   "devDependencies": {
     "eslint": "^9.39.5",
