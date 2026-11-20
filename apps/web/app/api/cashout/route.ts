@@ -111,6 +111,7 @@ export async function POST(request: Request) {
       target_profile_id: auth.user.id,
       returned_amount_cents: amountCents,
       failed_reference: reference,
+      allow_success_reversal: false,
     });
     if (error || !data?.success) {
       console.error('Unable to restore a rejected cashout debit.', error ?? data);
@@ -206,12 +207,20 @@ export async function POST(request: Request) {
     console.error('Paystack transfer returned an unreadable response; leaving the debit pending.', error);
     return pendingResponse(reference);
   }
-  if (!transferResponse.ok || !transfer?.status) {
+  if (transferResponse.status >= 500) {
+    console.error('Paystack transfer response is ambiguous; leaving the debit pending.', transferResponse.status);
+    return pendingResponse(reference);
+  }
+  if (transfer?.status === false) {
     const restored = await restoreDebit();
     return NextResponse.json(
       { error: restored ? 'The payout provider rejected the transfer. Your wallet debit was restored.' : 'Cashout needs support review.' },
       { status: restored ? 502 : 503 },
     );
+  }
+  if (!transferResponse.ok || transfer?.status !== true) {
+    console.error('Paystack transfer response is ambiguous; leaving the debit pending.', transferResponse.status);
+    return pendingResponse(reference);
   }
 
   if (transfer.data?.transfer_code) {

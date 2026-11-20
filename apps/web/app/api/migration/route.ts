@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { adminClient, authenticate } from '../_lib/auth';
+import { readRequestBody, RequestBodyTooLargeError } from '../_lib/request-body';
 
 // Roles a user may pick for themselves; admin roles are never self-assignable.
 const SELF_SERVICE_ROLES = ['customer', 'vendor_micro', 'vendor_elite'];
@@ -15,7 +16,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
     }
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = JSON.parse(new TextDecoder().decode(await readRequestBody(req, 16_384)));
+    } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return NextResponse.json({ error: 'Request body is too large.' }, { status: 413 });
+      }
+      return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+    }
     const { fullName, phoneNumber, ghanaCardPin, roleTier } = body ?? {};
     if (
       typeof fullName !== 'string' ||
@@ -42,7 +51,15 @@ export async function POST(req: Request) {
     }
 
     const profileId = auth.user.id;
-    const { data: existing } = await supabase.from('profiles').select('role_tier').eq('id', profileId).maybeSingle();
+    const { data: existing, error: existingError } = await supabase
+      .from('profiles')
+      .select('role_tier')
+      .eq('id', profileId)
+      .maybeSingle();
+    if (existingError) {
+      console.error('Unable to verify the existing onboarding profile.', existingError);
+      return NextResponse.json({ error: 'Account verification could not be completed.' }, { status: 500 });
+    }
     if (existing?.role_tier === 'admin_central') {
       return NextResponse.json({ error: 'Admin profiles cannot be modified here.' }, { status: 403 });
     }
@@ -60,16 +77,19 @@ export async function POST(req: Request) {
           phone_number: normalizedPhone,
           role_tier: roleTier,
           national_id_hash: nationalIdHash,
+          verification: 'pending',
         },
         { onConflict: 'id' }
       );
 
     if (dbError) {
-      return NextResponse.json({ error: dbError.message }, { status: 500 });
+      console.error('Unable to save onboarding details.', dbError);
+      return NextResponse.json({ error: 'Onboarding could not be saved.' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Submitted for administrator review.' }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('Unexpected onboarding failure.', error);
     return NextResponse.json({ error: 'Onboarding failed.' }, { status: 500 });
   }
 }
