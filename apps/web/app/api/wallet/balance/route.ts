@@ -55,6 +55,23 @@ export async function GET(request: Request) {
     reversed = new Set((reversals ?? []).map((row) => row.reference_id));
   }
 
+  const withdrawalReferences = (withdrawals ?? []).map((withdrawal) => withdrawal.reference_id);
+  let transferStatuses = new Map<string, string>();
+  if (withdrawalReferences.length > 0) {
+    const { data: transfers, error: transferError } = await supabase
+      .from('paystack_transfers')
+      .select('reference, status')
+      .eq('user_id', auth.user.id)
+      .in('reference', withdrawalReferences);
+    if (transferError) {
+      console.error('Unable to load wallet transfer status.', transferError);
+      return NextResponse.json({ error: 'Unable to load wallet activity.' }, { status: 503 });
+    }
+    transferStatuses = new Map(
+      (transfers ?? []).map((transfer) => [transfer.reference, transfer.status]),
+    );
+  }
+
   return NextResponse.json({
     success: true,
     wallet: {
@@ -68,7 +85,12 @@ export async function GET(request: Request) {
       id: withdrawal.id,
       amountGhs: (Math.abs(withdrawal.amount_cents) / 100).toFixed(2),
       reference: withdrawal.reference_id,
-      status: reversed.has(`reversal_${withdrawal.reference_id}`) ? 'reversed' : 'pending',
+      status: transferStatuses.get(withdrawal.reference_id) === 'success'
+        ? 'completed'
+        : transferStatuses.get(withdrawal.reference_id) === 'reversed' ||
+            reversed.has(`reversal_${withdrawal.reference_id}`)
+          ? 'reversed'
+          : 'pending',
       createdAt: withdrawal.created_at,
     })),
   });

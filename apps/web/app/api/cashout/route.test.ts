@@ -12,7 +12,29 @@ jest.mock('../_lib/auth', () => ({
 
 const user = { id: 'user-123' };
 const rpc = jest.fn();
-const database = { rpc };
+const activeCashoutQuery = {
+  select: jest.fn(),
+  eq: jest.fn(),
+  in: jest.fn(),
+  limit: jest.fn(),
+  maybeSingle: jest.fn(),
+};
+const transferUpdateQuery = {
+  update: jest.fn(),
+  eq: jest.fn(),
+  select: jest.fn(),
+  maybeSingle: jest.fn(),
+};
+const transferCodeQuery = {
+  update: jest.fn(),
+  eq: jest.fn(),
+  select: jest.fn(),
+  maybeSingle: jest.fn(),
+};
+const database = {
+  rpc,
+  from: jest.fn(),
+};
 const validPayload = {
   amount: '50.00',
   bankCode: 'MTN',
@@ -39,6 +61,23 @@ describe('POST /api/cashout', () => {
     jest.mocked(authenticate).mockResolvedValue({ user } as Awaited<ReturnType<typeof authenticate>>);
     jest.mocked(adminClient).mockReturnValue(database as unknown as ReturnType<typeof adminClient>);
     rpc.mockResolvedValue({ data: { success: true }, error: null });
+    activeCashoutQuery.select.mockReturnValue(activeCashoutQuery);
+    activeCashoutQuery.eq.mockReturnValue(activeCashoutQuery);
+    activeCashoutQuery.in.mockReturnValue(activeCashoutQuery);
+    activeCashoutQuery.limit.mockReturnValue(activeCashoutQuery);
+    activeCashoutQuery.maybeSingle.mockResolvedValue({ data: null, error: null });
+    transferUpdateQuery.update.mockReturnValue(transferUpdateQuery);
+    transferUpdateQuery.eq.mockReturnValue(transferUpdateQuery);
+    transferUpdateQuery.select.mockReturnValue(transferUpdateQuery);
+    transferUpdateQuery.maybeSingle.mockResolvedValue({ data: { reference: 'cashout_test' }, error: null });
+    transferCodeQuery.update.mockReturnValue(transferCodeQuery);
+    transferCodeQuery.eq.mockReturnValue(transferCodeQuery);
+    transferCodeQuery.select.mockReturnValue(transferCodeQuery);
+    transferCodeQuery.maybeSingle.mockResolvedValue({ data: { reference: 'cashout_test' }, error: null });
+    database.from.mockImplementation(() => {
+      const callNumber = database.from.mock.calls.length;
+      return callNumber === 1 ? activeCashoutQuery : callNumber === 2 ? transferUpdateQuery : transferCodeQuery;
+    });
   });
 
   afterEach(() => {
@@ -49,6 +88,19 @@ describe('POST /api/cashout', () => {
     const response = await POST(request({ ...validPayload, amount: '49.99' }));
 
     expect(response.status).toBe(400);
+    expect(rpc).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('prevents another cashout while a prior transfer is unresolved', async () => {
+    activeCashoutQuery.maybeSingle.mockResolvedValue({
+      data: { reference: 'cashout_existing' },
+      error: null,
+    });
+
+    const response = await POST(request(validPayload));
+
+    expect(response.status).toBe(409);
     expect(rpc).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -76,6 +128,10 @@ describe('POST /api/cashout', () => {
       target_profile_id: user.id,
       requested_amount_cents: 5000,
     }));
+    expect(transferUpdateQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({ recipient_code: 'RCP_test', status: 'pending' }),
+    );
+    expect(transferCodeQuery.update).toHaveBeenCalledWith({ transfer_code: 'TRF_test', updated_at: expect.any(String) });
     expect(jest.mocked(fetch).mock.calls[1][1]?.headers).toMatchObject({
       Authorization: 'Bearer test-paystack-secret',
     });
