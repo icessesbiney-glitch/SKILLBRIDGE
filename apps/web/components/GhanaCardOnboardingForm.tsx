@@ -20,18 +20,19 @@ export default function GhanaCardOnboardingForm() {
     e.preventDefault();
     setStatus({ loading: true, success: false, error: '' });
 
-    const ghanaCardRegex = /^GHA-\d{9}-\d$/;
-    if (!ghanaCardRegex.test(formData.ghanaCardPin)) {
-      setStatus({ loading: false, success: false, error: 'Invalid Ghana Card PIN. Pattern: GHA-123456789-0' });
+    const ghanaCardRegex = /^GHA-\d{9}-\d$/i;
+    if (!ghanaCardRegex.test(formData.ghanaCardPin.trim())) {
+      setStatus({ loading: false, success: false, error: 'Enter a valid Ghana Card PIN.' });
       return;
     }
 
-    if (formData.phoneNumber.length < 10) {
+    if (!/^(?:\+?233|0)\d{9}$/.test(formData.phoneNumber.replace(/[\s-]/g, ''))) {
       setStatus({ loading: false, success: false, error: 'Enter a valid 10-digit phone number.' });
       return;
     }
 
     try {
+      if (!supabase) throw new Error('Account services are not configured.');
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) throw new Error('Please sign in before submitting verification.');
@@ -42,7 +43,8 @@ export default function GhanaCardOnboardingForm() {
         body: JSON.stringify(formData)
       });
 
-      if (!response.ok) throw new Error('Compliance validation failed.');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Submission failed.');
       setStatus({ loading: false, success: true, error: '' });
     } catch (err: any) {
       setStatus({ loading: false, success: false, error: err.message || 'Server error.' });
@@ -71,13 +73,12 @@ export default function GhanaCardOnboardingForm() {
             <option value="customer">Standard Customer</option>
             <option value="vendor_micro">Micro Vendor</option>
             <option value="vendor_elite">Elite Wholesaler</option>
-            <option value="driver_rider">Logistics Rider</option>
           </select>
         </div>
         {status.error && <div className="p-3 text-xs bg-red-50 text-red-600 rounded-lg">{status.error}</div>}
-        {status.success && <div className="p-3 text-xs bg-emerald-50 text-emerald-700 rounded-lg">Verification complete!</div>}
+        {status.success && <div className="p-3 text-xs bg-emerald-50 text-emerald-700 rounded-lg">Your information was submitted for administrator review. It has not been verified yet.</div>}
         <button type="submit" disabled={status.loading} className="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg text-sm">
-          {status.loading ? 'Processing...' : 'Submit Records'}
+          {status.loading ? 'Submitting...' : 'Submit for review'}
         </button>
       </form>
     </div>

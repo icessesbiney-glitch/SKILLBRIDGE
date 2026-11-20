@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { adminClient, authenticate } from '../_lib/auth';
 
 // Roles a user may pick for themselves; admin roles are never self-assignable.
-const SELF_SERVICE_ROLES = ['customer', 'vendor_micro', 'vendor_elite', 'driver_rider'];
+const SELF_SERVICE_ROLES = ['customer', 'vendor_micro', 'vendor_elite'];
 
 export async function POST(req: Request) {
   try {
@@ -15,9 +15,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Server is not configured.' }, { status: 500 });
     }
 
-    const { fullName, phoneNumber, ghanaCardPin, roleTier } = await req.json();
-    if (!fullName || !phoneNumber || !ghanaCardPin || !roleTier) {
+    const body = await req.json();
+    const { fullName, phoneNumber, ghanaCardPin, roleTier } = body ?? {};
+    if (
+      typeof fullName !== 'string' ||
+      typeof phoneNumber !== 'string' ||
+      typeof ghanaCardPin !== 'string' ||
+      typeof roleTier !== 'string'
+    ) {
       return NextResponse.json({ error: 'Incomplete payload attributes.' }, { status: 400 });
+    }
+    const normalizedName = fullName.trim();
+    const normalizedPhone = phoneNumber.replace(/[\s-]/g, '');
+    const normalizedCardPin = ghanaCardPin.trim().toUpperCase();
+    if (!normalizedName || normalizedName.length > 200) {
+      return NextResponse.json({ error: 'Enter a valid full name.' }, { status: 400 });
+    }
+    if (!/^(?:\+?233|0)\d{9}$/.test(normalizedPhone)) {
+      return NextResponse.json({ error: 'Enter a valid Ghana phone number.' }, { status: 400 });
+    }
+    if (!/^GHA-\d{9}-\d$/.test(normalizedCardPin)) {
+      return NextResponse.json({ error: 'Enter a valid Ghana Card PIN.' }, { status: 400 });
     }
     if (!SELF_SERVICE_ROLES.includes(roleTier)) {
       return NextResponse.json({ error: 'Invalid role selection.' }, { status: 400 });
@@ -30,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     // Keyed hash: a plain SHA-256 of a short ID number is trivially brute-forced.
-    const nationalIdHash = crypto.createHmac('sha256', idSecret).update(String(ghanaCardPin)).digest('hex');
+    const nationalIdHash = crypto.createHmac('sha256', idSecret).update(normalizedCardPin).digest('hex');
 
     // Verification stays 'pending' until an admin approves the record.
     const { error: dbError } = await supabase
@@ -38,8 +56,8 @@ export async function POST(req: Request) {
       .upsert(
         {
           id: profileId,
-          legal_name: String(fullName).slice(0, 200),
-          phone_number: String(phoneNumber).slice(0, 30),
+          legal_name: normalizedName,
+          phone_number: normalizedPhone,
           role_tier: roleTier,
           national_id_hash: nationalIdHash,
         },
@@ -50,7 +68,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Submitted for verification.' }, { status: 200 });
+    return NextResponse.json({ success: true, message: 'Submitted for administrator review.' }, { status: 200 });
   } catch {
     return NextResponse.json({ error: 'Onboarding failed.' }, { status: 500 });
   }

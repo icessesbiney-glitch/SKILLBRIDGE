@@ -32,6 +32,12 @@ export default function TaskWorkspace() {
 
   useEffect(() => {
     async function loadTasks() {
+      if (!supabase) {
+        setTaskError('Task services are not configured. Please try again later.');
+        setIsLoadingTasks(false);
+        return;
+      }
+
       setIsLoadingTasks(true);
       setTaskError('');
 
@@ -76,6 +82,11 @@ export default function TaskWorkspace() {
     e.preventDefault();
 
     if (!activeTask) {
+      return;
+    }
+
+    if (!supabase) {
+      setSubmissionError('Task services are not configured. Please try again later.');
       return;
     }
 
