@@ -3,11 +3,31 @@ import type { NextRequest } from "next/server";
 import { updateSession } from "./utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isDeferredApi = [
+    "/api/gps",
+    "/api/dispatch",
+    "/api/delivery/dispatch",
+    "/api/rider/telemetry",
+    "/api/orders/create",
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
+
+  if (isDeferredApi) {
+    return NextResponse.json(
+      { error: "Driver and delivery functionality is deferred until 2029.", code: "sector_deferred" },
+      { status: 410 },
+    );
+  }
+
+  if (pathname === "/rider" || pathname.startsWith("/rider/") || pathname === "/admin/gps") {
+    return NextResponse.rewrite(new URL("/deferred", request.url));
+  }
+
   const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const isAdminRoute = pathname.startsWith("/admin");
   const isSessionRoute =
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/roadmap");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/roadmap");
 
   if (
     (isAdminRoute || isSessionRoute) &&
@@ -53,5 +73,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/roadmap/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/dashboard/:path*",
+    "/roadmap/:path*",
+    "/rider/:path*",
+    "/api/gps/:path*",
+    "/api/dispatch/:path*",
+    "/api/delivery/dispatch/:path*",
+    "/api/rider/telemetry/:path*",
+    "/api/orders/create/:path*",
+  ],
 };
