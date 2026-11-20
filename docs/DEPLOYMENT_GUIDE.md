@@ -64,9 +64,15 @@ Configure the Paystack webhook to call `/api/paystack-webhook` on the production
 
 ## Dependency audit status
 
-The production-only audit reports three moderate findings for `minimatch` 10.2.6, reached through Expo 58.0.26 and `@expo/fingerprint` 0.21.10. The advisory describes denial of service through glob-pattern amplification. The available automatic Expo fix downgrades the SDK to 52, which is not compatible with the current migration; keep Expo CLI use in trusted builds and do not accept user-controlled fingerprint ignore patterns. Revisit when Expo updates this dependency.
+The production-only audit reports three moderate findings for `minimatch` 10.2.6, reached through Expo 58.0.26 and `@expo/fingerprint` 0.21.10. The advisory describes denial of service through glob-pattern amplification. The available automatic Expo fix would downgrade from SDK 58 to SDK 52, reversing the completed SDK migration, so it was not applied. Keep Expo CLI use in trusted builds, review changes to fingerprint ignore patterns, and revisit when Expo updates this dependency.
 
-The full monorepo audit additionally reports eight high and one critical finding in the legacy desktop toolchain, including `electron` 27.3.11, `electron-builder` 24.13.3, and `tar` 6.2.1. Fixes require major desktop-toolchain upgrades. Desktop builds are outside the currently validated web/mobile launch scope; do not create a desktop production tag or dispatch its workflows until the dependencies and workflow paths are corrected and cross-platform builds are verified. See [DEPLOY_DESKTOP.md](./DEPLOY_DESKTOP.md).
+The full audit reports 30 findings (21 moderate, eight high, one critical):
+
+| Scope | Dependencies | Impact and mitigation |
+|---|---|---|
+| Mobile build tooling | `expo` 58.0.26, `@expo/fingerprint` 0.21.10, `minimatch` 10.2.6 | Three moderate findings; keep Expo CLI use in trusted builds and update when Expo supplies a compatible fix. |
+| Test tooling | Jest 30.5.2 / `@jest/*`, `glob` 13.0.7, `test-exclude` 7.0.2, `config-file-ts` 0.2.6 | Moderate findings in test and glob-pattern processing; current automatic fixes downgrade Jest to 29.7.0 or have no safe fix. Do not feed untrusted patterns to test tooling; these packages are not deployed as web/mobile runtime code. |
+| Legacy desktop packaging | `electron` 27.3.11, `electron-builder` 24.13.3, `tar` 6.2.1, `extract-zip` | Eight high and one critical finding in packaging/runtime dependencies. Fixes require major desktop-toolchain upgrades. Desktop builds are outside the currently validated web/mobile launch scope; do not create a desktop production tag or dispatch its workflows until dependencies and workflow paths are corrected and cross-platform builds are verified. See [DEPLOY_DESKTOP.md](./DEPLOY_DESKTOP.md). |
 
 ## Mobile companion
 
