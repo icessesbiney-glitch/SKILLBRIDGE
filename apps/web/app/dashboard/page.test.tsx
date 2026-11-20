@@ -34,8 +34,7 @@ describe('DashboardPage', () => {
 
     render(<DashboardPage />);
 
-    // Aligned to match your clean repository operational headers perfectly
     expect(screen.getByRole('heading', { name: /marketplace dashboard/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /browse marketplace/i }).getAttribute('href')).toBe('/tasks');
+    expect(screen.getByRole('link', { name: /browse work/i }).getAttribute('href')).toBe('/tasks');
   });
 });
