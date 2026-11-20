@@ -22,8 +22,6 @@ export default function TaskWorkspace() {
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [taskError, setTaskError] = useState('');
 
-  const [uploads, setUploads] = useState<string[]>([]);
-
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [submissionText, setSubmissionText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -301,44 +299,8 @@ export default function TaskWorkspace() {
         )}
       </div>
 
-      {/* Upload and resources */}
+      {/* Resources */}
       <div className="sb-card-grid sb-card-grid-compact">
-        <article className="sb-card">
-          <span className="sb-status-pill">Upload support</span>
-
-          <h3>Attach learning files</h3>
-
-          <p>
-            Select task evidence, worksheets, or project files that you may
-            attach to your task submission.
-          </p>
-
-          <label className="sb-upload-box">
-            <span>Select files</span>
-
-            <input
-              type="file"
-              multiple
-              onChange={(event) =>
-                setUploads(
-                  Array.from(event.target.files ?? []).map(
-                    (file) =>
-                      `${file.name} (${Math.ceil(file.size / 1024)} KB)`,
-                  ),
-                )
-              }
-            />
-          </label>
-
-          <ul className="sb-simple-list">
-            {uploads.length > 0 ? (
-              uploads.map((file) => <li key={file}>{file}</li>)
-            ) : (
-              <li>No files selected yet.</li>
-            )}
-          </ul>
-        </article>
-
         <article className="sb-card">
           <span className="sb-status-pill">Download support</span>
 

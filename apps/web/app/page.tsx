@@ -16,7 +16,7 @@ export default function HomePage() {
               Account verification is submitted securely for review.
             </p>
             <div className="sb-session-actions">
-              <Link href="/auth?signup=1" className="sb-button">Create an account</Link>
+              <Link href="/auth?mode=signup" className="sb-button">Create an account</Link>
               <Link href="/tasks" className="sb-button-secondary">Browse available work</Link>
             </div>
           </div>

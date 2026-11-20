@@ -11,25 +11,10 @@ import { getSafeNextPath } from './nextPath';
 
 export const dynamic = 'force-dynamic';
 
-// Hardcoded clean values to pass Dodo review instantly
-const countryOptions = ['Ghana', 'Nigeria', 'Kenya', 'South Africa', 'United Kingdom', 'United States', 'Other'];
-const educationLevels = [
-  'Independent Application Builder',
-  'Technical Interface Manager',
-  'Database Workspace Controller',
-  'Software Project Director',
-  'Cloud Infrastructure Strategist',
-];
-
 export default function AuthPage() {
   const router = useRouter();
   const { session } = useAuthSession();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [fullName, setFullName] = useState('');
-  const [age, setAge] = useState('22');
-  const [country, setCountry] = useState('Ghana');
-  const [visibility, setVisibility] = useState<'local' | 'public'>('local');
-  const [educationLevel, setEducationLevel] = useState(educationLevels[0]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +29,7 @@ export default function AuthPage() {
     }
 
     setNextPath(getSafeNextPath(window.location.search));
+    setIsSignUp(new URLSearchParams(window.location.search).get('mode') === 'signup');
   }, []);
 
   useEffect(() => {
@@ -66,27 +52,17 @@ export default function AuthPage() {
       }
 
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-              age,
-              country,
-              visibility,
-              education_level: educationLevel,
-              qualification_access: 'Open to all learners',
-            },
-          },
-        });
+        const { error } = await supabase.auth.signUp({ email: email.trim(), password });
         if (error) {
           throw error;
         }
         setFeedbackType('success');
         setMessage('Registration started. Check your email to confirm your account.');
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
         if (error) {
           throw error;
         }
@@ -110,9 +86,9 @@ export default function AuthPage() {
         <div className="sb-container sb-auth-layout">
           <div className="sb-panel">
             <span className="sb-eyebrow">Access and onboarding</span>
-            <h1>{isSignUp ? 'Create a SkillBridge account' : 'Sign in to continue the rebuild'}</h1>
+            <h1>{isSignUp ? 'Create a SkillBridge account' : 'Sign in to SkillBridge'}</h1>
             <p>
-              This page now uses the configured Supabase client instead of placeholder success messages, and it clearly reports when the deployment environment is still incomplete.
+              Use your account to manage your wallet and marketplace activity.
             </p>
             <div className="sb-notice">
               <strong>{isSupabaseConfigured ? 'Supabase detected' : 'Supabase missing'}</strong>
@@ -127,82 +103,16 @@ export default function AuthPage() {
           <div className="sb-auth-card">
             <div className="sb-auth-head">
               <h2>{isSignUp ? 'Create your account' : 'Welcome back'}</h2>
-              <p>{isSignUp ? 'Register from any country, with Ghana prioritised, and learn to earn at every level.' : 'Continue with repository operations.'}</p>
+              <p>{isSignUp ? 'Create an account to get started.' : 'Welcome back. Sign in to continue.'}</p>
             </div>
 
             <form className="sb-form" onSubmit={handleAuth} aria-busy={loading}>
-              {isSignUp && (
-                <>
-                  <label className="sb-field">
-                    <span>Full name</span>
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Ama Mensah"
-                    />
-                  </label>
-
-                  <div className="sb-form-grid">
-                    <label className="sb-field">
-                      <span>Age</span>
-                      <input
-                        type="number"
-                        min="16"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                      />
-                    </label>
-
-                    <label className="sb-field">
-                      <span>Country</span>
-                      <select value={country} onChange={(e) => setCountry(e.target.value)} className="sb-select">
-                        {countryOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="sb-form-grid">
-                    <label className="sb-field">
-                      <span>Education or qualification</span>
-                      <select
-                        value={educationLevel}
-                        onChange={(e) => setEducationLevel(e.target.value)}
-                        className="sb-select"
-                      >
-                        {educationLevels.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className="sb-field">
-                      <span>Task visibility</span>
-                      <select
-                        value={visibility}
-                        onChange={(e) => setVisibility(e.target.value as 'local' | 'public')}
-                        className="sb-select"
-                      >
-                        <option value="local">Local</option>
-                        <option value="public">Public</option>
-                      </select>
-                    </label>
-                  </div>
-                </>
-              )}
-
               <label className="sb-field">
                 <span>Email address</span>
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -214,6 +124,8 @@ export default function AuthPage() {
                 <input
                   type="password"
                   required
+                  minLength={6}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
