@@ -58,7 +58,7 @@ npm run build
 
 ## Supabase and payments
 
-The migration directory does not contain a complete baseline schema. Confirm the target database already has the required application tables and functions, and review each migration against the live migration history before applying anything. The wallet migrations depend on existing `profiles`, `platform_wallets`, and `ledger_entries` tables. `20261127_cashout_wallet_debit.sql` supplies the wallet-debit function used by cashout; the migration must be applied to the intended database before cashouts can work. Do not apply migrations to production as part of this deployment task.
+The migration directory does not contain a complete baseline schema. Confirm the target database already has the required application tables and functions, and review each migration against the live migration history before applying anything. The wallet migrations depend on existing `profiles`, `platform_wallets`, and `ledger_entries` tables. `20261127_cashout_wallet_debit.sql` creates the restricted cashout-debit function and transfer-status table; it must be applied to the intended database before cashouts can work. Cashout requests stay blocked while an earlier transfer is unresolved, preventing duplicate payouts. Do not apply migrations to production as part of this deployment task.
 
 Configure the Paystack webhook to call `/api/paystack-webhook` on the production origin and keep the provider secret in `PAYSTACK_SECRET_KEY`. Confirm the configured webhook behavior and database schema with the service owner before enabling live money movement.
 
