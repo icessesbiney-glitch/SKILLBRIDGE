@@ -1,10 +1,7 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabaseClient';
 
 interface RiderRequestProps {
   riderProfileId: string;
@@ -30,9 +27,10 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
   const [processing, setProcessing] = useState<boolean>(false);
 
   useEffect(() => {
-    const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+    const client = supabase;
+    if (!client) return undefined;
 
-    const dispatchChannel = supabase
+    const dispatchChannel = client
       .channel(`rider-dispatch-${riderProfileId}`)
       .on(
         'postgres_changes',
@@ -44,7 +42,7 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
         },
         async (payload: any) => {
           if (payload.new.assignment_status === 'pending') {
-            const { data: orderData } = await supabase
+            const { data: orderData } = await client
               .from('delivery_orders')
               .select('order_reference, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, order_total')
               .eq('id', payload.new.order_id)
@@ -64,27 +62,21 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
       .subscribe();
 
     return () => {
-      supabase.removeChannel(dispatchChannel);
+      client.removeChannel(dispatchChannel);
     };
   }, [riderProfileId]);
 
-  useEffect(() => {
-    if (activeRequest && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (activeRequest && countdown === 0) {
-      handleResolution('expired');
-    }
-  }, [activeRequest, countdown]);
-
-  const handleResolution = async (status: 'accepted' | 'declined' | 'expired', reason?: string) => {
+  const handleResolution = useCallback(async (status: 'accepted' | 'declined' | 'expired', reason?: string) => {
     if (!activeRequest || processing) return;
+    const client = supabase;
+    if (!client) {
+      console.error('Rider request services are not configured.');
+      return;
+    }
+
     setProcessing(true);
-
-    const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
-
     try {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await client
         .from('delivery_assignments')
         .update({
           assignment_status: status,
@@ -96,7 +88,7 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
       if (updateError) throw updateError;
 
       if (status === 'declined' || status === 'expired') {
-        await supabase.from('rider_compliance_logs').insert([
+        const { error: complianceError } = await client.from('rider_compliance_logs').insert([
           {
             rider_profile_id: riderProfileId,
             order_id: activeRequest.order_id,
@@ -104,16 +96,26 @@ export default function RiderRequestPrompt({ riderProfileId, onAssignmentResolve
             penalty_fee: 2.50
           }
         ]);
+        if (complianceError) throw complianceError;
       }
 
       setActiveRequest(null);
       onAssignmentResolved();
-    } catch (err: any) {
-      console.error(err.message);
+    } catch (error) {
+      console.error('Rider request update failed:', error);
     } finally {
       setProcessing(false);
     }
-  };
+  }, [activeRequest, onAssignmentResolved, processing, riderProfileId]);
+
+  useEffect(() => {
+    if (activeRequest && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (activeRequest && countdown === 0) {
+      handleResolution('expired');
+    }
+  }, [activeRequest, countdown, handleResolution]);
 
   if (!activeRequest) return null;
 

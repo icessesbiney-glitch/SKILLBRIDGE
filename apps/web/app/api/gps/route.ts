@@ -31,12 +31,13 @@ export async function POST(request: Request) {
     }
 
     // 1. Resolve or create the active tracking profile mapping
-    let { data: profile, error: profileError } = await supabase
+    const { data: existingProfile, error: profileError } = await supabase
       .from('gps_profiles')
       .select('id')
       .eq('user_id', userId)
       .eq('profile_type', profileType)
       .single();
+    let profile = existingProfile;
 
     if (profileError || !profile) {
       const { data: newProfile, error: createError } = await supabase
