@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../utils/supabaseClient";
-import { createClient } from "@supabase/supabase-js";
 
 interface WalletData {
   balance_cents: number;
@@ -28,19 +27,21 @@ export default function VendorWalletCard({ profileId }: { profileId: string }) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("platform_wallets")
-        .select("balance_cents, paystack_recipient_code")
-        .eq("profile_id", profileId)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from("platform_wallets")
+          .select("balance_cents, paystack_recipient_code")
+          .eq("profile_id", profileId)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Vendor wallet request failed:", error);
+        if (error) throw error;
+        if (data) setWallet(data);
+      } catch (walletError) {
+        console.error("Vendor wallet request failed:", walletError);
         setError("We could not load this wallet.");
-      } else if (data) {
-        setWallet(data);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     void fetchWalletState();
   }, [profileId]);

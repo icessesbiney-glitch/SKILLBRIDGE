@@ -21,7 +21,7 @@ jest.mock('../../utils/supabaseClient', () => ({
 }));
 
 describe('DashboardPage', () => {
-  it('shows the public repository operations view', () => {
+  it('shows the authenticated marketplace dashboard', () => {
     (useAuthSession as jest.Mock).mockReturnValue({
       isConfigured: true,
       isLoading: false,
@@ -35,8 +35,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     // Aligned to match your clean repository operational headers perfectly
-    expect(screen.getByRole('heading', { name: /repository status and deployment readiness/i })).toBeTruthy();
-    expect(screen.getByText(/validation runs without suppressing errors/i)).toBeTruthy();
-    expect(screen.getByText(/workflow files now match the repository structure/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /marketplace dashboard/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /browse marketplace/i })).toHaveAttribute('href', '/tasks');
   });
 });
