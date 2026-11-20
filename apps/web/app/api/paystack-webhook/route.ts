@@ -72,16 +72,18 @@ export async function POST(req: Request) {
     }
 
     if (eventData.event === "transfer.success") {
+      if (typeof data.reference !== "string") {
+        return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
+      }
+      if (!data.reference.startsWith("cashout_")) {
+        return NextResponse.json({ processed: true }, { status: 200 });
+      }
       if (
-        typeof data.reference !== "string" ||
         !Number.isSafeInteger(data.amount) ||
         (data.amount as number) <= 0 ||
         data.currency !== "GHS"
       ) {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
-      }
-      if (!data.reference.startsWith("cashout_")) {
-        return NextResponse.json({ processed: true }, { status: 200 });
       }
 
       const now = new Date().toISOString();
@@ -101,7 +103,7 @@ export async function POST(req: Request) {
       if (!transfer) {
         const { data: existing, error: existingError } = await supabase
           .from("paystack_transfers")
-          .select("status")
+          .select("status, amount_cents, currency")
           .eq("reference", data.reference)
           .maybeSingle();
         if (
@@ -117,16 +119,18 @@ export async function POST(req: Request) {
     }
 
     if (eventData.event === "transfer.failed" || eventData.event === "transfer.reversed") {
+      if (typeof data.reference !== "string") {
+        return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
+      }
+      if (!data.reference.startsWith("cashout_")) {
+        return NextResponse.json({ processed: true }, { status: 200 });
+      }
       if (
-        typeof data.reference !== "string" ||
         !Number.isSafeInteger(data.amount) ||
         (data.amount as number) <= 0 ||
         data.currency !== "GHS"
       ) {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
-      }
-      if (!data.reference.startsWith("cashout_")) {
-        return NextResponse.json({ processed: true }, { status: 200 });
       }
 
       const { data: entry, error: entryError } = await supabase

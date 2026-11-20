@@ -171,7 +171,11 @@ describe('POST /api/paystack-webhook', () => {
 
     const response = await POST(request({
       event: 'transfer.failed',
-      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+      data: {
+        reference: 'cashout_12345678-1234-1234-1234-123456789abc',
+        amount: 5000,
+        currency: 'GHS',
+      },
     }));
 
     expect(response.status).toBe(500);
