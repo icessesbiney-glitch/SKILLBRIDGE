@@ -72,6 +72,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Enter a valid Ghanaian mobile money number and account name.' }, { status: 400 });
   }
 
+  const { data: activeCashout, error: activeCashoutError } = await admin
+    .from('paystack_transfers')
+    .select('reference')
+    .eq('user_id', auth.user.id)
+    .in('status', ['initialized', 'pending'])
+    .limit(1)
+    .maybeSingle();
+  if (activeCashoutError) {
+    console.error('Unable to check for an active cashout.', activeCashoutError);
+    return NextResponse.json({ error: 'Cashout status could not be verified.' }, { status: 503 });
+  }
+  if (activeCashout) {
+    return NextResponse.json(
+      { error: 'A cashout is already being processed. Check wallet activity before retrying.' },
+      { status: 409 },
+    );
+  }
+
   const normalizedBankCode = bankCode.toUpperCase();
   const reference = `cashout_${randomUUID()}`;
   const { data: debit, error: debitError } = await admin.rpc('execute_wallet_withdrawal', {
@@ -81,9 +99,10 @@ export async function POST(request: Request) {
   });
   if (debitError || !debit?.success) {
     if (debitError) console.error('Wallet rejected a cashout debit.', debitError);
+    const message = debit?.error || 'Cashout could not be debited from your wallet.';
     return NextResponse.json(
-      { error: debit?.error || 'Cashout could not be debited from your wallet.' },
-      { status: 400 },
+      { error: message },
+      { status: message === 'A cashout is already being processed.' ? 409 : 400 },
     );
   }
 
@@ -147,6 +166,19 @@ export async function POST(request: Request) {
     );
   }
 
+  const { data: pendingTransfer, error: pendingTransferError } = await admin
+    .from('paystack_transfers')
+    .update({ recipient_code: recipientCode, status: 'pending', updated_at: new Date().toISOString() })
+    .eq('reference', reference)
+    .eq('user_id', auth.user.id)
+    .select('reference')
+    .maybeSingle();
+  if (pendingTransferError || !pendingTransfer) {
+    console.error('Unable to record the pending Paystack transfer.', pendingTransferError);
+    await restoreDebit();
+    return NextResponse.json({ error: 'Cashout needs support review.' }, { status: 503 });
+  }
+
   let transferResponse: Response;
   try {
     transferResponse = await fetch(`${PAYSTACK_URL}/transfer`, {
@@ -180,6 +212,18 @@ export async function POST(request: Request) {
       { error: restored ? 'The payout provider rejected the transfer. Your wallet debit was restored.' : 'Cashout needs support review.' },
       { status: restored ? 502 : 503 },
     );
+  }
+
+  if (transfer.data?.transfer_code) {
+    const { error: transferCodeError } = await admin
+      .from('paystack_transfers')
+      .update({ transfer_code: transfer.data.transfer_code, updated_at: new Date().toISOString() })
+      .eq('reference', reference)
+      .select('reference')
+      .maybeSingle();
+    if (transferCodeError) {
+      console.error('Unable to record the Paystack transfer code.', transferCodeError);
+    }
   }
 
   return NextResponse.json(

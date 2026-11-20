@@ -66,6 +66,38 @@ export async function POST(req: Request) {
       }
     }
 
+    if (eventData.event === "transfer.success") {
+      if (typeof data.reference !== "string") {
+        return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
+      }
+      if (!data.reference.startsWith("cashout_")) {
+        return NextResponse.json({ processed: true }, { status: 200 });
+      }
+
+      const { data: transfer, error: transferError } = await supabase
+        .from("paystack_transfers")
+        .update({ status: "success", updated_at: new Date().toISOString(), completed_at: new Date().toISOString() })
+        .eq("reference", data.reference)
+        .in("status", ["initialized", "pending"])
+        .select("reference")
+        .maybeSingle();
+      if (transferError) {
+        console.error("Unable to record successful Paystack cashout.", transferError);
+        return NextResponse.json({ error: "Cashout status update is pending review." }, { status: 500 });
+      }
+      if (!transfer) {
+        const { data: existing, error: existingError } = await supabase
+          .from("paystack_transfers")
+          .select("status")
+          .eq("reference", data.reference)
+          .maybeSingle();
+        if (existingError || !existing || !["success", "reversed"].includes(existing.status)) {
+          console.error("Unable to find a pending cashout for the success event.", existingError);
+          return NextResponse.json({ error: "Cashout status update is pending review." }, { status: 500 });
+        }
+      }
+    }
+
     if (eventData.event === "transfer.failed" || eventData.event === "transfer.reversed") {
       if (typeof data.reference !== "string") {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
