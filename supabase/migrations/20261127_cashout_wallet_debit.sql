@@ -17,7 +17,7 @@ begin
     or requested_amount_cents is null
     or requested_amount_cents < 5000
     or payment_reference is null
-    or payment_reference !~ '^cashout_[0-9a-f-]{36}$'
+    or payment_reference !~ '^cashout_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
   then
     return jsonb_build_object('success', false, 'error', 'Invalid cashout request.');
   end if;

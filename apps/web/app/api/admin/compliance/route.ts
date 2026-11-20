@@ -17,7 +17,7 @@ async function authorizedAdmin(request: Request) {
   return { supabase };
 }
 
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<NextResponse> {
   const access = await authorizedAdmin(request);
   if ('response' in access) return access.response;
 
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ profiles: data ?? [] });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   const access = await authorizedAdmin(request);
   if ('response' in access) return access.response;
 
