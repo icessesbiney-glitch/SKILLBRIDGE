@@ -7,8 +7,7 @@
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "lint": "echo \"Pass shared package linting checks\"",
-    "test": "echo \"Pass shared package unit tests\""
+    "lint": "eslint --config ../../apps/web/eslint.config.mjs src --max-warnings=0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"

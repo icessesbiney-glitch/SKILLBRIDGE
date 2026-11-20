@@ -10,8 +10,7 @@
     "web": "expo start --web",
     "ts:check": "tsc",
     "type-check": "npm run ts:check",
-    "lint": "echo \"Pass mobile linting checks\"",
-    "test": "echo \"Pass mobile unit tests\""
+    "lint": "eslint --config ../web/eslint.config.mjs App.tsx index.js --max-warnings=0"
   },
   "dependencies": {
     "expo": "~58.0.26",
