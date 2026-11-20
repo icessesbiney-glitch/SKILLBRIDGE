@@ -64,4 +64,25 @@ describe('web middleware', () => {
       'https://example.com/auth?next=%2Froadmap%3Ftab%3Dadvanced',
     );
   });
+
+  it('returns a gone response for deferred driver and delivery APIs', async () => {
+    const request = new NextRequest('https://example.com/api/rider/telemetry', {
+      method: 'POST',
+    });
+    const response = await middleware(request);
+
+    expect(response.status).toBe(410);
+    await expect(response.json()).resolves.toMatchObject({
+      code: 'sector_deferred',
+    });
+    expect(updateSession).not.toHaveBeenCalled();
+  });
+
+  it('rewrites rider pages to the public deferred notice', async () => {
+    const request = new NextRequest('https://example.com/rider/dashboard');
+    const response = await middleware(request);
+
+    expect(response.headers.get('x-middleware-rewrite')).toBe('https://example.com/deferred');
+    expect(updateSession).not.toHaveBeenCalled();
+  });
 });
