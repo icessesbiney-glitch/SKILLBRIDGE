@@ -13,6 +13,11 @@ export default function MobileRiderDashboard() {
   const [statusMsg, setStatusMsg] = useState("");
 
   const handleMobileCashout = async () => {
+    if (!supabase) {
+      setStatusMsg("Rider services are not configured.");
+      return;
+    }
+
     if (!amount || parseFloat(amount) <= 0) {
       setStatusMsg("Please input a valid transfer value.");
       return;

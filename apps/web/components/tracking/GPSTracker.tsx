@@ -16,8 +16,12 @@ export default function GPSTracker({ userId, profileType }: GPSTrackerProps) {
 
   useEffect(() => {
     let watchId: number | null = null;
+    const client = supabase;
 
-    if (isTracking && typeof window !== 'undefined' && navigator.geolocation) {
+    if (isTracking && !client) {
+      setSystemMessage('GPS services are not configured.');
+      setIsTracking(false);
+    } else if (isTracking && typeof window !== 'undefined' && navigator.geolocation) {
       setSystemMessage('📡 Querying satellite telemetry streams...');
       
       watchId = navigator.geolocation.watchPosition(
@@ -26,7 +30,7 @@ export default function GPSTracker({ userId, profileType }: GPSTrackerProps) {
           setCoordinates({ lat: latitude, lng: longitude });
 
           try {
-            const { data: sessionData } = await supabase.auth.getSession();
+            const { data: sessionData } = await client.auth.getSession();
             const token = sessionData.session?.access_token;
             if (!token) throw new Error('Please sign in');
             const response = await fetch('/api/gps', {

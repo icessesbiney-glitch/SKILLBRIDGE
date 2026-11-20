@@ -10,6 +10,8 @@ interface WithdrawalRow {
 }
 
 async function authHeaders(): Promise<Record<string, string> | null> {
+  if (!supabase) return null;
+
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   return token ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` } : null;
