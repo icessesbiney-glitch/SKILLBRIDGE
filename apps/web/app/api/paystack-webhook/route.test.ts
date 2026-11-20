@@ -86,7 +86,20 @@ describe('POST /api/paystack-webhook', () => {
       target_profile_id: 'user-123',
       returned_amount_cents: 5000,
       failed_reference: reference,
+      allow_success_reversal: false,
     });
+  });
+
+  it('allows provider reversals to reverse a previously successful transfer', async () => {
+    const response = await POST(request({
+      event: 'transfer.reversed',
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith('reverse_wallet_withdrawal', expect.objectContaining({
+      allow_success_reversal: true,
+    }));
   });
 
   it('marks a confirmed SkillBridge cashout as completed', async () => {
@@ -116,6 +129,30 @@ describe('POST /api/paystack-webhook', () => {
 
     expect(response.status).toBe(500);
     expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('does not acknowledge a success event for a reversed cashout', async () => {
+    query.maybeSingle
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: { status: 'reversed' }, error: null });
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const response = await POST(request({
+      event: 'transfer.success',
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+    }));
+
+    expect(response.status).toBe(500);
+  });
+
+  it('rejects oversized webhook payloads before database access', async () => {
+    const response = await POST(new Request('https://skillbridge.example/api/paystack-webhook', {
+      method: 'POST',
+      body: 'x'.repeat(1_000_001),
+    }));
+
+    expect(response.status).toBe(413);
+    expect(adminClient).not.toHaveBeenCalled();
   });
 
   it('ignores transfer events that are not for SkillBridge cashouts', async () => {

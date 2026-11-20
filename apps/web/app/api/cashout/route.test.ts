@@ -152,6 +152,22 @@ describe('POST /api/cashout', () => {
     await expect(response.json()).resolves.toMatchObject({ pending: true });
   });
 
+  it('does not restore the debit after an ambiguous provider server error', async () => {
+    jest.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        status: true,
+        data: { recipient_code: 'RCP_test' },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: false }), { status: 500 }));
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const response = await POST(request(validPayload));
+
+    expect(response.status).toBe(202);
+    expect(rpc).toHaveBeenCalledTimes(1);
+    await expect(response.json()).resolves.toMatchObject({ pending: true });
+  });
+
   it('restores a debit after an explicit provider rejection', async () => {
     jest.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({
@@ -165,6 +181,7 @@ describe('POST /api/cashout', () => {
     expect(response.status).toBe(502);
     expect(rpc).toHaveBeenNthCalledWith(2, 'reverse_wallet_withdrawal', expect.objectContaining({
       target_profile_id: user.id,
+      allow_success_reversal: false,
     }));
   });
 });

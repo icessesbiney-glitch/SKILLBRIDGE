@@ -48,9 +48,6 @@ export async function POST(req: Request) {
       currency?: unknown;
     };
 
-    if (!process.env.PAYSTACK_SECRET_KEY) {
-      return NextResponse.json({ error: "Webhook service is not configured." }, { status: 503 });
-    }
     const supabase = adminClient();
     if (!supabase) return NextResponse.json({ error: "Server is not configured." }, { status: 500 });
 
@@ -108,15 +105,14 @@ export async function POST(req: Request) {
     }
 
     if (eventData.event === "transfer.failed" || eventData.event === "transfer.reversed") {
-      if (
-        typeof data.reference !== "string" ||
-        !Number.isSafeInteger(data.amount) ||
-        (data.amount as number) <= 0
-      ) {
+      if (typeof data.reference !== "string") {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
       if (!data.reference.startsWith("cashout_")) {
         return NextResponse.json({ processed: true }, { status: 200 });
+      }
+      if (!Number.isSafeInteger(data.amount) || (data.amount as number) <= 0) {
+        return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
 
       const { data: entry, error: entryError } = await supabase
