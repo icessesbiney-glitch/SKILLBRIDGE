@@ -36,6 +36,7 @@ export default function PaystackCheckoutButton() {
       }
       setMessage(result.error || 'Could not start the payment.');
     } catch (error) {
+      console.error('Wallet funding request failed:', error);
       setMessage('Could not reach the payment gateway.');
     } finally {
       setLoading(false);

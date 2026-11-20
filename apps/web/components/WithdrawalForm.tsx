@@ -5,8 +5,9 @@ import { supabase } from "../utils/supabaseClient";
 
 interface WithdrawalRow {
   id: string;
-  amount: number;
-  payout_status: string | null;
+  amountGhs: string;
+  reference: string;
+  status: string;
 }
 
 async function authHeaders(): Promise<Record<string, string> | null> {
@@ -26,19 +27,24 @@ export default function WithdrawalForm() {
   const [message, setMessage] = useState("");
   const [balance, setBalance] = useState<string | null>(null);
   const [history, setHistory] = useState<WithdrawalRow[]>([]);
+  const [historyError, setHistoryError] = useState("");
 
   const refresh = useCallback(async () => {
     const headers = await authHeaders();
-    if (!headers) return;
+    if (!headers) {
+      setHistoryError("Sign in to load wallet activity.");
+      return;
+    }
     try {
-      const res = await fetch("/api/wallet/balance", { method: "POST", headers });
+      setHistoryError("");
+      const res = await fetch("/api/wallet/balance", { headers });
       const result = await res.json();
-      if (result.success) {
-        setBalance(result.wallet.balanceGhs);
-        setHistory(result.recentWithdrawals ?? []);
-      }
-    } catch {
-      // Balance stays hidden when the wallet cannot be loaded.
+      if (!res.ok) throw new Error(result.error || "Wallet activity could not be loaded.");
+      setBalance(result.wallet.balanceGhs);
+      setHistory(result.recentWithdrawals ?? []);
+    } catch (error) {
+      console.error("Wallet activity request failed:", error);
+      setHistoryError(error instanceof Error ? error.message : "Wallet activity could not be loaded.");
     }
   }, []);
 
@@ -66,12 +72,13 @@ export default function WithdrawalForm() {
       if (!res.ok || result.error) {
         setMessage(result.error || "Cashout failed.");
       } else {
-        setMessage("Cashout submitted. Funds are on their way to your mobile money account.");
+        setMessage(result.message || "Cashout submitted. Check wallet activity for updates.");
         setAmount("");
-        refresh();
+        await refresh();
       }
-    } catch {
-      setMessage("Connection error. Please try again.");
+    } catch (error) {
+      console.error("Cashout request failed:", error);
+      setMessage("We could not confirm the cashout status. Check wallet activity before retrying.");
     } finally {
       setLoading(false);
     }
@@ -100,11 +107,11 @@ export default function WithdrawalForm() {
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Mobile money number</label>
-            <input type="tel" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} required className={field} />
+            <input type="tel" autoComplete="tel" maxLength={16} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} required className={field} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Registered name</label>
-            <input type="text" value={accountName} onChange={(e) => setAccountName(e.target.value)} required className={field} />
+            <input type="text" autoComplete="name" maxLength={100} value={accountName} onChange={(e) => setAccountName(e.target.value)} required className={field} />
           </div>
           <button
             type="submit"
@@ -114,18 +121,20 @@ export default function WithdrawalForm() {
             {loading ? "Processing..." : "Request Cashout"}
           </button>
         </form>
-        {message ? <p className="text-xs font-medium mt-3 text-center text-gray-700">{message}</p> : null}
+        {message ? <p role="status" className="text-xs font-medium mt-3 text-center text-gray-700">{message}</p> : null}
       </div>
 
       <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm text-left">
         <h3 className="text-sm font-bold text-gray-900 mb-3">Recent withdrawals</h3>
-        {history.length > 0 ? (
+        {historyError ? (
+          <p role="alert" className="text-xs text-red-600">{historyError}</p>
+        ) : history.length > 0 ? (
           <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
             {history.map((tx) => (
               <div key={tx.id} className="flex justify-between items-center text-xs p-2 bg-gray-50 border rounded-lg">
-                <p className="font-bold text-gray-800">GH₵ {tx.amount}</p>
+                <p className="font-bold text-gray-800">GH₵ {tx.amountGhs}</p>
                 <span className="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-amber-100 text-amber-700">
-                  {tx.payout_status || "pending"}
+                  {tx.status}
                 </span>
               </div>
             ))}

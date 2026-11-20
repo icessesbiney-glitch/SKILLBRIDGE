@@ -50,7 +50,7 @@ export default function WalletBalanceDisplay() {
       </h3>
       <div className="mt-4 pt-3 border-t border-emerald-500/30 flex justify-between text-xs text-emerald-100">
         <span>Currency: GHS (₵)</span>
-        <span className="font-medium">● Live Production Ledger</span>
+        <span className="font-medium">Wallet balance</span>
       </div>
     </div>
   );

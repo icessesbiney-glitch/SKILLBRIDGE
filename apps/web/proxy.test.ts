@@ -65,24 +65,33 @@ describe('web proxy', () => {
     );
   });
 
-  it('returns a gone response for deferred driver and delivery APIs', async () => {
-    const request = new NextRequest('https://example.com/api/rider/telemetry', {
-      method: 'POST',
-    });
+  it.each([
+    '/api/gps',
+    '/api/dispatch',
+    '/api/delivery/dispatch',
+    '/api/rider/telemetry',
+    '/api/orders/create',
+    '/api/vendor/settle',
+  ])('does not expose deferred API route %s', async (path) => {
+    const request = new NextRequest(`https://example.com${path}`, { method: 'POST' });
     const response = await proxy(request);
 
-    expect(response.status).toBe(410);
-    await expect(response.json()).resolves.toMatchObject({
-      code: 'sector_deferred',
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      error: 'This endpoint is unavailable.',
+      code: 'endpoint_unavailable',
     });
     expect(updateSession).not.toHaveBeenCalled();
   });
 
-  it('rewrites rider pages to the public deferred notice', async () => {
-    const request = new NextRequest('https://example.com/rider/dashboard');
-    const response = await proxy(request);
+  it.each(['/rider/dashboard', '/admin/gps', '/deferred'])(
+    'redirects inactive route %s out of current navigation',
+    async (path) => {
+      const request = new NextRequest(`https://example.com${path}`);
+      const response = await proxy(request);
 
-    expect(response.headers.get('x-middleware-rewrite')).toBe('https://example.com/deferred');
-    expect(updateSession).not.toHaveBeenCalled();
-  });
+      expect(response.headers.get('location')).toBe('https://example.com/');
+      expect(updateSession).not.toHaveBeenCalled();
+    },
+  );
 });

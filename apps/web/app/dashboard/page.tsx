@@ -4,6 +4,8 @@ import Link from "next/link";
 import ProtectedShell from "../../components/ProtectedShell";
 import SiteChrome from "../../components/SiteChrome";
 import WalletBalanceDisplay from "../../components/WalletBalanceDisplay";
+import PaystackCheckoutButton from "../../components/PaystackCheckoutButton";
+import WithdrawalForm from "../../components/WithdrawalForm";
 
 export default function DashboardPage() {
   return (
@@ -26,6 +28,8 @@ export default function DashboardPage() {
 
             <div className="sb-card-grid sb-card-grid-compact">
               <WalletBalanceDisplay />
+              <PaystackCheckoutButton />
+              <WithdrawalForm />
               <article className="sb-card">
                 <span className="sb-status-pill">Marketplace</span>
                 <h2>Explore available work</h2>
