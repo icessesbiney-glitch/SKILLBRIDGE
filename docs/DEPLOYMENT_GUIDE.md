@@ -1,384 +1,73 @@
-# SKILLBRIDGE Deployment Configuration Guide
+# SkillBridge Deployment Guide
 
-This guide explains how deployments are configured for all SKILLBRIDGE platforms.
+This guide describes the deployment configuration currently present in this repository. Do not deploy, publish, or modify production data without the required owner authorization.
 
-## Overview
+## Current release scope
 
-SKILLBRIDGE uses GitHub Actions to automate deployments across public and private release channels:
+- The web application is the production marketplace, account, and wallet surface.
+- The Expo app is a companion that opens the configured web application; it does not provide driver or delivery workflows.
+- Driver, rider, GPS-tracking, dispatch, and delivery features are deferred until 2029. Do not enable their routes or apply `supabase/migrations/20261007_admin_gps_tracking.sql` for this launch.
+- No mobile publishing workflow is active in the root `.github/workflows` directory. CI validates an Android export but does not publish an app.
 
-| Platform | Visibility | Trigger | Target | Status |
-|----------|-----------|---------|--------|--------|
-| **Web** | Public | Push to `main` | Vercel (Production) | ✅ Automated |
-| **Web** | Private | Push to `develop` | Netlify (Preview) | 🔒 Automated |
-| **Mobile** | Private | Push to `main` | EAS (Internal Distribution) | 📱 Internal |
-| **Desktop** | Mixed | Push to `develop` (dev), Tags (prod) | GitHub Releases | 💻 Dev/Prod |
+## Web hosting
 
----
+### Vercel production
 
-## 1. Web App - Public Production Deployment
+The root `.github/workflows/deploy-web-production.yml` workflow validates and deploys on pushes to `main` when the web or shared workspace changes, and supports manual dispatch. The Vercel action deploys from `apps/web`.
 
-**File**: `.github/workflows/deploy-web-production.yml`
+Configure these GitHub environment values/secrets:
 
-### How It Works
-- Triggers on every push to `main` branch
-- Runs tests, linting, and builds
-- Deploys to Vercel automatically
-- Comments on the commit with deployment status
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `NEXT_PUBLIC_URL`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
-### Prerequisites
-Set these secrets in GitHub (Settings → Secrets and Variables → Actions):
+Configure the following server-only variables in the Vercel project for the production runtime. Never prefix these with `NEXT_PUBLIC_`:
 
-```
-VERCEL_TOKEN        # From https://vercel.com/account/tokens
-VERCEL_ORG_ID       # Organization ID from Vercel dashboard
-VERCEL_PROJECT_ID   # Project ID for SkillBridge app
-```
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PAYSTACK_SECRET_KEY`
+- `NATIONAL_ID_HASH_SECRET`
 
-### Environment Variables
-Set in Vercel dashboard (Settings → Environment Variables):
+The GitHub workflow requires the public Supabase settings and `NEXT_PUBLIC_URL` to build, then fails if any Vercel deployment secret is missing.
 
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_URL=https://your-production-domain.example.com
-```
+### Netlify preview
 
-### Monitoring
-- **Live URL**: https://skillbridge.vercel.app
-- **Dashboard**: https://vercel.com/dashboard
-- **Logs**: GitHub Actions tab → `Deploy Web - Production (Public)`
+The root `.github/workflows/deploy-web-private.yml` validates on pushes and pull requests targeting `main` or `develop`; push/manual events also publish a Netlify preview. The repository-root `netlify.toml` defines the build command. Configure:
 
-### Deployment Workflow
-```
-Push to main
-    ↓
-Run tests & linting
-    ↓
-Build web app
-    ↓
-Deploy to Vercel
-    ↓
-Comment on commit with live URL
-```
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `NEXT_PUBLIC_URL`
+- `NETLIFY_AUTH_TOKEN`
+- `NETLIFY_SITE_ID`
 
----
+Set the server-only runtime variables listed above in the hosting environment if the preview needs authenticated server-side or payment functionality.
 
-## 2. Web App - Private Preview Deployment
+### Local web checks
 
-**Files**: `.github/workflows/deploy-web-private.yml`, `netlify.toml`
+From the repository root:
 
-### How It Works
-- Triggers on every push to `develop`
-- Validates linting, typing, and tests before deploy
-- Deploys a private preview to Netlify when required secrets exist
-- Keeps public production on Vercel and internal review on Netlify
-
-### Prerequisites
-Set these secrets in GitHub:
-
-```
-NETLIFY_AUTH_TOKEN   # From https://app.netlify.com/user/applications
-NETLIFY_SITE_ID      # Site ID for the preview environment
-```
-
-### Notes
-- `netlify.toml` keeps the build rooted in this monorepo
-- This preview channel is intended for internal review, QA, and stakeholder sign-off
-- For Bolt.new projects, export the app to this repository first, then let GitHub Actions handle the deploy
-
----
-
-## 3. Mobile App - Private Distribution
-
-**File**: `.github/workflows/deploy-mobile-private.yml`
-
-### How It Works
-- Triggers on every push to `main` branch
-- Can also be triggered manually or on schedule (daily)
-- Builds iOS and Android for internal testing
-- Uploads to EAS (private by default)
-
-### Prerequisites
-Set these secrets in GitHub:
-
-```
-EXPO_TOKEN          # From https://expo.dev account
-```
-
-### Environment Setup
-Ensure `eas.json` is configured in `apps/mobile/`:
-
-```json
-{
-  "build": {
-    "preview": {
-      "ios": {
-        "buildType": "simulator"
-      },
-      "android": {
-        "buildType": "preview"
-      }
-    }
-  }
-}
-```
-
-### Access Control
-- **iOS**: Available via TestFlight (internal only)
-- **Android**: Available via internal distribution link (private)
-- **Expiration**: Builds auto-delete after 7 days
-
-### Monitoring
-- **Dashboard**: https://expo.dev (login required)
-- **Logs**: GitHub Actions tab → `Deploy Mobile - Private Distribution`
-
-### Deployment Workflow
-```
-Push to main
-    ↓
-Build iOS (EAS)
-    ↓
-Build Android (EAS)
-    ↓
-Notify team with download links
-    ↓
-Auto-delete in 7 days
-```
-
-### Manual Build
 ```bash
-cd apps/mobile
-eas login
-eas build --platform ios --profile preview
-eas build --platform android --profile preview
+npm ci --legacy-peer-deps
+npm run type-check
+npm run lint --workspace=@skillbridge/web
+npm test
+npm run build
 ```
 
----
+## Supabase and payments
 
-## 4. Desktop App - Development & Production
+The migration directory does not contain a complete baseline schema. Confirm the target database already has the required application tables and functions, and review each migration against the live migration history before applying anything. In particular, wallet integrity changes depend on existing payment and wallet schema. Do not apply migrations to production as part of this deployment task.
 
-### A. Development Builds
+Configure the Paystack webhook to call `/api/paystack-webhook` on the production origin and keep the provider secret in `PAYSTACK_SECRET_KEY`. Confirm the configured webhook behavior and database schema with the service owner before enabling live money movement.
 
-**File**: `.github/workflows/deploy-desktop-dev.yml`
+## Mobile companion
 
-#### How It Works
-- Triggers on pushes to `develop` branch
-- Builds for Windows, macOS, and Linux simultaneously
-- Stores builds as artifacts (14-day retention)
-- Creates cross-platform binaries
+Set `EXPO_PUBLIC_WEB_URL` to the HTTPS production web origin when preparing a mobile companion build. The current mobile validation command checks Expo package alignment and exports an Android bundle:
 
-#### Available Downloads
-- **Windows**: `.exe` installer + portable `.exe`
-- **macOS**: `.dmg` disk image + `.zip`
-- **Linux**: `.AppImage` + `.deb` package
-
-#### Monitoring
-- **Logs**: GitHub Actions tab → `Deploy Desktop - Development Build`
-- **Artifacts**: Available in workflow run (Actions → latest run → Artifacts)
-
-#### Development Workflow
-```
-Push to develop
-    ↓
-Build for Linux
-Build for macOS
-Build for Windows (parallel)
-    ↓
-Upload to artifacts
-    ↓
-Notify with download links
-    ↓
-Auto-delete in 14 days
-```
-
-### B. Production Release
-
-**File**: `.github/workflows/deploy-desktop-production.yml`
-
-#### How It Works
-- Triggers on tags matching `v*.*.*` (e.g., `v1.0.0`)
-- Builds production-ready binaries for all platforms
-- Creates GitHub Release with auto-generated notes
-- Enables code signing and notarization (when credentials available)
-
-#### Creating a Production Release
 ```bash
-# Tag the release
-git tag v1.0.0
-
-# Push tag to GitHub
-git push origin v1.0.0
-
-# GitHub Actions automatically:
-# 1. Builds all platforms
-# 2. Creates GitHub Release
-# 3. Uploads binaries
+npm run validate:mobile
 ```
 
-#### Prerequisites for Signing
-Set these secrets for production signing (optional but recommended):
-
-```
-# macOS Code Signing
-APPLE_ID              # Your Apple ID email
-APPLE_ID_PASSWORD     # App-specific password
-APPLE_CERTIFICATE_P12 # Base64-encoded certificate
-
-# Windows Code Signing (optional)
-WINDOWS_CERTIFICATE   # Code signing certificate
-```
-
-#### GitHub Release Contents
-- Platform-specific installers and portable versions
-- Auto-generated release notes
-- Download links for end-users
-
-#### Production Workflow
-```
-Create git tag v1.0.0
-    ↓
-Push tag to main
-    ↓
-Build for Linux
-Build for macOS
-Build for Windows (parallel)
-    ↓
-Sign binaries (if credentials available)
-    ↓
-Create GitHub Release
-    ↓
-Upload all binaries
-    ↓
-Notify with release URL
-```
-
-#### User Download Flow
-1. Visit: https://github.com/icessesbiney-glitch/SKILLBRIDGE/releases
-2. Click latest release
-3. Download for their platform
-4. Extract and run
-
----
-
-## Repository Access Levels
-
-### Public Access
-- **Web App**: ✅ Publicly accessible via Vercel
-- **Documentation**: ✅ Public (GitHub Releases, deployment guides)
-- **Source Code**: Depends on GitHub repo visibility
-
-### Private Access
-- **Mobile App**: 🔒 Internal distribution only (EAS private builds)
-- **Signed Builds**: 🔒 GitHub Releases (auto-update enabled)
-- **Secrets**: 🔒 Never committed (stored as GitHub Secrets)
-
----
-
-## Environment Management
-
-### Development Environment
-- **Branch**: `develop`
-- **Deployment**: Desktop development builds only
-- **Retention**: 14 days
-- **Access**: Team members via GitHub
-
-### Production Environment
-- **Branch**: `main` (web & mobile)
-- **Tags**: `v*.*.*` (desktop releases)
-- **Deployment**: Live + public releases
-- **Retention**: Permanent (GitHub Releases)
-
----
-
-## Secrets Management
-
-All deployment secrets are stored as GitHub repository secrets. To configure:
-
-1. Go to: **Settings → Secrets and Variables → Actions**
-2. Click "New repository secret"
-3. Add each secret from the respective section above
-
-### Secret Checklist
-- [ ] `VERCEL_TOKEN` - Web deployment
-- [ ] `VERCEL_ORG_ID` - Web deployment
-- [ ] `VERCEL_PROJECT_ID` - Web deployment
-- [ ] `EXPO_TOKEN` - Mobile deployment
-- [ ] `APPLE_ID` - macOS signing (optional)
-- [ ] `APPLE_ID_PASSWORD` - macOS signing (optional)
-
-### Security Best Practices
-- Rotate tokens quarterly
-- Use app-specific passwords (not account passwords)
-- Never commit `.env` files
-- Review GitHub audit logs regularly
-
----
-
-## Troubleshooting
-
-### Web Deployment Issues
-```bash
-# Test build locally
-npm run build:web
-
-# Check Vercel status
-vercel status
-
-# View deployment logs
-vercel logs --prod
-```
-
-### Mobile Build Issues
-```bash
-# Clear EAS cache
-eas build:clean
-
-# View build logs
-eas build:logs
-
-# Test build locally
-cd apps/mobile
-npm run build:ios  # macOS only
-npm run build:android
-```
-
-### Desktop Build Issues
-```bash
-# Clear build cache
-rm -rf apps/desktop/dist apps/desktop/build
-
-# Test build locally
-npm run build:desktop
-npm run dist:desktop:linux
-npm run dist:desktop:mac  # macOS only
-npm run dist:desktop:win  # Windows only
-```
-
----
-
-## Quick Reference
-
-| Task | Command | Branch | Env |
-|------|---------|--------|-----|
-| Local web dev | `npm run dev` | develop | dev |
-| Deploy web to prod | Push to `main` | main | prod |
-| Test mobile locally | `npm run dev:web` or simulator | develop | dev |
-| Build mobile private | Manual trigger or auto | main | private |
-| Build desktop dev | Push to `develop` | develop | dev |
-| Release desktop | `git tag v1.0.0 && git push origin v1.0.0` | main | prod |
-
----
-
-## Next Steps
-
-1. **Add secrets** to GitHub (see above)
-2. **Test web deployment** by pushing to `main`
-3. **Configure mobile signing** (iOS certificates, Android keystore)
-4. **Set up code signing** for macOS (optional but recommended)
-5. **Create first release** by tagging: `git tag v1.0.0`
-
-For platform-specific guides, see:
-- [Web Deployment](./DEPLOY_WEB.md)
-- [Mobile Deployment](./DEPLOY_MOBILE.md)
-- [Desktop Deployment](./DEPLOY_DESKTOP.md)
-- [PWA Deployment](./DEPLOY_PWA.md)
+This is a validation/export check, not an app-store or EAS publishing workflow. Do not configure mobile publishing credentials or distribute a build without separate release authorization.
