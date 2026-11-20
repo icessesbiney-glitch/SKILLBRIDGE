@@ -16,7 +16,7 @@
     "test": "npm run test --workspace=@skillbridge/web"
   },
   "devDependencies": {
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.5",
     "turbo": "^2.11.7",
     "typescript": "^5.0.0"
   },
