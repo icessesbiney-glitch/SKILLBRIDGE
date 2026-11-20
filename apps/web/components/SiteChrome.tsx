@@ -45,10 +45,9 @@ export default function SiteChrome({ children }: SiteChromeProps) {
           <div>
             <p className="sb-footer-title">SkillBridge</p>
             <p className="sb-footer-copy">
-              A hyperlocal marketplace for customers and independent vendors.
+              Account, wallet, and marketplace services for customers and vendors.
             </p>
           </div>
-          <p className="sb-footer-copy">Driver and delivery services are planned for 2029.</p>
         </div>
       </footer>
     </div>

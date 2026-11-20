@@ -10,17 +10,23 @@ export async function proxy(request: NextRequest) {
     "/api/delivery/dispatch",
     "/api/rider/telemetry",
     "/api/orders/create",
+    "/api/vendor/settle",
   ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
   if (isDeferredApi) {
     return NextResponse.json(
-      { error: "Driver and delivery functionality is deferred until 2029.", code: "sector_deferred" },
-      { status: 410 },
+      { error: "This endpoint is unavailable.", code: "endpoint_unavailable" },
+      { status: 404 },
     );
   }
 
-  if (pathname === "/rider" || pathname.startsWith("/rider/") || pathname === "/admin/gps") {
-    return NextResponse.rewrite(new URL("/deferred", request.url));
+  if (
+    pathname === "/rider" ||
+    pathname.startsWith("/rider/") ||
+    pathname === "/admin/gps" ||
+    pathname === "/deferred"
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
@@ -83,5 +89,7 @@ export const config = {
     "/api/delivery/dispatch/:path*",
     "/api/rider/telemetry/:path*",
     "/api/orders/create/:path*",
+    "/api/vendor/settle/:path*",
+    "/deferred/:path*",
   ],
 };
