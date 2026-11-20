@@ -16,6 +16,10 @@ jest.mock('../../hooks/useAuthSession', () => ({
   useAuthSession: jest.fn(),
 }));
 
+jest.mock('../../utils/supabaseClient', () => ({
+  supabase: null,
+}));
+
 describe('DashboardPage', () => {
   it('shows the public repository operations view', () => {
     (useAuthSession as jest.Mock).mockReturnValue({

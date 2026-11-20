@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { supabase } from "../../utils/supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 
 interface WalletData {
@@ -11,29 +12,41 @@ interface WalletData {
 export default function VendorWalletCard({ profileId }: { profileId: string }) {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-  );
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchWalletState() {
+      if (!supabase) {
+        setError("Wallet services are not configured.");
+        setLoading(false);
+        return;
+      }
+
+      if (!profileId) {
+        setError("A profile is required to view this wallet.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("platform_wallets")
         .select("balance_cents, paystack_recipient_code")
         .eq("profile_id", profileId)
         .maybeSingle();
 
-      if (!error && data) {
+      if (error) {
+        console.error("Vendor wallet request failed:", error);
+        setError("We could not load this wallet.");
+      } else if (data) {
         setWallet(data);
       }
       setLoading(false);
     }
-    if (profileId) fetchWalletState();
+    void fetchWalletState();
   }, [profileId]);
 
   if (loading) return <div style={{ padding: "20px", color: "#888" }}>Syncing secure balance configurations...</div>;
+  if (error) return <p role="status" style={{ padding: "20px", color: "#888" }}>{error}</p>;
 
   const balanceGHS = wallet ? (wallet.balance_cents / 100).toFixed(2) : "0.00";
 

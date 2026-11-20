@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { supabase } from "@skillbridge/shared";
+import { supabase } from "../../utils/supabaseClient";
 import AuthStatusCard from "../../components/AuthStatusCard";
 import ProtectedShell from "../../components/ProtectedShell";
 import SiteChrome from "../../components/SiteChrome";
@@ -21,6 +21,10 @@ export default function DashboardPage() {
   useEffect(() => {
     async function streamWalletData() {
       try {
+        if (!supabase) {
+          return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setLoadingBalance(false);

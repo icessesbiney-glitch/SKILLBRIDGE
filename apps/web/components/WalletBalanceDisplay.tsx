@@ -1,28 +1,46 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+import { supabase } from "../utils/supabaseClient";
 
 export default function WalletBalanceDisplay() {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function streamWalletMetrics() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("platform_wallets").select("balance_cents").eq("profile_id", user.id).single();
-      if (data) setBalance(data.balance_cents / 100);
-      setLoading(false);
+      if (!supabase) {
+        setError("Wallet services are not configured.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        if (!user) {
+          setError("Sign in to view your wallet balance.");
+          return;
+        }
+        const { data, error: walletError } = await supabase
+          .from("platform_wallets")
+          .select("balance_cents")
+          .eq("profile_id", user.id)
+          .single();
+        if (walletError) throw walletError;
+        setBalance(data.balance_cents / 100);
+      } catch (walletError) {
+        console.error("Wallet balance request failed:", walletError);
+        setError("We could not load your wallet balance.");
+      } finally {
+        setLoading(false);
+      }
     }
-    streamWalletMetrics();
+    void streamWalletMetrics();
   }, []);
 
   if (loading) return <div className="text-sm text-gray-400 animate-pulse">Loading wallet balance...</div>;
+  if (error) return <p role="status" className="text-sm text-gray-400">{error}</p>;
 
   return (
     <div className="p-6 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-lg text-white max-w-sm">

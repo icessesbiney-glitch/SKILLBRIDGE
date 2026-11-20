@@ -1,18 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
 export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
-  // Defensive fallbacks to insulate the Next.js prerender layer from crashing in CI containers
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
-  const clientKey = supabaseKey || "placeholder-anon-key";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error("Supabase public configuration is missing.");
+  }
 
   return createServerClient(
-    clientUrl,
-    clientKey,
+    url,
+    key,
     {
       cookies: {
         getAll() {
@@ -20,12 +21,9 @@ export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) =
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => 
-              cookieStore.set(name, value, options)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This safely catches and ignores exceptions if middleware refreshes active sessions.
+            // Server Components cannot write cookies; middleware handles session refresh.
           }
         },
       },

@@ -38,6 +38,7 @@ describe('POST /api/checkout', () => {
   const mockedAdminClient = jest.mocked(adminClient);
 
   beforeEach(() => {
+    jest.clearAllMocks();
     process.env.PAYSTACK_SECRET_KEY = 'test-secret';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role';
     delete process.env.NEXT_PUBLIC_URL;

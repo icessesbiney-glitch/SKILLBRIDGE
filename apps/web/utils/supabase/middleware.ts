@@ -6,21 +6,19 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export const updateSession = async (request: NextRequest) => {
-  // 1. Build defensive baseline fallbacks for your deployment server compilation pass
-  const clientUrl = supabaseUrl || "https://placeholder-project.supabase.co";
-  const clientKey = supabaseKey || "placeholder-anon-key";
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase public configuration is missing.");
+  }
 
-  // Create the baseline response stream
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  // 2. Initialize your secure server-side workspace middleware client
   const supabase = createServerClient(
-    clientUrl,
-    clientKey,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -47,12 +45,10 @@ export const updateSession = async (request: NextRequest) => {
   );
 
   try {
-    // 3. Securely validate the active user token directly from the database server instance
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // 4. Return both the verified user payload and the synchronized header response stream
     return { response: supabaseResponse, user, supabase };
   } catch (error) {
     console.error("Supabase middleware token resolution error:", error);
