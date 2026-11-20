@@ -14,6 +14,8 @@ const rpc = jest.fn();
 const query = {
   select: jest.fn(),
   eq: jest.fn(),
+  in: jest.fn(),
+  update: jest.fn(),
   maybeSingle: jest.fn(),
 };
 const database = {
@@ -41,6 +43,8 @@ describe('POST /api/paystack-webhook', () => {
     jest.mocked(adminClient).mockReturnValue(database as unknown as ReturnType<typeof adminClient>);
     query.select.mockReturnValue(query);
     query.eq.mockReturnValue(query);
+    query.in.mockReturnValue(query);
+    query.update.mockReturnValue(query);
     query.maybeSingle.mockResolvedValue({
       data: { platform_wallets: { profile_id: 'user-123' } },
       error: null,
@@ -83,6 +87,22 @@ describe('POST /api/paystack-webhook', () => {
       returned_amount_cents: 5000,
       failed_reference: reference,
     });
+  });
+
+  it('marks a confirmed SkillBridge cashout as completed', async () => {
+    const reference = 'cashout_12345678-1234-1234-1234-123456789abc';
+    const response = await POST(request({
+      event: 'transfer.success',
+      data: { reference, amount: 5000 },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(database.from).toHaveBeenCalledWith('paystack_transfers');
+    expect(query.update).toHaveBeenCalledWith(expect.objectContaining({
+      status: 'success',
+      completed_at: expect.any(String),
+    }));
+    expect(query.in).toHaveBeenCalledWith('status', ['initialized', 'pending']);
   });
 
   it('does not acknowledge a failed cashout without its ledger entry', async () => {
