@@ -13,7 +13,7 @@ This guide describes the deployment configuration currently present in this repo
 
 ### Vercel production
 
-The root `.github/workflows/deploy-web-production.yml` workflow validates and deploys on pushes to `main` when the web or shared workspace changes, and supports manual dispatch. The Vercel action deploys from `apps/web`.
+The root `.github/workflows/deploy-web-production.yml` workflow validates and deploys on pushes to `main` when the web or shared workspace changes, and supports manual dispatch. Vercel must use the repository root as its project Root Directory; [`vercel.json`](../vercel.json) installs the npm workspaces and builds `@skillbridge/web`.
 
 Configure these GitHub environment values/secrets:
 
@@ -30,7 +30,7 @@ Configure the following server-only variables in the Vercel project for the prod
 - `PAYSTACK_SECRET_KEY`
 - `NATIONAL_ID_HASH_SECRET`
 
-The GitHub workflow requires the public Supabase settings and `NEXT_PUBLIC_URL` to build, then fails if any Vercel deployment secret is missing.
+The GitHub workflow requires the public Supabase settings and `NEXT_PUBLIC_URL` to build, then fails if any Vercel deployment secret is missing. Set the three server-only runtime variables in Vercel separately; they are not required by the client build and must never be copied into GitHub build arguments.
 
 ### Netlify preview
 
@@ -56,9 +56,22 @@ npm test
 npm run build
 ```
 
+### Release and rollback
+
+1. Confirm the Vercel project Root Directory is the repository root and that the production environment contains the variables above.
+2. Verify the target Supabase database and its migration history with the database owner. The repository has no complete baseline schema, so do not assume a fresh database is supported.
+3. Configure the Paystack live webhook URL as `https://<production-origin>/api/paystack-webhook` in the Paystack dashboard; verify the live secret is stored as `PAYSTACK_SECRET_KEY`.
+4. Review the CI run and the generated Vercel deployment before authorizing a production release. The workflow deploys on `main`; this guide does not authorize a deployment.
+5. To roll back web code, promote/redeploy the last known-good immutable Vercel deployment from the Vercel project dashboard. Confirm its required environment variables remain configured. Do not reverse database migrations automatically; use a reviewed forward migration if a schema correction is needed.
+6. For Netlify previews, republish the last known-good deploy from the Netlify deploy history. Preview rollback does not roll back Supabase data.
+
+Configure host-level request rate limits/abuse protection for authenticated account, checkout, and cashout endpoints before public launch. Application checks serialize cashouts per user, but they are not a substitute for deployment-level traffic controls.
+
 ## Supabase and payments
 
-The migration directory does not contain a complete baseline schema. Confirm the target database already has the required application tables and functions, and review each migration against the live migration history before applying anything. The wallet migrations depend on existing `profiles`, `platform_wallets`, and `ledger_entries` tables. `20261127_cashout_wallet_debit.sql` creates the restricted cashout-debit function and transfer-status table; it must be applied to the intended database before cashouts can work. Cashout requests stay blocked while an earlier transfer is unresolved, preventing duplicate payouts. Do not apply migrations to production as part of this deployment task.
+The migration directory does not contain a complete baseline schema. Confirm the target database already has the required application tables and functions, and review each migration against the live migration history before applying anything. The wallet migrations depend on existing `profiles`, `platform_wallets`, and `ledger_entries` tables. Apply only missing migrations in filename order after owner review: `20261106_wallet_hardening.sql`, `20261120_paystack_wallet_integrity.sql`, `20261127_cashout_wallet_debit.sql`, then `20261128_cashout_state_guard.sql`. The final migration replaces the unsafe three-argument reversal function; it is required before cashouts are enabled. Cashout requests stay blocked while an earlier transfer is unresolved, preventing duplicate payouts. Do not apply migrations to production as part of this task.
+
+Before applying those migrations, confirm `profiles`, `platform_wallets`, `ledger_entries`, and `paystack_transactions` exist with the columns/functions referenced by the scripts, inspect current ledger references for duplicates, and verify that prior migrations are recorded as applied. The SQL files are transactional database changes and have not been tested against the live schema in this workspace; owner review and a non-production staging run are required. Never run the GPS/delivery migration for this launch.
 
 Configure the Paystack webhook to call `/api/paystack-webhook` on the production origin and keep the provider secret in `PAYSTACK_SECRET_KEY`. Confirm the configured webhook behavior and database schema with the service owner before enabling live money movement.
 

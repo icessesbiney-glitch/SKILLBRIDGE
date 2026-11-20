@@ -1,4 +1,6 @@
 {
-  "buildCommand": "npm install --no-workspaces --force && npx next build",
+  "framework": "nextjs",
+  "installCommand": "npm ci --legacy-peer-deps",
+  "buildCommand": "npm run build:web",
   "outputDirectory": "apps/web/.next"
 }
