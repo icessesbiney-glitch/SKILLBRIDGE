@@ -1,8 +1,12 @@
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
 /** @type {import("eslint").Linter.Config[]} */
 const eslintConfig = [
+  ...nextVitals,
+  ...nextTypescript,
   {
     ignores: [".next/**", "node_modules/**", "dist/**", "build/**"]
   },
