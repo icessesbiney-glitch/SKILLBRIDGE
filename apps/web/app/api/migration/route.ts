@@ -25,7 +25,10 @@ export async function POST(req: Request) {
       }
       return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
     }
-    const { fullName, phoneNumber, ghanaCardPin, roleTier } = body ?? {};
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid request payload.' }, { status: 400 });
+    }
+    const { fullName, phoneNumber, ghanaCardPin, roleTier } = body as Record<string, unknown>;
     if (
       typeof fullName !== 'string' ||
       typeof phoneNumber !== 'string' ||
