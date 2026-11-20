@@ -8,7 +8,16 @@ const eslintConfig = [
   ...nextVitals,
   ...nextTypescript,
   {
-    ignores: [".next*/**", "node_modules/**", "dist/**", "build/**", "coverage/**"]
+    ignores: [
+      ".next*/**",
+      ".vercel/**",
+      ".turbo/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "out/**"
+    ]
   },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
