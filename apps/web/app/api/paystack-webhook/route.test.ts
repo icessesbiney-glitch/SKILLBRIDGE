@@ -102,6 +102,20 @@ describe('POST /api/paystack-webhook', () => {
     }));
   });
 
+  it('does not acknowledge failed events when the database confirms a successful transfer', async () => {
+    rpc.mockResolvedValue({ data: { success: false }, error: null });
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = await POST(request({
+      event: 'transfer.failed',
+      data: { reference: 'cashout_12345678-1234-1234-1234-123456789abc', amount: 5000 },
+    }));
+
+    expect(response.status).toBe(500);
+    expect(rpc).toHaveBeenCalledWith('reverse_wallet_withdrawal', expect.objectContaining({
+      allow_success_reversal: false,
+    }));
+  });
+
   it('marks a confirmed SkillBridge cashout as completed', async () => {
     const reference = 'cashout_12345678-1234-1234-1234-123456789abc';
     const response = await POST(request({

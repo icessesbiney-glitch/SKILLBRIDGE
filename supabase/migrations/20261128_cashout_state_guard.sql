@@ -96,3 +96,6 @@ revoke all on function public.reverse_wallet_withdrawal(uuid, bigint, text, bool
 from public, anon, authenticated;
 grant execute on function public.reverse_wallet_withdrawal(uuid, bigint, text, boolean)
 to service_role;
+
+revoke update (legal_name, phone_number) on public.profiles from anon, authenticated;
+revoke insert, update, delete on public.profiles from anon, authenticated;
