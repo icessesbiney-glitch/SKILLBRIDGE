@@ -12,7 +12,7 @@ type SiteChromeProps = {
 
 const navigation = [
   { href: '/', label: 'Home' },
-  { href: '/tasks', label: 'Tasks' },
+  { href: '/tasks', label: 'Work' },
   { href: '/dashboard', label: 'Dashboard' },
 ];
 

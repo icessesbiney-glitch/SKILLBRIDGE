@@ -17,22 +17,6 @@ export const deploymentSteps = [
   { step: 2, task: "Webhook Pipeline Verification" }
 ];
 
-export const learnerBands = [
-  {
-    title: "Advanced Development Tier",
-    range: "Paid Access",
-    summary: "Complete verified marketplace tasks and unlock paid opportunities.",
-    points: ["Task-based learning", "Verified submissions", "Marketplace access"]
-  }
-];
-
-export const learningResources = [
-  {
-    href: "/templates/dodo-payments-api-handbook.pdf",
-    label: "Dodo Payments API Handbook"
-  }
-];
-
 export const mentorGuidance = [
   { title: "Monorepo Strategy Configuration", description: "Bypass engine locks cleanly using workspace keys." }
 ];

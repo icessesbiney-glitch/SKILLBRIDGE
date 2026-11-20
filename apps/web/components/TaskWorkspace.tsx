@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { learnerBands, learningResources } from '../data/siteContent';
 import { supabase } from '../utils/supabaseClient';
 
 type Task = {
@@ -149,32 +148,13 @@ export default function TaskWorkspace() {
 
   return (
     <div className="sb-stack">
-      {/* Learner bands */}
-      <div className="sb-card-grid sb-card-grid-compact">
-        {learnerBands.map((band) => (
-          <article key={band.title} className="sb-card">
-            <span className="sb-status-pill">{band.range}</span>
-
-            <h3>{band.title}</h3>
-
-            <p>{band.summary}</p>
-
-            <ul className="sb-simple-list">
-              {band.points.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
       {/* Task catalog */}
       <div className="sb-panel">
         <div className="sb-section-heading">
           <div>
-            <span className="sb-eyebrow">Paid task marketplace</span>
+            <span className="sb-eyebrow">Marketplace</span>
 
-            <h2>Learn, practice, complete tasks, and earn</h2>
+            <h2>Browse available work</h2>
           </div>
 
           <div
@@ -265,16 +245,12 @@ export default function TaskWorkspace() {
                     <li>
                       Audience:{' '}
                       {task.visibility === 'all'
-                        ? 'All learners'
+                        ? 'Everyone'
                         : task.visibility}
                     </li>
 
                     <li>
                       Complete the task and submit your own work for review.
-                    </li>
-
-                    <li>
-                      Payment is tracked after successful task approval.
                     </li>
                   </ul>
                 </div>
@@ -301,34 +277,6 @@ export default function TaskWorkspace() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* Resources */}
-      <div className="sb-card-grid sb-card-grid-compact">
-        <article className="sb-card">
-          <span className="sb-status-pill">Download support</span>
-
-          <h3>Download starter resources</h3>
-
-          <p>
-            Use these templates for beginner planning, Ghana-focused task
-            tracking, and public portfolio preparation.
-          </p>
-
-          <ul className="sb-download-list">
-            {learningResources.map((resource) => (
-              <li key={resource.href}>
-                <a
-                  href={resource.href}
-                  download
-                  className="sb-download-link"
-                >
-                  {resource.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </article>
       </div>
 
       {/* Real task workspace */}

@@ -32,9 +32,9 @@ export default function DashboardPage() {
               <WithdrawalForm />
               <article className="sb-card">
                 <span className="sb-status-pill">Marketplace</span>
-                <h2>Explore available work</h2>
+                <h2>Browse available work</h2>
                 <p>Browse current marketplace opportunities and submit work from your account.</p>
-                <Link href="/tasks" className="sb-button">Browse marketplace</Link>
+                <Link href="/tasks" className="sb-button">Browse work</Link>
               </article>
             </div>
           </div>
