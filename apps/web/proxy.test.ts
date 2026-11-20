@@ -3,14 +3,14 @@
  */
 
 import { NextRequest } from 'next/server';
-import { middleware } from './middleware';
+import { proxy } from './proxy';
 import { updateSession } from './utils/supabase/middleware';
 
 jest.mock('./utils/supabase/middleware', () => ({
   updateSession: jest.fn(),
 }));
 
-describe('web middleware', () => {
+describe('web proxy', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('web middleware', () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     const request = new NextRequest('https://example.com/roadmap');
-    const response = await middleware(request);
+    const response = await proxy(request);
 
     expect(response.headers.get('location')).toBe('https://example.com/auth?next=%2Froadmap');
   });
@@ -43,7 +43,7 @@ describe('web middleware', () => {
     });
 
     const request = new NextRequest('https://example.com/dashboard');
-    const response = await middleware(request);
+    const response = await proxy(request);
 
     expect(response.headers.get('location')).toBe('https://example.com/auth?next=%2Fdashboard');
   });
@@ -58,7 +58,7 @@ describe('web middleware', () => {
     });
 
     const request = new NextRequest('https://example.com/roadmap?tab=advanced');
-    const response = await middleware(request);
+    const response = await proxy(request);
 
     expect(response.headers.get('location')).toBe(
       'https://example.com/auth?next=%2Froadmap%3Ftab%3Dadvanced',
@@ -69,7 +69,7 @@ describe('web middleware', () => {
     const request = new NextRequest('https://example.com/api/rider/telemetry', {
       method: 'POST',
     });
-    const response = await middleware(request);
+    const response = await proxy(request);
 
     expect(response.status).toBe(410);
     await expect(response.json()).resolves.toMatchObject({
@@ -80,7 +80,7 @@ describe('web middleware', () => {
 
   it('rewrites rider pages to the public deferred notice', async () => {
     const request = new NextRequest('https://example.com/rider/dashboard');
-    const response = await middleware(request);
+    const response = await proxy(request);
 
     expect(response.headers.get('x-middleware-rewrite')).toBe('https://example.com/deferred');
     expect(updateSession).not.toHaveBeenCalled();
