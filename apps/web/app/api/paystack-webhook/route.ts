@@ -18,13 +18,21 @@ export async function POST(req: Request) {
     if (rawBody.length > 1_000_000) {
       return NextResponse.json({ error: "Webhook payload is too large." }, { status: 413 });
     }
+    if (!process.env.PAYSTACK_SECRET_KEY) {
+      return NextResponse.json({ error: "Webhook service is not configured." }, { status: 503 });
+    }
     if (!validSignature(rawBody, req.headers.get("x-paystack-signature"))) {
       return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
     }
     const supabase = adminClient();
     if (!supabase) return NextResponse.json({ error: "Server is not configured." }, { status: 500 });
 
-    const event: unknown = JSON.parse(rawBody);
+    let event: unknown;
+    try {
+      event = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
+    }
     if (!event || typeof event !== "object" || Array.isArray(event)) {
       return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
     }
@@ -62,32 +70,39 @@ export async function POST(req: Request) {
       if (typeof data.reference !== "string") {
         return NextResponse.json({ error: "Invalid transfer event." }, { status: 400 });
       }
+      if (!data.reference.startsWith("cashout_")) {
+        return NextResponse.json({ processed: true }, { status: 200 });
+      }
 
       const { data: entry, error: entryError } = await supabase
         .from("ledger_entries")
         .select("wallet_id, platform_wallets(profile_id)")
         .eq("reference_id", data.reference)
+        .eq("entry_type", "withdrawal")
         .maybeSingle();
-      if (entryError) {
+      if (entryError || !entry) {
         console.error("Unable to find the failed cashout ledger entry.", entryError);
         return NextResponse.json({ error: "Cashout reversal is pending review." }, { status: 500 });
       }
       const wallet = entry?.platform_wallets as unknown as { profile_id: string } | null;
-      if (wallet?.profile_id) {
-        const { data: reversal, error } = await supabase.rpc("reverse_wallet_withdrawal", {
-          target_profile_id: wallet.profile_id,
-          returned_amount_cents: typeof data.amount === "number" ? data.amount : 0,
-          failed_reference: data.reference,
-        });
-        if (error || !reversal?.success) {
-          console.error("Paystack cashout reversal failed.", error ?? reversal);
-          return NextResponse.json({ error: "Cashout reversal is pending review." }, { status: 500 });
-        }
+      if (!wallet?.profile_id) {
+        console.error("Failed cashout ledger entry has no associated wallet.", data.reference);
+        return NextResponse.json({ error: "Cashout reversal is pending review." }, { status: 500 });
+      }
+      const { data: reversal, error } = await supabase.rpc("reverse_wallet_withdrawal", {
+        target_profile_id: wallet.profile_id,
+        returned_amount_cents: typeof data.amount === "number" ? data.amount : 0,
+        failed_reference: data.reference,
+      });
+      if (error || !reversal?.success) {
+        console.error("Paystack cashout reversal failed.", error ?? reversal);
+        return NextResponse.json({ error: "Cashout reversal is pending review." }, { status: 500 });
       }
     }
 
     return NextResponse.json({ processed: true }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error("Unexpected Paystack webhook processing failure.", error);
     return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
   }
 }

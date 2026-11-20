@@ -68,7 +68,7 @@ export async function GET(request: Request) {
       id: withdrawal.id,
       amountGhs: (Math.abs(withdrawal.amount_cents) / 100).toFixed(2),
       reference: withdrawal.reference_id,
-      status: reversed.has(`reversal_${withdrawal.reference_id}`) ? 'reversed' : 'submitted',
+      status: reversed.has(`reversal_${withdrawal.reference_id}`) ? 'reversed' : 'pending',
       createdAt: withdrawal.created_at,
     })),
   });
