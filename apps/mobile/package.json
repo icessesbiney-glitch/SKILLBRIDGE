@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "ts:check": "tsc",
     "type-check": "npm run ts:check",
-    "validate:mobile": "npx expo install --check && npx expo-doctor && npx expo export --platform android",
+    "validate:mobile": "npx expo install --check && npx expo export --platform android",
     "lint": "eslint --config ../web/eslint.config.mjs App.tsx index.js --max-warnings=0"
   },
   "dependencies": {

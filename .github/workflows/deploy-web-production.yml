@@ -49,6 +49,9 @@ jobs:
             exit 1
           }
 
+      - name: Type-check SkillBridge workspaces
+        run: npm run type-check
+
       - name: Lint SkillBridge Web App
         run: npm run lint --workspace=@skillbridge/web
 
