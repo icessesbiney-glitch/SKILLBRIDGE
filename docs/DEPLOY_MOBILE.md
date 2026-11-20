@@ -1,13 +1,14 @@
-# Mobile App Status
+# Mobile Companion Status
 
-The current Expo app is a rider and delivery application. Driver onboarding, location
-tracking, dispatch, and delivery are explicitly deferred until 2029 and are not part
-of the current launch.
+The current Expo app is a companion entry point to the web application. It does not
+provide driver, rider, dispatch, GPS-tracking, or delivery workflows; those sectors
+are deferred until 2029.
 
-The app now displays a non-operational notice and does not request location
-permissions or send telemetry. Its automated private-distribution workflow has been
-archived at [docs/deferred/deploy-mobile-private.yml](./deferred/deploy-mobile-private.yml)
-so GitHub Actions cannot build or publish it.
+The root CI workflow checks Expo dependency alignment and performs an Android bundle
+export. This validates the companion app but does not publish it. No mobile
+publishing workflow is active in the root `.github/workflows` directory.
 
-Do not configure mobile publishing credentials or distribute builds during the
-current launch. The archived source and workflow are retained for future work.
+Set `EXPO_PUBLIC_WEB_URL` to the HTTPS web origin for a companion build. Do not
+configure publishing credentials or distribute a build without separate release
+authorization. See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for the current
+release configuration.
