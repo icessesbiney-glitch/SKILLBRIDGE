@@ -11,7 +11,7 @@
     "ts:check": "tsc",
     "type-check": "npm run ts:check",
     "validate:mobile": "npx expo install --check && npx expo export --platform android",
-    "lint": "eslint --config ../web/eslint.config.mjs App.tsx index.js --max-warnings=0"
+    "lint": "eslint --config ../web/eslint.config.mjs --rule '@next/next/no-html-link-for-pages: off' App.tsx index.js --max-warnings=0"
   },
   "dependencies": {
     "expo": "~58.0.26",

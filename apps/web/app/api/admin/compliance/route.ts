@@ -4,22 +4,32 @@ import { adminClient, authenticate, isAdmin } from '../../_lib/auth';
 const PROFILE_FIELDS = 'id, legal_name, phone_number, role_tier, verification, created_at';
 const VERIFICATION_STATUSES = ['verified', 'suspended'] as const;
 
-async function authorizedAdmin(request: Request) {
+type AdminAccess =
+  | { authorized: true; supabase: NonNullable<ReturnType<typeof adminClient>> }
+  | { authorized: false; response: NextResponse };
+
+async function authorizedAdmin(request: Request): Promise<AdminAccess> {
   const auth = await authenticate(request);
-  if ('error' in auth) return { response: auth.error };
+  if ('error' in auth) return { authorized: false, response: auth.error };
   if (!(await isAdmin(auth.user.id))) {
-    return { response: NextResponse.json({ error: 'Admin access required.' }, { status: 403 }) };
+    return {
+      authorized: false,
+      response: NextResponse.json({ error: 'Admin access required.' }, { status: 403 }),
+    };
   }
   const supabase = adminClient();
   if (!supabase) {
-    return { response: NextResponse.json({ error: 'Server is not configured.' }, { status: 503 }) };
+    return {
+      authorized: false,
+      response: NextResponse.json({ error: 'Server is not configured.' }, { status: 503 }),
+    };
   }
-  return { supabase };
+  return { authorized: true, supabase };
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
   const access = await authorizedAdmin(request);
-  if ('response' in access) return access.response;
+  if (!access.authorized) return access.response;
 
   const { data, error } = await access.supabase
     .from('profiles')
@@ -37,7 +47,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
 export async function POST(request: Request): Promise<NextResponse> {
   const access = await authorizedAdmin(request);
-  if ('response' in access) return access.response;
+  if (!access.authorized) return access.response;
 
   let body: unknown;
   try {

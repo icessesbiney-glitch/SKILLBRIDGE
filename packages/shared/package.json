@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --config ../../apps/web/eslint.config.mjs src --max-warnings=0"
+    "lint": "eslint --config ../../apps/web/eslint.config.mjs --rule '@next/next/no-html-link-for-pages: off' src --max-warnings=0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
